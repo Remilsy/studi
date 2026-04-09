@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 
 export default function Login() {
@@ -76,6 +77,13 @@ export default function Login() {
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
+
+        <p className="text-xs text-gray-400 text-center mt-4">
+          Pas encore de compte ?{' '}
+          <Link href="/inscription" className="text-[#5C7A5C] hover:underline">
+            Créer mon espace
+          </Link>
+        </p>
       </div>
     </div>
   )
