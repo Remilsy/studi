@@ -18,7 +18,7 @@ export async function inscrire(formData: FormData) {
     if (error.message.includes('already registered')) {
       return { error: 'Un compte existe déjà avec cet email' }
     }
-    return { error: error.message }
+    return { error: 'Une erreur est survenue, réessaie' }
   }
 
   return { success: true }
