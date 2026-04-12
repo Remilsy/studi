@@ -11,10 +11,18 @@ export default function Inscription() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     const formData = new FormData(e.currentTarget)
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirm') as string
+
+    if (password !== confirm) {
+      setError('Les mots de passe ne correspondent pas')
+      return
+    }
+
+    setLoading(true)
     const result = await inscrire(formData)
 
     if (result.error) {
@@ -49,7 +57,7 @@ export default function Inscription() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center">
+    <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center py-10">
       <div className="bg-white rounded-2xl border border-[#C8D8C8] p-8 w-full max-w-sm">
 
         <div className="flex items-center gap-2 mb-8">
@@ -61,12 +69,72 @@ export default function Inscription() {
         <p className="text-sm text-gray-400 mb-6">SUP-PHOTO · Espace de suivi</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">Prénom</label>
+              <input
+                type="text"
+                name="prenom"
+                required
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">Nom</label>
+              <input
+                type="text"
+                name="nom"
+                required
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">Âge</label>
+              <input
+                type="number"
+                name="age"
+                min={15}
+                max={40}
+                required
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">Section</label>
+              <select
+                name="niveau"
+                required
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+              >
+                <option value="Bac+1">Bac+1</option>
+                <option value="Bac+2">Bac+2</option>
+                <option value="Bac+3">Bac+3</option>
+                <option value="Bac+4">Bac+4</option>
+                <option value="Bac+5">Bac+5</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1.5 block">Type de formation</label>
+            <select
+              name="type_formation"
+              required
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+            >
+              <option value="alternance">Alternance</option>
+              <option value="initial">Initial</option>
+            </select>
+          </div>
+
           <div>
             <label className="text-xs font-medium text-gray-500 mb-1.5 block">Email</label>
             <input
               type="email"
               name="email"
-              placeholder="ton@email.fr"
               required
               className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
             />
@@ -77,7 +145,17 @@ export default function Inscription() {
             <input
               type="password"
               name="password"
-              placeholder="••••••••"
+              minLength={6}
+              required
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1.5 block">Confirmer le mot de passe</label>
+            <input
+              type="password"
+              name="confirm"
               minLength={6}
               required
               className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors"
