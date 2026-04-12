@@ -2,26 +2,33 @@ import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
 import LogoutButton from '../components/LogoutButton'
 
-function getLevel(score: number) {
-  if (score >= 80) return { label: 'Expert', icon: '🏆', color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' }
-  if (score >= 60) return { label: 'Avancé', icon: '⚡', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' }
-  if (score >= 40) return { label: 'Intermédiaire', icon: '🎯', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' }
-  if (score >= 20) return { label: 'En progression', icon: '🌱', color: 'text-[#5C7A5C]', bg: 'bg-[#E4EDE4]', border: 'border-[#C8D8C8]' }
-  return { label: 'Débutant', icon: '✨', color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' }
+function getStatut(statut: string) {
+  const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
+    en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#374151', bg: '#F3F4F6' },
+    en_recherche:   { label: 'En recherche',   dot: '#5C7A5C', text: '#3D553D', bg: '#E4EDE4' },
+    place:          { label: 'Placé',           dot: '#16A34A', text: '#15803D', bg: '#F0FDF4' },
+  }
+  return map[statut] || map['en_preparation']
 }
 
-function getStatutConfig(statut: string) {
-  const config: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-    en_preparation: { label: 'En préparation', bg: 'bg-gray-100', text: 'text-gray-600', dot: 'bg-gray-400' },
-    en_recherche: { label: 'En recherche', bg: 'bg-[#E4EDE4]', text: 'text-[#3D553D]', dot: 'bg-[#5C7A5C]' },
-    place: { label: 'Placé ✓', bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
-  }
-  return config[statut] || config['en_preparation']
+function getDocStatut(val: string | null) {
+  if (val === 'depose')          return { label: 'Déposé',            color: 'text-green-600',  bg: 'bg-green-50',  dot: '#16A34A' }
+  if (val === 'a_mettre_a_jour') return { label: 'À mettre à jour',   color: 'text-orange-500', bg: 'bg-orange-50', dot: '#F97316' }
+  return                                { label: 'Non déposé',         color: 'text-gray-400',   bg: 'bg-gray-50',   dot: '#D1D5DB' }
+}
+
+function getProgression(e: Record<string, unknown>) {
+  let score = 0
+  if (e.telephone)                                score += 20
+  if (e.linkedin)                                 score += 20
+  if (e.cv_statut === 'depose')                   score += 20
+  if (e.lettre_statut === 'depose')               score += 20
+  if (e.nb_candidatures && (e.nb_candidatures as number) > 0) score += 20
+  return score
 }
 
 export default async function Profil() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -33,111 +40,214 @@ export default async function Profil() {
 
   if (!etudiant) {
     return (
-      <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-[#C8D8C8] p-8 text-center max-w-sm w-full">
-          <div className="text-4xl mb-3">🔍</div>
           <h2 className="text-base font-semibold text-gray-900 mb-1">Aucune fiche trouvée</h2>
-          <p className="text-sm text-gray-400">Contacte ton responsable pour créer ton profil.</p>
+          <p className="text-sm text-gray-400">Contacte ton responsable.</p>
         </div>
       </div>
     )
   }
 
-  const level = getLevel(etudiant.score_progression)
-  const statut = getStatutConfig(etudiant.statut)
-  const initiales = `${etudiant.prenom[0]}${etudiant.nom[0]}`
+  const statut    = getStatut(etudiant.statut)
+  const cvStatut  = getDocStatut(etudiant.cv_statut)
+  const lmStatut  = getDocStatut(etudiant.lettre_statut)
+  const progression = getProgression(etudiant)
+  const initiale  = etudiant.prenom[0].toUpperCase()
+
+  const candidatures = etudiant.nb_candidatures || 0
+  const attente      = etudiant.nb_candidatures_attente || 0
+  const refus        = etudiant.nb_candidatures_refus || 0
+  const entretiens   = etudiant.nb_entretiens || 0
+  const entreprises  = etudiant.nb_entreprises || 0
+  const objectif     = etudiant.objectif_candidatures || 5
+  const objectifPct  = Math.min(Math.round((candidatures / objectif) * 100), 100)
+
+  const prochainEntretien = etudiant.prochain_entretien
+    ? new Date(etudiant.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
-    <div className="min-h-screen bg-[#D6E6D6] p-4 flex flex-col items-center justify-center">
-      <div className="w-full max-w-sm flex flex-col gap-3">
+    <div className="min-h-screen bg-[#D6E6D6]">
 
-        {/* Header nav */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
-            <span className="font-semibold text-[#3D553D] tracking-tight text-sm">Studi</span>
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-5 pt-6 pb-3 max-w-sm mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
+          <span className="font-semibold text-[#3D553D] text-sm tracking-tight">Studi</span>
+        </div>
+        <LogoutButton />
+      </div>
+
+      <div className="px-4 pb-10 max-w-sm mx-auto flex flex-col gap-3">
+
+        {/* Hero */}
+        <div className="bg-[#3D553D] rounded-2xl px-5 py-5">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-white/15 flex items-center justify-center text-2xl font-bold text-white shrink-0">
+              {initiale}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-white font-bold text-base leading-tight">{etudiant.prenom} {etudiant.nom}</h1>
+              <p className="text-white/50 text-xs mt-0.5 truncate">{etudiant.email}</p>
+              <div className="flex items-center gap-1.5 mt-2">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statut.dot }}></div>
+                <span className="text-white/70 text-xs">{statut.label}</span>
+              </div>
+            </div>
+            <div
+              className="text-right shrink-0"
+            >
+              <p className="text-white/50 text-[10px] mb-0.5">Profil</p>
+              <p className="text-white font-bold text-xl">{progression}%</p>
+            </div>
           </div>
-          <LogoutButton />
+
+          {/* Barre de complétion profil */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-white/50 text-[10px]">Complétion du profil</span>
+              <span className="text-white/70 text-[10px]">{progression}/100%</span>
+            </div>
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white/70 rounded-full transition-all"
+                style={{ width: `${progression}%` }}
+              ></div>
+            </div>
+            <p className="text-white/30 text-[10px] mt-1">
+              {progression < 100 ? 'Complète ton profil pour maximiser tes chances' : 'Profil complet !'}
+            </p>
+          </div>
         </div>
 
-        {/* Card principale — Avatar + niveau */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
-          <div className="bg-gradient-to-br from-[#5C7A5C] to-[#3D553D] px-6 pt-8 pb-10 text-center relative">
-            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-3">
-              {initiales}
+        {/* Candidatures stats */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-3">Candidatures</p>
+
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-900">{candidatures}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">Envoyées</p>
             </div>
-            <h1 className="text-white font-semibold text-lg tracking-tight">{etudiant.prenom} {etudiant.nom}</h1>
-            <p className="text-white/60 text-xs mt-0.5">{etudiant.email}</p>
+            <div className="text-center border-x border-gray-100">
+              <p className="text-2xl font-bold text-orange-500">{attente}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">En attente</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-red-400">{refus}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">Refus</p>
+            </div>
           </div>
 
-          {/* Badge niveau chevauchant */}
-          <div className="flex justify-center -mt-4 mb-4">
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold shadow-sm bg-white ${level.border}`}>
-              <span>{level.icon}</span>
-              <span className={level.color}>{level.label}</span>
-            </div>
-          </div>
-
-          {/* Progression XP */}
-          <div className="px-6 pb-6">
+          {/* Objectif semaine */}
+          <div className="bg-[#F8FAF8] rounded-xl p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-400">Progression</span>
-              <span className="text-xs font-bold text-gray-900">{etudiant.score_progression} <span className="text-gray-400 font-normal">/ 100 XP</span></span>
+              <span className="text-xs text-gray-600 font-medium">Objectif semaine</span>
+              <span className="text-xs font-bold text-gray-900">{candidatures} / {objectif}</span>
             </div>
-            <div className="w-full h-3 bg-[#E4EDE4] rounded-full overflow-hidden">
+            <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#5C7A5C] to-[#7A9A7A] rounded-full transition-all duration-700"
-                style={{ width: `${etudiant.score_progression}%` }}
+                className="h-full bg-[#5C7A5C] rounded-full transition-all"
+                style={{ width: `${objectifPct}%` }}
               ></div>
             </div>
           </div>
         </div>
 
-        {/* Statut */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4 flex items-center justify-between">
+        {/* Entretiens & Entreprises */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-4">
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-2">Entretiens</p>
+            <p className="text-3xl font-bold text-gray-900">{entretiens}</p>
+            {prochainEntretien && (
+              <p className="text-[10px] text-[#5C7A5C] mt-1.5 font-medium">Prochain : {prochainEntretien}</p>
+            )}
+            {!prochainEntretien && (
+              <p className="text-[10px] text-gray-300 mt-1.5">Aucun planifié</p>
+            )}
+          </div>
+          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-4">
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-2">Entreprises</p>
+            <p className="text-3xl font-bold text-gray-900">{entreprises}</p>
+            <p className="text-[10px] text-gray-300 mt-1.5">contactées</p>
+          </div>
+        </div>
+
+        {/* Documents */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-3">Documents</p>
+          <div className="flex flex-col gap-2">
+            {[
+              { label: 'Curriculum Vitae', s: cvStatut },
+              { label: 'Lettre de motivation', s: lmStatut },
+            ].map(({ label, s }) => (
+              <div key={label} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <span className="text-sm text-gray-700">{label}</span>
+                <div
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${s.bg} ${s.color}`}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Identité */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-3">Identité</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+              <span className="text-xs text-gray-400">Section</span>
+              <span className="text-sm font-medium text-gray-900">{etudiant.niveau}</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+              <span className="text-xs text-gray-400">Formation</span>
+              <span className="text-sm font-medium text-gray-900">{etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial'}</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+              <span className="text-xs text-gray-400">Âge</span>
+              <span className="text-sm font-medium text-gray-900">{etudiant.age} ans</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+              <span className="text-xs text-gray-400">Téléphone</span>
+              <span className={`text-sm font-medium ${etudiant.telephone ? 'text-gray-900' : 'text-gray-300'}`}>
+                {etudiant.telephone || 'Non renseigné'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-xs text-gray-400">LinkedIn</span>
+              {etudiant.linkedin ? (
+                <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-[#5C7A5C] underline truncate max-w-[160px]">
+                  Voir le profil
+                </a>
+              ) : (
+                <span className="text-sm font-medium text-gray-300">Non renseigné</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Notes du responsable */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-2">Note de ton responsable</p>
+          {etudiant.notes_responsable ? (
+            <p className="text-sm text-gray-700 leading-relaxed">{etudiant.notes_responsable}</p>
+          ) : (
+            <p className="text-sm text-gray-300 italic">Aucune note pour l'instant.</p>
+          )}
+        </div>
+
+        {/* Offres bientôt */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4 flex items-center justify-between opacity-50">
           <div>
-            <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-0.5">Statut actuel</p>
-            <p className="text-sm font-semibold text-gray-900">{statut.label}</p>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-1">Offres d'emploi</p>
+            <p className="text-sm font-semibold text-gray-500">Bientôt disponible</p>
           </div>
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${statut.bg}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${statut.dot}`}></div>
-            <span className={`text-xs font-medium ${statut.text}`}>{statut.label}</span>
-          </div>
-        </div>
-
-        {/* Infos */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4 flex flex-col gap-3">
-          <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Informations</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#F8FAF8] rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 mb-1">Section</p>
-              <p className="text-sm font-semibold text-gray-900">{etudiant.niveau}</p>
-            </div>
-            <div className="bg-[#F8FAF8] rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 mb-1">Formation</p>
-              <p className="text-sm font-semibold text-gray-900">{etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial'}</p>
-            </div>
-            <div className="bg-[#F8FAF8] rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 mb-1">Âge</p>
-              <p className="text-sm font-semibold text-gray-900">{etudiant.age} ans</p>
-            </div>
-            <div className="bg-[#F8FAF8] rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 mb-1">XP</p>
-              <p className="text-sm font-semibold text-gray-900">{etudiant.score_progression} pts</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Section offres — à venir */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-0.5">Offres</p>
-              <p className="text-sm font-semibold text-gray-900">Bientôt disponible</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-[#E4EDE4] flex items-center justify-center text-sm">
-              🔒
-            </div>
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs">
+            Soon
           </div>
         </div>
 
