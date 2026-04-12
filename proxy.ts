@@ -39,8 +39,8 @@ export async function proxy(request: NextRequest) {
 
   const role = user.user_metadata?.role
 
-  // Un étudiant ne peut accéder qu'à /profil
-  if (role === 'etudiant' && !pathname.startsWith('/profil')) {
+  // Tout utilisateur non-admin est redirigé vers /profil
+  if (role !== 'admin' && !pathname.startsWith('/profil')) {
     const url = request.nextUrl.clone()
     url.pathname = '/profil'
     return NextResponse.redirect(url)
