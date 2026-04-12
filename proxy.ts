@@ -37,6 +37,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  const role = user.user_metadata?.role
+
+  // Un étudiant ne peut accéder qu'à /profil
+  if (role === 'etudiant' && !pathname.startsWith('/profil')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/profil'
+    return NextResponse.redirect(url)
+  }
+
+  // Un admin ne peut pas aller sur /profil
+  if (role === 'admin' && pathname.startsWith('/profil')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
+
   return response
 }
 

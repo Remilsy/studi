@@ -18,7 +18,11 @@ export async function inscrire(formData: FormData) {
 
   const supabase = await createClient()
 
-  const { data, error: authError } = await supabase.auth.signUp({ email, password })
+  const { data, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { role: 'etudiant' } },
+  })
 
   if (authError) {
     if (authError.message.includes('already registered')) {
