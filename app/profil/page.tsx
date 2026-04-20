@@ -2,7 +2,7 @@ import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
 import LogoutButton from '../components/LogoutButton'
 import EditIdentite from './EditIdentite'
-import CandidatureTracker from './CandidatureTracker'
+import CandidatureLog from './CandidatureLog'
 
 function getStatut(statut: string) {
   const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
@@ -34,9 +34,10 @@ export default async function Profil() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: etudiant }, { data: offres }] = await Promise.all([
+  const [{ data: etudiant }, { data: offres }, { data: candidaturesLog }] = await Promise.all([
     supabase.from('etudiants').select('*').eq('email', user.email).single(),
     supabase.from('offres').select('*').eq('active', true).order('created_at', { ascending: false }),
+    supabase.from('candidatures').select('*').order('created_at', { ascending: false }),
   ])
 
   if (!etudiant) {
@@ -160,16 +161,9 @@ export default async function Profil() {
 
           {/* Tracker interactif — colonne principale */}
           <div className="lg:col-span-3">
-            <CandidatureTracker
-              initial={{
-                nb_candidatures:         candidatures,
-                nb_candidatures_attente: attente,
-                nb_candidatures_refus:   refus,
-                nb_entretiens:           entretiens,
-                nb_entreprises:          entreprises,
-                prochain_entretien:      etudiant.prochain_entretien,
-                objectif_candidatures:   objectif,
-              }}
+            <CandidatureLog
+              initial={candidaturesLog || []}
+              objectif={objectif}
             />
           </div>
 
