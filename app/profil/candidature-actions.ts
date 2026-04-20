@@ -42,7 +42,7 @@ export async function addCandidature(data: {
     date_action: data.date_action,
     notes:       data.notes || null,
   })
-  if (error) return { error: 'Erreur lors de l\'ajout' }
+  if (error) return { error: error.message }
 
   await syncStats(supabase, etudiant.id, user.email!)
   revalidatePath('/profil')
