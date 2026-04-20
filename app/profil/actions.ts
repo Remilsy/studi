@@ -18,3 +18,23 @@ export async function updateProfil(formData: FormData) {
   revalidatePath('/profil')
   return { success: true }
 }
+
+export async function updateCandidatureStats(stats: {
+  nb_candidatures: number
+  nb_candidatures_attente: number
+  nb_candidatures_refus: number
+  nb_entretiens: number
+  nb_entreprises: number
+  prochain_entretien: string | null
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté' }
+
+  const { error } = await supabase.from('etudiants').update(stats).eq('email', user.email)
+
+  if (error) return { error: 'Erreur lors de la sauvegarde' }
+
+  revalidatePath('/profil')
+  return { success: true }
+}

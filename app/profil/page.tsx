@@ -2,6 +2,7 @@ import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
 import LogoutButton from '../components/LogoutButton'
 import EditIdentite from './EditIdentite'
+import CandidatureTracker from './CandidatureTracker'
 
 function getStatut(statut: string) {
   const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
@@ -63,9 +64,6 @@ export default async function Profil() {
   const objectif     = etudiant.objectif_candidatures || 5
   const objectifPct  = Math.min(Math.round((candidatures / objectif) * 100), 100)
 
-  const prochainEntretien = etudiant.prochain_entretien
-    ? new Date(etudiant.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-    : null
 
   return (
     <div className="min-h-screen bg-[#D6E6D6]">
@@ -130,7 +128,7 @@ export default async function Profil() {
               <div className="grid grid-cols-3 gap-6">
                 {[
                   { label: 'Candidatures', value: candidatures, sub: `objectif : ${objectif}`,             color: '#3D553D' },
-                  { label: 'Entretiens',   value: entretiens,   sub: prochainEntretien ?? 'Aucun planifié', color: '#1D4ED8' },
+                  { label: 'Entretiens',   value: entretiens,   sub: etudiant.prochain_entretien ? new Date(etudiant.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Aucun planifié', color: '#1D4ED8' },
                   { label: 'Entreprises',  value: entreprises,  sub: 'contactées',                         color: '#6D28D9' },
                 ].map(({ label, value, sub, color }) => (
                   <div key={label}>
@@ -157,128 +155,122 @@ export default async function Profil() {
           </div>
         </div>
 
-        {/* ── LIGNE 2 ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* ── LIGNE 2 : tracker + infos ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-          {/* Candidatures détail */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Détail candidatures</p>
-            <div className="flex flex-col gap-2">
-              {[
-                { label: 'Envoyées',    value: candidatures, color: '#3D553D', bg: '#F0F7F0' },
-                { label: 'En attente',  value: attente,      color: '#C2410C', bg: '#FFF7ED' },
-                { label: 'Refus',       value: refus,        color: '#9F1239', bg: '#FFF1F2' },
-              ].map(({ label, value, color, bg }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl"
-                  style={{ backgroundColor: bg }}
-                >
-                  <span className="text-sm font-medium" style={{ color }}>{label}</span>
-                  <span className="text-2xl font-bold" style={{ color }}>{value}</span>
-                </div>
-              ))}
-            </div>
+          {/* Tracker interactif — colonne principale */}
+          <div className="lg:col-span-3">
+            <CandidatureTracker
+              initial={{
+                nb_candidatures:         candidatures,
+                nb_candidatures_attente: attente,
+                nb_candidatures_refus:   refus,
+                nb_entretiens:           entretiens,
+                nb_entreprises:          entreprises,
+                prochain_entretien:      etudiant.prochain_entretien,
+                objectif_candidatures:   objectif,
+              }}
+            />
           </div>
 
-          {/* Documents */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
-            <div className="flex flex-col gap-3">
-              {[
-                { label: 'Curriculum Vitae',     s: cvStatut },
-                { label: 'Lettre de motivation', s: lmStatut },
-              ].map(({ label, s }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between p-4 rounded-xl"
-                  style={{ backgroundColor: s.bg }}
-                >
-                  <span className="text-sm font-medium text-gray-700">{label}</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
-                    <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Colonne droite : documents + identité + note */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
 
-          {/* Identité */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase">Identité</p>
-              <EditIdentite telephone={etudiant.telephone} linkedin={etudiant.linkedin} />
-            </div>
-            <div className="flex flex-col">
-              {[
-                { label: 'Section',   value: etudiant.niveau },
-                { label: 'Formation', value: etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial' },
-                { label: 'Âge',       value: `${etudiant.age} ans` },
-                { label: 'Tél.',      value: etudiant.telephone || null },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between py-2.5 border-b border-[#F3F4F6] last:border-0">
-                  <span className="text-xs text-gray-400">{label}</span>
-                  <span className={`text-sm font-semibold ${value ? 'text-gray-900' : 'text-gray-300'}`}>
-                    {value || '—'}
-                  </span>
-                </div>
-              ))}
-              <div className="flex items-center justify-between py-2.5">
-                <span className="text-xs text-gray-400">LinkedIn</span>
-                {etudiant.linkedin ? (
-                  <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-semibold text-[#5C7A5C]">
-                    Voir le profil
-                  </a>
-                ) : (
-                  <span className="text-sm font-semibold text-gray-300">—</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── LIGNE 3 ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-          {/* Note responsable */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-3">Note de ton responsable</p>
-            {etudiant.notes_responsable ? (
-              <p className="text-sm text-gray-700 leading-relaxed">{etudiant.notes_responsable}</p>
-            ) : (
-              <p className="text-sm text-gray-300 italic">Aucune note pour l'instant.</p>
-            )}
-          </div>
-
-          {/* Offres */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Offres d'emploi</p>
-            {!offres || offres.length === 0 ? (
-              <p className="text-sm text-gray-300 italic">Aucune offre disponible pour l'instant.</p>
-            ) : (
+            {/* Documents */}
+            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
               <div className="flex flex-col gap-3">
-                {offres.map((offre: any) => (
-                  <div key={offre.id} className="p-3 rounded-xl bg-[#F8FAF8] border border-[#EEF3EE]">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{offre.titre}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{offre.entreprise}{offre.localisation ? ` · ${offre.localisation}` : ''}</p>
-                      </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#E4EDE4] text-[#3D553D] shrink-0">
-                        {offre.type_contrat.toUpperCase()}
-                      </span>
+                {[
+                  { label: 'Curriculum Vitae',     s: cvStatut },
+                  { label: 'Lettre de motivation', s: lmStatut },
+                ].map(({ label, s }) => (
+                  <div
+                    key={label}
+                    className="flex items-center justify-between p-4 rounded-xl"
+                    style={{ backgroundColor: s.bg }}
+                  >
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
+                      <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
                     </div>
-                    {offre.description && (
-                      <p className="text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2">{offre.description}</p>
-                    )}
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
 
+            {/* Identité */}
+            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase">Identité</p>
+                <EditIdentite telephone={etudiant.telephone} linkedin={etudiant.linkedin} />
+              </div>
+              <div className="flex flex-col">
+                {[
+                  { label: 'Section',   value: etudiant.niveau },
+                  { label: 'Formation', value: etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial' },
+                  { label: 'Âge',       value: `${etudiant.age} ans` },
+                  { label: 'Tél.',      value: etudiant.telephone || null },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between py-2.5 border-b border-[#F3F4F6] last:border-0">
+                    <span className="text-xs text-gray-400">{label}</span>
+                    <span className={`text-sm font-semibold ${value ? 'text-gray-900' : 'text-gray-300'}`}>
+                      {value || '—'}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-xs text-gray-400">LinkedIn</span>
+                  {etudiant.linkedin ? (
+                    <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer"
+                      className="text-sm font-semibold text-[#5C7A5C]">
+                      Voir le profil
+                    </a>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-300">—</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Note responsable */}
+            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-3">Note de ton responsable</p>
+              {etudiant.notes_responsable ? (
+                <p className="text-sm text-gray-700 leading-relaxed">{etudiant.notes_responsable}</p>
+              ) : (
+                <p className="text-sm text-gray-300 italic">Aucune note pour l'instant.</p>
+              )}
+            </div>
+
+            {/* Offres */}
+            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Offres d'emploi</p>
+              {!offres || offres.length === 0 ? (
+                <p className="text-sm text-gray-300 italic">Aucune offre disponible.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {offres.map((offre: any) => (
+                    <div key={offre.id} className="p-3 rounded-xl bg-[#F8FAF8] border border-[#EEF3EE]">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{offre.titre}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{offre.entreprise}{offre.localisation ? ` · ${offre.localisation}` : ''}</p>
+                        </div>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#E4EDE4] text-[#3D553D] shrink-0">
+                          {offre.type_contrat.toUpperCase()}
+                        </span>
+                      </div>
+                      {offre.description && (
+                        <p className="text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2">{offre.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
