@@ -328,7 +328,7 @@ export default function EtudiantDetail() {
             <div className="flex flex-col gap-3">
               {[
                 { label: 'Curriculum Vitae',     cfg: cv },
-                { label: 'Lettre de motivation', cfg: lm },
+                { label: 'Portfolio', cfg: lm },
               ].map(({ label, cfg }) => (
                 <div key={label} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: cfg.bg }}>
                   <span className="text-sm font-medium text-gray-700">{label}</span>

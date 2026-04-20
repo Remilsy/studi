@@ -159,7 +159,7 @@ export default function DocumentsClient({ cvStatut, lettreStatut, cvUrl, lettreU
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DocCard label="Curriculum Vitae (CV)" statut={cv} setStatut={setCv} link={cvLink} setLink={setCvLink} />
-          <DocCard label="Lettre de motivation" statut={lm} setStatut={setLm} link={lmLink} setLink={setLmLink} />
+          <DocCard label="Portfolio" statut={lm} setStatut={setLm} link={lmLink} setLink={setLmLink} />
         </div>
 
         {/* Conseils */}
@@ -169,7 +169,7 @@ export default function DocumentsClient({ cvStatut, lettreStatut, cvUrl, lettreU
             {[
               { icon: '📁', tip: 'Utilise Google Drive ou Dropbox pour partager tes documents via lien.' },
               { icon: '🔄', tip: 'Mets à jour ton CV après chaque nouvelle expérience ou formation.' },
-              { icon: '✉️', tip: 'Personnalise ta lettre de motivation pour chaque candidature importante.' },
+              { icon: '🖼️', tip: 'Mets à jour ton portfolio régulièrement avec tes dernières réalisations.' },
               { icon: '👀', tip: 'Assure-toi que les liens sont en "accès public" pour que ton responsable puisse les consulter.' },
             ].map(({ icon, tip }) => (
               <div key={tip} className="flex items-start gap-3">

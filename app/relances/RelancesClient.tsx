@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { addRelance, deleteRelance } from './actions'
 
 interface Etudiant { id: string; prenom: string; nom: string; email: string; statut: string }
-interface Relance  { id: string; etudiant_id: string; message: string; type: string; lu: boolean; created_at: string }
+interface Relance  { id: string; etudiant_id: string; message: string; type: string; lu: boolean; reponse: string | null; reponse_at: string | null; created_at: string }
 
 const TYPES = [
   { key: 'general',      label: 'Général',         color: '#3D553D', bg: '#E4EDE4' },
@@ -45,6 +45,8 @@ export default function RelancesClient({ etudiants, relances: initial }: { etudi
         message,
         type,
         lu: false,
+        reponse: null,
+        reponse_at: null,
         created_at: new Date().toISOString(),
       }, ...prev])
       setMessage('')
@@ -171,6 +173,17 @@ export default function RelancesClient({ etudiants, relances: initial }: { etudi
                   <p className="text-sm text-gray-700 mb-1">{r.message}</p>
                   <p className="text-xs text-gray-400">{fmtDate(r.created_at)}</p>
                 </div>
+                {/* Réponse de l'étudiant */}
+                {r.reponse && (
+                  <div className="mt-2 p-3 bg-[#F0FDF4] rounded-xl border border-[#BBF7D0]">
+                    <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Réponse de l'étudiant</p>
+                    <p className="text-sm text-gray-700">{r.reponse}</p>
+                    {r.reponse_at && (
+                      <p className="text-[10px] text-gray-400 mt-1">{fmtDate(r.reponse_at)}</p>
+                    )}
+                  </div>
+                )}
+
                 {/* Supprimer */}
                 <button onClick={() => handleDelete(r.id)}
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 shrink-0">

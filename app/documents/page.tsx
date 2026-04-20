@@ -41,7 +41,7 @@ export default async function DocumentsPage() {
           {[
             { label: 'Profils complets', value: complets,        color: '#15803D', bg: '#F0FDF4' },
             { label: 'CV manquants',     value: cvManquants,     color: '#C2410C', bg: '#FFF7ED' },
-            { label: 'Lettres manquantes', value: lettreManquantes, color: '#C2410C', bg: '#FFF7ED' },
+            { label: 'Portfolios manquants', value: lettreManquantes, color: '#C2410C', bg: '#FFF7ED' },
           ].map(({ label, value, color, bg }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
               <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{label}</p>
@@ -57,7 +57,7 @@ export default async function DocumentsPage() {
               <tr className="bg-[#F8FAF8] border-b border-[#E5E7EB]">
                 <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Étudiant</th>
                 <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-36">CV</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-36">Lettre</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-36">Portfolio</th>
                 <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-20">Liens</th>
                 <th className="px-4 py-3 w-10"></th>
               </tr>
@@ -102,7 +102,7 @@ export default async function DocumentsPage() {
                         )}
                         {e.lettre_url && (
                           <a href={e.lettre_url} target="_blank" rel="noopener noreferrer"
-                            className="text-xs text-[#5C7A5C] hover:underline font-medium">LM ↗</a>
+                            className="text-xs text-[#5C7A5C] hover:underline font-medium">Portfolio ↗</a>
                         )}
                         {!e.cv_url && !e.lettre_url && <span className="text-xs text-gray-300">—</span>}
                       </div>

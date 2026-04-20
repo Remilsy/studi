@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import LogoutButton from '../components/LogoutButton'
 import EditIdentite from './EditIdentite'
 import Link from 'next/link'
+import RelancesWidget from './RelancesWidget'
 
 function getStatut(statut: string) {
   const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
@@ -98,47 +99,9 @@ export default async function Profil() {
 
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-4">
 
-        {/* ── RELANCES NON LUES ── */}
-        {relancesNonLues.length > 0 && (
-          <div className="bg-white rounded-2xl border-2 border-orange-200 p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-xl shrink-0">🔔</div>
-              <div>
-                <p className="text-sm font-bold text-gray-900">
-                  {relancesNonLues.length} message{relancesNonLues.length > 1 ? 's' : ''} de ton responsable
-                </p>
-                <p className="text-xs text-gray-400">Clique pour marquer comme lu</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              {relancesNonLues.map((r: any) => {
-                const typeColors: Record<string, { color: string; bg: string }> = {
-                  urgent:      { color: '#9F1239', bg: '#FFF1F2' },
-                  document:    { color: '#C2410C', bg: '#FFF7ED' },
-                  candidature: { color: '#1D4ED8', bg: '#EFF6FF' },
-                  entretien:   { color: '#6D28D9', bg: '#F5F3FF' },
-                  general:     { color: '#3D553D', bg: '#E4EDE4' },
-                }
-                const tc = typeColors[r.type] || typeColors.general
-                const typeLabels: Record<string, string> = {
-                  urgent: 'Urgent', document: 'Document', candidature: 'Candidature', entretien: 'Entretien', general: 'Général'
-                }
-                return (
-                  <div key={r.id} className="flex items-start gap-3 p-3 rounded-xl"
-                    style={{ backgroundColor: tc.bg }}>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5"
-                      style={{ backgroundColor: 'white', color: tc.color, border: `1px solid ${tc.color}30` }}>
-                      {typeLabels[r.type] || 'Général'}
-                    </span>
-                    <p className="text-sm text-gray-800 flex-1">{r.message}</p>
-                    <span className="text-xs text-gray-400 shrink-0">
-                      {new Date(r.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+        {/* ── RELANCES ── */}
+        {(relancesData || []).length > 0 && (
+          <RelancesWidget initial={relancesData as any} />
         )}
 
         {/* ── HERO ── */}
@@ -275,7 +238,7 @@ export default async function Profil() {
               <div className="flex flex-col gap-3">
                 {[
                   { label: 'Curriculum Vitae',     s: cvStatut },
-                  { label: 'Lettre de motivation', s: lmStatut },
+                  { label: 'Portfolio', s: lmStatut },
                 ].map(({ label, s }) => (
                   <div
                     key={label}
