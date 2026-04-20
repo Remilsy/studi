@@ -155,7 +155,7 @@ export default function Etudiants() {
           {loading ? (
             <div className="p-8 text-center text-sm text-gray-400">Chargement...</div>
           ) : etudiants.map((e: any) => (
-            <div key={e.id} className="flex items-center gap-3 px-4 py-3 border-b border-[#EEF3EE] last:border-0">
+            <Link key={e.id} href={`/etudiants/${e.id}`} className="flex items-center gap-3 px-4 py-3 border-b border-[#EEF3EE] last:border-0 hover:bg-[#F8FAF8] transition-colors cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-[#E4EDE4] flex items-center justify-center text-xs font-medium text-[#3D553D]">
                 {e.prenom[0]}{e.nom[0]}
               </div>
@@ -167,7 +167,8 @@ export default function Etudiants() {
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#E4EDE4] text-[#3D553D]">
                 {e.statut === 'place' ? 'Placé' : e.statut === 'en_recherche' ? 'En recherche' : 'En préparation'}
               </span>
-            </div>
+              <span className="text-[10px] text-gray-400">→</span>
+            </Link>
           ))}
         </div>
       </div>

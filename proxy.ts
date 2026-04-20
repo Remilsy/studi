@@ -40,6 +40,7 @@ export async function proxy(request: NextRequest) {
   const role = user.user_metadata?.role
 
   // Tout utilisateur non-admin est redirigé vers /profil
+  // Les étudiants ne peuvent pas accéder au dashboard, etudiants, offres (gestion)
   if (role !== 'admin' && !pathname.startsWith('/profil')) {
     const url = request.nextUrl.clone()
     url.pathname = '/profil'
