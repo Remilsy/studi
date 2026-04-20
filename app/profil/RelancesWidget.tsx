@@ -145,7 +145,7 @@ export default function RelancesWidget({ initial }: { initial: Relance[] }) {
                       onChange={e => setReply(e.target.value)}
                       placeholder="Écris ta réponse ici..."
                       rows={3}
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors resize-none bg-white"
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors resize-none bg-white text-gray-900"
                     />
                     <div className="flex gap-2">
                       <button

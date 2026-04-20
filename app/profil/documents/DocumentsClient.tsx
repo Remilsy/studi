@@ -44,7 +44,7 @@ export default function DocumentsClient({ cvStatut, lettreStatut, cvUrl, lettreU
     setTimeout(() => setSaved(false), 3000)
   }
 
-  const inp = "w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white"
+  const inp = "w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white text-gray-900"
 
   function DocCard({ label, statut, setStatut, link, setLink }: {
     label: string; statut: string; setStatut: (s: string) => void; link: string; setLink: (s: string) => void

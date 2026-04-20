@@ -70,7 +70,7 @@ export default function RelancesClient({ etudiants, relances: initial }: { etudi
   })
 
   const etudiantMap = Object.fromEntries(etudiants.map(e => [e.id, e]))
-  const inp = "w-full px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white"
+  const inp = "w-full px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white text-gray-900"
 
   return (
     <div>
