@@ -26,6 +26,7 @@ export async function addCandidature(data: {
   statut: string
   date_action: string
   notes?: string
+  url?: string
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -41,6 +42,7 @@ export async function addCandidature(data: {
     statut:      data.statut,
     date_action: data.date_action,
     notes:       data.notes || null,
+    url:         data.url || null,
   })
   if (error) return { error: error.message }
 
@@ -60,6 +62,31 @@ export async function updateCandidatureStatut(id: string, statut: string) {
   await supabase.from('candidatures').update({ statut }).eq('id', id)
   await syncStats(supabase, etudiant.id, user.email!)
   revalidatePath('/profil')
+  revalidatePath('/profil/candidatures')
+  return { success: true }
+}
+
+export async function updateCandidature(id: string, data: {
+  entreprise: string
+  poste: string
+  statut: string
+  date_action: string
+  notes: string | null
+  url: string | null
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté' }
+
+  const { data: etudiant } = await supabase.from('etudiants').select('id').eq('email', user.email).single()
+  if (!etudiant) return { error: 'Étudiant introuvable' }
+
+  const { error } = await supabase.from('candidatures').update(data).eq('id', id)
+  if (error) return { error: error.message }
+
+  await syncStats(supabase, etudiant.id, user.email!)
+  revalidatePath('/profil')
+  revalidatePath('/profil/candidatures')
   return { success: true }
 }
 
