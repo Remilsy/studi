@@ -1,10 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabase'
-import { updateEtudiant } from './actions'
+import { updateEtudiant, getCandidaturesForEtudiant } from './actions'
+
+const CAND_STATUTS = [
+  { key: 'envoye',     label: 'Envoyée',    color: '#3D553D', bg: '#E4EDE4', dot: '#5C7A5C' },
+  { key: 'en_attente', label: 'En attente', color: '#C2410C', bg: '#FFF7ED', dot: '#F97316' },
+  { key: 'entretien',  label: 'Entretien',  color: '#1D4ED8', bg: '#EFF6FF', dot: '#3B82F6' },
+  { key: 'refus',      label: 'Refus',      color: '#9F1239', bg: '#FFF1F2', dot: '#F43F5E' },
+  { key: 'accepte',    label: 'Acceptée',   color: '#15803D', bg: '#F0FDF4', dot: '#16A34A' },
+]
+const MOIS_GRAPH = [
+  { key: '2026-04', label: 'Avr' },
+  { key: '2026-05', label: 'Mai' },
+  { key: '2026-06', label: 'Jun' },
+  { key: '2026-07', label: 'Jul' },
+  { key: '2026-08', label: 'Aoû' },
+]
+function getCS(key: string) { return CAND_STATUTS.find(s => s.key === key) || CAND_STATUTS[0] }
+function isCRelance(c: any) {
+  if (c.statut !== 'en_attente') return false
+  return Math.round((Date.now() - new Date(c.date_action).getTime()) / 86400000) >= 7
+}
+function fmtDate(str: string) {
+  const d = new Date(str)
+  const diff = Math.round((new Date().setHours(0,0,0,0) - d.setHours(0,0,0,0)) / 86400000)
+  if (diff === 0) return "Aujourd'hui"
+  if (diff === 1) return 'Hier'
+  if (diff < 7) return `Il y a ${diff}j`
+  return new Date(str).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
 
 const statutConfig: Record<string, { label: string; dot: string; text: string; bg: string; border: string }> = {
   en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB' },
@@ -26,13 +54,43 @@ export default function EtudiantDetail() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [scoreVal, setScoreVal] = useState(0)
+  const [candidatures, setCandidatures] = useState<any[]>([])
+  const [candFilter, setCandFilter] = useState('toutes')
+  const [candSearch, setCandSearch] = useState('')
 
   useEffect(() => {
     supabase.from('etudiants').select('*').eq('id', id).single().then(({ data }) => {
       if (data) { setEtudiant(data); setScoreVal(data.score_progression ?? 0) }
       setLoading(false)
     })
+    getCandidaturesForEtudiant(id).then(data => setCandidatures(data))
   }, [id])
+
+  const candStats = useMemo(() => ({
+    total:       candidatures.length,
+    envoye:      candidatures.filter(c => c.statut === 'envoye').length,
+    attente:     candidatures.filter(c => c.statut === 'en_attente').length,
+    entretien:   candidatures.filter(c => c.statut === 'entretien').length,
+    refus:       candidatures.filter(c => c.statut === 'refus').length,
+    accepte:     candidatures.filter(c => c.statut === 'accepte').length,
+    relances:    candidatures.filter(isCRelance).length,
+    tauxReponse: candidatures.length > 0
+      ? Math.round((candidatures.filter(c => c.statut !== 'envoye').length / candidatures.length) * 100) : 0,
+  }), [candidatures])
+
+  const candFiltered = useMemo(() => {
+    let list = candidatures
+    if (candFilter !== 'toutes') list = list.filter(c => c.statut === candFilter)
+    if (candSearch) {
+      const q = candSearch.toLowerCase()
+      list = list.filter(c =>
+        c.entreprise.toLowerCase().includes(q) ||
+        c.poste.toLowerCase().includes(q) ||
+        (c.notes || '').toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [candidatures, candFilter, candSearch])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -63,10 +121,10 @@ export default function EtudiantDetail() {
   const s = statutConfig[etudiant.statut] || statutConfig['en_preparation']
   const cv = docConfig[etudiant.cv_statut] || docConfig['a_deposer']
   const lm = docConfig[etudiant.lettre_statut] || docConfig['a_deposer']
-  const candidatures = etudiant.nb_candidatures ?? 0
+  const nbCandidatures = etudiant.nb_candidatures ?? 0
   const objectif = etudiant.objectif_candidatures ?? 5
-  const objectifPct = Math.min(Math.round((candidatures / objectif) * 100), 100)
-  const urgence = etudiant.statut === 'en_recherche' && candidatures === 0
+  const objectifPct = Math.min(Math.round((nbCandidatures / objectif) * 100), 100)
+  const urgence = etudiant.statut === 'en_recherche' && nbCandidatures === 0
   const inputCls = "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors bg-white"
   const labelCls = "text-xs font-medium text-gray-500 mb-1.5 block"
 
@@ -225,7 +283,7 @@ export default function EtudiantDetail() {
               <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Candidatures</p>
               <div className="grid grid-cols-3 gap-4 mb-4">
                 {[
-                  { label: 'Envoyées',    value: candidatures,                          color: '#3D553D' },
+                  { label: 'Envoyées',    value: nbCandidatures,                        color: '#3D553D' },
                   { label: 'Entretiens',  value: etudiant.nb_entretiens ?? 0,            color: '#1D4ED8' },
                   { label: 'Entreprises', value: etudiant.nb_entreprises ?? 0,           color: '#6D28D9' },
                 ].map(({ label, value, color }) => (
@@ -252,7 +310,7 @@ export default function EtudiantDetail() {
             <div className="border-t border-[#F3F4F6] pt-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-gray-600">Objectif de la semaine</span>
-                <span className="text-xs text-gray-400">{candidatures} / {objectif} candidatures</span>
+                <span className="text-xs text-gray-400">{nbCandidatures} / {objectif} candidatures</span>
               </div>
               <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
                 <div className="h-full bg-[#5C7A5C] rounded-full transition-all" style={{ width: `${objectifPct}%` }}></div>
@@ -319,6 +377,203 @@ export default function EtudiantDetail() {
               <p className="text-sm text-gray-300 italic">Aucune note. Clique sur "Modifier la fiche" pour en ajouter une.</p>
             )}
           </div>
+        </div>
+
+        {/* ── CANDIDATURES ── */}
+        <div className="bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
+
+          {/* En-tête + stats */}
+          <div className="p-6 border-b border-[#F3F4F6]">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-1">Suivi des candidatures</p>
+                <p className="text-2xl font-black text-gray-900">
+                  {candStats.total}
+                  <span className="text-sm font-normal text-gray-400 ml-2">candidature{candStats.total > 1 ? 's' : ''}</span>
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Taux réponse', value: `${candStats.tauxReponse}%`, color: '#1D4ED8', bg: '#EFF6FF' },
+                  { label: 'Entretiens',   value: candStats.entretien,          color: '#1D4ED8', bg: '#EFF6FF' },
+                  ...(candStats.relances > 0 ? [{ label: 'À relancer', value: candStats.relances, color: '#C2410C', bg: '#FFF7ED' }] : []),
+                  ...(candStats.accepte > 0  ? [{ label: 'Acceptées',  value: candStats.accepte,  color: '#15803D', bg: '#F0FDF4' }] : []),
+                ].map(({ label, value, color, bg }) => (
+                  <div key={label} className="px-4 py-2.5 rounded-xl text-center" style={{ backgroundColor: bg }}>
+                    <p className="text-xl font-black" style={{ color }}>{value}</p>
+                    <p className="text-[10px] font-semibold text-gray-400 mt-0.5">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mini graphe mensuel */}
+            {candStats.total > 0 && (() => {
+              const data = MOIS_GRAPH.map(m => ({
+                ...m,
+                count: candidatures.filter(c => c.date_action?.startsWith(m.key)).length,
+              }))
+              const max = Math.max(...data.map(m => m.count), 1)
+              const now = new Date().toISOString().slice(0, 7)
+              return (
+                <div className="mt-5 flex items-end gap-3 h-20">
+                  {data.map(m => {
+                    const pct   = m.count > 0 ? Math.max((m.count / max) * 100, 10) : 3
+                    const isCur = m.key === now
+                    return (
+                      <div key={m.key} className="flex-1 flex flex-col items-center gap-1.5">
+                        <div className="h-3 flex items-end">
+                          {m.count > 0 && <span className="text-[10px] font-black" style={{ color: isCur ? '#3D553D' : '#5C7A5C' }}>{m.count}</span>}
+                        </div>
+                        <div className="w-full flex items-end" style={{ height: '44px' }}>
+                          <div className="w-full rounded-t-lg transition-all"
+                            style={{ height: `${pct}%`, minHeight: '3px',
+                              backgroundColor: isCur ? '#3D553D' : m.count > 0 ? '#A3BFA3' : '#E4EDE4',
+                              boxShadow: isCur ? '0 -2px 6px rgba(61,85,61,0.2)' : 'none' }} />
+                        </div>
+                        <p className="text-[10px] font-semibold" style={{ color: isCur ? '#3D553D' : '#9CA3AF' }}>{m.label}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+
+            {/* Répartition par statut */}
+            {candStats.total > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-4">
+                {CAND_STATUTS.map(st => {
+                  const count = candidatures.filter(c => c.statut === st.key).length
+                  if (!count) return null
+                  return (
+                    <span key={st.key} className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: st.bg, color: st.color }}>
+                      <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: st.dot }}></span>
+                      {count} {st.label}
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Filtres + recherche */}
+          {candStats.total > 0 && (
+            <div className="px-5 py-3 border-b border-[#F3F4F6] flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <div className="flex gap-1 flex-wrap">
+                {[
+                  { key: 'toutes',     label: `Toutes (${candStats.total})` },
+                  { key: 'envoye',     label: `Envoyées (${candStats.envoye})` },
+                  { key: 'en_attente', label: `Attente (${candStats.attente})` },
+                  { key: 'entretien',  label: `Entretiens (${candStats.entretien})` },
+                  { key: 'refus',      label: `Refus (${candStats.refus})` },
+                  { key: 'accepte',    label: `Acceptées (${candStats.accepte})` },
+                ].map(({ key, label }) => {
+                  const opt = CAND_STATUTS.find(x => x.key === key)
+                  return (
+                    <button key={key} onClick={() => setCandFilter(key)}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                      style={candFilter === key
+                        ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                        : { color: '#9CA3AF' }}>
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+              <input type="text" placeholder="Rechercher..." value={candSearch}
+                onChange={e => setCandSearch(e.target.value)}
+                className="sm:ml-auto px-3 py-1.5 rounded-xl border border-[#C8D8C8] text-xs outline-none focus:border-[#5C7A5C] w-44 bg-white" />
+            </div>
+          )}
+
+          {/* Tableau */}
+          {candStats.total === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-3xl mb-3">📋</p>
+              <p className="text-sm font-semibold text-gray-500">Aucune candidature enregistrée</p>
+              <p className="text-xs text-gray-400 mt-1">L'étudiant n'a pas encore commencé à tracker ses candidatures.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse" style={{ minWidth: '640px' }}>
+                <thead>
+                  <tr className="bg-[#F8FAF8] border-b border-[#E5E7EB]">
+                    <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Entreprise</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Poste</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-36">Statut</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-28">Date</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-20">Lien</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {candFiltered.map((c, i) => {
+                    const s = getCS(c.statut)
+                    const relance = isCRelance(c)
+                    return (
+                      <tr key={c.id}
+                        className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors"
+                        style={{ borderLeft: `3px solid ${s.dot}` }}>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
+                              style={{ backgroundColor: s.bg, color: s.color }}>
+                              {c.entreprise[0]?.toUpperCase()}
+                            </div>
+                            <span className="text-sm font-bold text-gray-900">{c.entreprise}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 max-w-44 truncate">{c.poste}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                              style={{ backgroundColor: s.bg, color: s.color }}>
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></span>
+                              {s.label}
+                            </span>
+                            {relance && (
+                              <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-200">
+                                🔔
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.date_action)}</td>
+                        <td className="px-4 py-3 text-xs text-gray-500 max-w-52 truncate">
+                          {c.notes || <span className="text-gray-300">—</span>}
+                        </td>
+                        <td className="px-4 py-3">
+                          {c.url
+                            ? <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#5C7A5C] hover:underline font-medium">↗ Voir</a>
+                            : <span className="text-gray-300 text-xs">—</span>
+                          }
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                {candFiltered.length > 0 && (
+                  <tfoot>
+                    <tr className="bg-[#F8FAF8] border-t-2 border-[#E5E7EB]">
+                      <td colSpan={6} className="px-5 py-3 text-xs font-bold text-gray-500">
+                        {candFiltered.length} candidature{candFiltered.length > 1 ? 's' : ''}
+                        {candFiltered.length !== candStats.total && <span className="text-gray-300 font-normal"> sur {candStats.total}</span>}
+                        {candStats.relances > 0 && (
+                          <span className="ml-3 text-orange-500">🔔 {candStats.relances} à relancer</span>
+                        )}
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+              {candFiltered.length === 0 && (
+                <div className="py-10 text-center">
+                  <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── MODE ÉDITION ── */}

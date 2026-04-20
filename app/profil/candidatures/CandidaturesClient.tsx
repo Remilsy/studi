@@ -55,7 +55,6 @@ function StatusStepper({ id, statut, onChange }: {
   id: string; statut: string; onChange: (id: string, s: string) => void
 }) {
   const currentIdx = STATUTS.findIndex(s => s.key === statut)
-
   return (
     <div className="px-4 pb-4 pt-1">
       <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
@@ -65,10 +64,8 @@ function StatusStepper({ id, statut, onChange }: {
         {STATUTS.map((opt, idx) => {
           const isCurrent = statut === opt.key
           const isPast    = idx < currentIdx
-
           return (
             <div key={opt.key} className="flex items-center flex-1 last:flex-none">
-              {/* Bouton étape */}
               <button
                 onClick={() => onChange(id, opt.key)}
                 title={`Marquer comme : ${opt.label}`}
@@ -96,8 +93,6 @@ function StatusStepper({ id, statut, onChange }: {
                   {opt.label === 'En attente' ? 'Attente' : opt.label}
                 </span>
               </button>
-
-              {/* Ligne connecteur */}
               {idx < STATUTS.length - 1 && (
                 <div
                   className="flex-1 h-0.5 mx-1 mb-4 transition-colors"
@@ -114,19 +109,16 @@ function StatusStepper({ id, statut, onChange }: {
 
 // ── Graphe d'activité (mensuel) ──────────────────────────────
 const MOIS = [
-  { key: '2026-04', label: 'Avril',   short: 'Avr' },
-  { key: '2026-05', label: 'Mai',     short: 'Mai' },
-  { key: '2026-06', label: 'Juin',    short: 'Jun' },
-  { key: '2026-07', label: 'Juillet', short: 'Jul' },
-  { key: '2026-08', label: 'Août',    short: 'Aoû' },
+  { key: '2026-04', label: 'Avril' },
+  { key: '2026-05', label: 'Mai' },
+  { key: '2026-06', label: 'Juin' },
+  { key: '2026-07', label: 'Juillet' },
+  { key: '2026-08', label: 'Août' },
 ]
 
 function ActivityGraph({ cands }: { cands: Candidature[] }) {
   const data = useMemo(() =>
-    MOIS.map(m => ({
-      ...m,
-      count: cands.filter(c => c.date_action?.startsWith(m.key)).length,
-    }))
+    MOIS.map(m => ({ ...m, count: cands.filter(c => c.date_action?.startsWith(m.key)).length }))
   , [cands])
 
   const max   = Math.max(...data.map(m => m.count), 1)
@@ -145,16 +137,13 @@ function ActivityGraph({ cands }: { cands: Candidature[] }) {
           <p className="text-xs text-gray-400">candidature{total > 1 ? 's' : ''}</p>
         </div>
       </div>
-
       <div className="flex items-end gap-4 h-36">
         {data.map(m => {
-          const pct     = m.count > 0 ? Math.max((m.count / max) * 100, 12) : 4
-          const isCur   = m.key === now
+          const pct      = m.count > 0 ? Math.max((m.count / max) * 100, 12) : 4
+          const isCur    = m.key === now
           const barColor = isCur ? '#3D553D' : m.count > 0 ? '#5C7A5C' : '#E4EDE4'
-
           return (
             <div key={m.key} className="flex-1 flex flex-col items-center gap-2">
-              {/* Valeur au dessus */}
               <div className="h-5 flex items-end justify-center">
                 {m.count > 0 && (
                   <span className="text-sm font-black" style={{ color: isCur ? '#3D553D' : '#5C7A5C' }}>
@@ -162,28 +151,14 @@ function ActivityGraph({ cands }: { cands: Candidature[] }) {
                   </span>
                 )}
               </div>
-
-              {/* Barre */}
               <div className="w-full flex items-end" style={{ height: '80px' }}>
-                <div
-                  className="w-full rounded-t-xl transition-all duration-700"
-                  style={{
-                    height: `${pct}%`,
-                    backgroundColor: barColor,
-                    minHeight: '4px',
-                    boxShadow: isCur ? '0 -2px 8px rgba(61,85,61,0.25)' : 'none',
-                  }}
-                />
+                <div className="w-full rounded-t-xl transition-all duration-700"
+                  style={{ height: `${pct}%`, backgroundColor: barColor, minHeight: '4px',
+                    boxShadow: isCur ? '0 -2px 8px rgba(61,85,61,0.25)' : 'none' }} />
               </div>
-
-              {/* Label mois */}
               <div className="text-center">
-                <p className="text-xs font-bold" style={{ color: isCur ? '#3D553D' : '#6B7280' }}>
-                  {m.label}
-                </p>
-                {isCur && (
-                  <div className="w-1 h-1 rounded-full bg-[#5C7A5C] mx-auto mt-0.5"></div>
-                )}
+                <p className="text-xs font-bold" style={{ color: isCur ? '#3D553D' : '#6B7280' }}>{m.label}</p>
+                {isCur && <div className="w-1 h-1 rounded-full bg-[#5C7A5C] mx-auto mt-0.5"></div>}
               </div>
             </div>
           )
@@ -193,17 +168,10 @@ function ActivityGraph({ cands }: { cands: Candidature[] }) {
   )
 }
 
-// ── Formulaire ajout/edit inline ─────────────────────────────
-function CandidatureForm({
-  title, values, onChange, onSubmit, onCancel, submitting, error,
-}: {
-  title: string
-  values: typeof EMPTY
-  onChange: (f: typeof EMPTY) => void
-  onSubmit: (e: React.FormEvent) => void
-  onCancel: () => void
-  submitting: boolean
-  error: string
+// ── Formulaire ajout/edit ────────────────────────────────────
+function CandidatureForm({ title, values, onChange, onSubmit, onCancel, submitting, error }: {
+  title: string; values: typeof EMPTY; onChange: (f: typeof EMPTY) => void
+  onSubmit: (e: React.FormEvent) => void; onCancel: () => void; submitting: boolean; error: string
 }) {
   const inp = "w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white text-gray-900"
   return (
@@ -256,20 +224,12 @@ function CandidatureForm({
   )
 }
 
-// ── Carte candidature ────────────────────────────────────────
-function CandidatureCard({
-  c, editId, editData, onStatusChange, onEdit, onSaveEdit, onCancelEdit, onDelete, onEditChange, saving,
-}: {
-  c: Candidature
-  editId: string | null
-  editData: typeof EMPTY | null
-  onStatusChange: (id: string, s: string) => void
-  onEdit: (c: Candidature) => void
-  onSaveEdit: (e: React.FormEvent) => void
-  onCancelEdit: () => void
-  onDelete: (id: string) => void
-  onEditChange: (f: typeof EMPTY) => void
-  saving: boolean
+// ── Carte candidature (vue liste) ────────────────────────────
+function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEdit, onCancelEdit, onDelete, onEditChange, saving }: {
+  c: Candidature; editId: string | null; editData: typeof EMPTY | null
+  onStatusChange: (id: string, s: string) => void; onEdit: (c: Candidature) => void
+  onSaveEdit: (e: React.FormEvent) => void; onCancelEdit: () => void
+  onDelete: (id: string) => void; onEditChange: (f: typeof EMPTY) => void; saving: boolean
 }) {
   const s = getS(c.statut)
   const relance = isRelance(c)
@@ -278,14 +238,11 @@ function CandidatureCard({
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden transition-all hover:shadow-sm"
       style={{ borderLeftWidth: '3px', borderLeftColor: s.dot }}>
-
-      {/* Ligne principale */}
       <div className="flex items-center gap-3 px-4 pt-3 pb-2">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
           style={{ backgroundColor: s.bg, color: s.color }}>
           {c.entreprise[0]?.toUpperCase()}
         </div>
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold text-gray-900">{c.entreprise}</span>
@@ -305,9 +262,7 @@ function CandidatureCard({
             )}
           </div>
         </div>
-
         <span className="text-xs text-gray-400 shrink-0 hidden sm:block">{formatDate(c.date_action)}</span>
-
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => onEdit(c)}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-[#5C7A5C] hover:bg-[#E4EDE4] transition-colors">
@@ -323,139 +278,386 @@ function CandidatureCard({
           </button>
         </div>
       </div>
-
-      {/* Stepper de statut — toujours visible */}
       <StatusStepper id={c.id} statut={c.statut} onChange={onStatusChange} />
-
-      {/* Formulaire édition inline */}
       {isEditing && editData && (
         <div className="border-t border-[#F3F4F6] px-4 py-4 bg-[#FAFAFA]">
-          <CandidatureForm
-            title="Sauvegarder"
-            values={editData}
-            onChange={onEditChange}
-            onSubmit={onSaveEdit}
-            onCancel={onCancelEdit}
-            submitting={saving}
-            error=""
-          />
+          <CandidatureForm title="Sauvegarder" values={editData} onChange={onEditChange}
+            onSubmit={onSaveEdit} onCancel={onCancelEdit} submitting={saving} error="" />
         </div>
       )}
     </div>
   )
 }
 
-// ── Carte kanban (compacte, sans stepper) ────────────────────
-function KanbanCard({ c, onStatusChange, onEdit, onDelete }: {
-  c: Candidature
-  onStatusChange: (id: string, s: string) => void
-  onEdit: (c: Candidature) => void
-  onDelete: (id: string) => void
+// ── Cellule éditable (tableau) ───────────────────────────────
+function EditableCell({ id, col, value, editCell, editVal, onStart, onChange, onCommit, onKeyDown, renderView, nullable = false }: {
+  id: string; col: string; value: string
+  editCell: { id: string; col: string } | null; editVal: string
+  onStart: (id: string, col: string, value: string) => void
+  onChange: (v: string) => void; onCommit: () => void
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  renderView: () => React.ReactNode; nullable?: boolean
 }) {
-  const s         = getS(c.statut)
-  const relance   = isRelance(c)
-  const curIdx    = STATUTS.findIndex(st => st.key === c.statut)
-  const prevS     = curIdx > 0 ? STATUTS[curIdx - 1] : null
-  const nextS     = curIdx < STATUTS.length - 1 ? STATUTS[curIdx + 1] : null
-
+  const isEditing = editCell?.id === id && editCell?.col === col
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-3 hover:shadow-sm transition-all"
-      style={{ borderLeftWidth: '3px', borderLeftColor: s.dot }}>
-
-      {/* En-tête */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-gray-900 truncate">{c.entreprise}</p>
-          <p className="text-xs text-gray-500 truncate">{c.poste}</p>
+    <td className="px-4 py-0 cursor-text group/cell" onClick={() => !isEditing && onStart(id, col, value)}>
+      {isEditing ? (
+        <input autoFocus type="text" value={editVal}
+          onChange={e => onChange(e.target.value)}
+          onBlur={onCommit} onKeyDown={onKeyDown}
+          placeholder={nullable ? '—' : ''}
+          className="w-full text-sm rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white my-1.5" />
+      ) : (
+        <div className="py-3 flex items-center gap-1.5">
+          {renderView()}
+          <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            className="shrink-0 opacity-0 group-hover/cell:opacity-40 transition-opacity text-gray-400">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
         </div>
-        <div className="flex gap-1 shrink-0">
-          <button onClick={() => onEdit(c)}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-gray-300 hover:text-[#5C7A5C] hover:bg-[#E4EDE4] transition-colors">
-            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-          </button>
-          <button onClick={() => onDelete(c.id)}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors">
-            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Meta */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] text-gray-400">{formatDate(c.date_action)}</span>
-        {relance && <span className="text-[9px] font-bold text-orange-500">🔔 Relancer</span>}
-      </div>
-
-      {c.notes && <p className="text-[10px] text-gray-400 truncate mb-2">{c.notes}</p>}
-      {c.url && (
-        <a href={c.url} target="_blank" rel="noopener noreferrer"
-          className="text-[10px] text-[#5C7A5C] hover:underline block mb-2">↗ Voir l'offre</a>
       )}
-
-      {/* Déplacer vers */}
-      <div className="flex gap-1 pt-2 border-t border-[#F9FAF9]">
-        {prevS && (
-          <button onClick={() => onStatusChange(c.id, prevS.key)}
-            className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg transition-colors hover:opacity-80"
-            style={{ backgroundColor: prevS.bg, color: prevS.color }}>
-            ← {prevS.label}
-          </button>
-        )}
-        {nextS && (
-          <button onClick={() => onStatusChange(c.id, nextS.key)}
-            className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg transition-colors hover:opacity-80"
-            style={{ backgroundColor: nextS.bg, color: nextS.color }}>
-            {nextS.label} →
-          </button>
-        )}
-      </div>
-    </div>
+    </td>
   )
 }
 
-// ── Vue Kanban ───────────────────────────────────────────────
-function KanbanView({ cands, onStatusChange, onEdit, onDelete }: {
+// ── Vue Tableau ──────────────────────────────────────────────
+function TableauView({ cands, onFieldUpdate, onDelete }: {
   cands: Candidature[]
-  onStatusChange: (id: string, s: string) => void
-  onEdit: (c: Candidature) => void
+  onFieldUpdate: (id: string, field: string, value: string) => Promise<void>
   onDelete: (id: string) => void
 }) {
-  return (
-    <div className="flex gap-3 overflow-x-auto pb-4">
-      {STATUTS.map(s => {
-        const col = cands.filter(c => c.statut === s.key)
-        return (
-          <div key={s.key} className="flex-shrink-0 w-56 flex flex-col gap-2">
-            {/* En-tête colonne */}
-            <div className="flex items-center gap-2 px-1 py-2 rounded-xl sticky top-0"
-              style={{ backgroundColor: s.bg }}>
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.dot }}></div>
-              <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
-              <span className="ml-auto text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: s.dot, color: 'white' }}>
-                {col.length}
-              </span>
-            </div>
+  const [sortCol, setSortCol]       = useState('date_action')
+  const [sortDir, setSortDir]       = useState<'asc' | 'desc'>('desc')
+  const [filter, setFilter]         = useState('toutes')
+  const [search, setSearch]         = useState('')
+  const [onlyRelance, setOnlyRelance] = useState(false)
+  const [editCell, setEditCell]     = useState<{ id: string; col: string } | null>(null)
+  const [editVal, setEditVal]       = useState('')
+  const [selected, setSelected]     = useState<Set<string>>(new Set())
+  const [bulkStatut, setBulkStatut] = useState('')
 
-            {/* Cartes */}
-            <div className="flex flex-col gap-2">
-              {col.map(c => (
-                <KanbanCard key={c.id} c={c}
-                  onStatusChange={onStatusChange} onEdit={onEdit} onDelete={onDelete} />
-              ))}
-              {col.length === 0 && (
-                <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl h-20 flex items-center justify-center">
-                  <span className="text-xs text-gray-300">Vide</span>
-                </div>
+  function toggleSort(col: string) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+  }
+
+  function startEdit(id: string, col: string, value: string | null) {
+    setEditCell({ id, col })
+    setEditVal(value || '')
+  }
+
+  async function commitEdit() {
+    if (!editCell) return
+    const { id, col } = editCell
+    setEditCell(null)
+    await onFieldUpdate(id, col, editVal)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') { e.preventDefault(); commitEdit() }
+    if (e.key === 'Escape') setEditCell(null)
+  }
+
+  const relanceCount = useMemo(() => cands.filter(isRelance).length, [cands])
+
+  const filtered = useMemo(() => {
+    let list = [...cands]
+    if (filter !== 'toutes') list = list.filter(c => c.statut === filter)
+    if (onlyRelance) list = list.filter(isRelance)
+    if (search) {
+      const q = search.toLowerCase()
+      list = list.filter(c =>
+        c.entreprise.toLowerCase().includes(q) ||
+        c.poste.toLowerCase().includes(q) ||
+        (c.notes || '').toLowerCase().includes(q)
+      )
+    }
+    return list.sort((a, b) => {
+      const av = String((a as any)[sortCol] || '')
+      const bv = String((b as any)[sortCol] || '')
+      return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+    })
+  }, [cands, filter, onlyRelance, search, sortCol, sortDir])
+
+  const allSelected = selected.size > 0 && selected.size === filtered.length
+  function toggleAll() {
+    setSelected(allSelected ? new Set() : new Set(filtered.map(c => c.id)))
+  }
+  function toggleOne(id: string) {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function deleteSelected() {
+    Array.from(selected).forEach(id => onDelete(id))
+    setSelected(new Set())
+  }
+  async function applyBulkStatut() {
+    if (!bulkStatut) return
+    await Promise.all(Array.from(selected).map(id => onFieldUpdate(id, 'statut', bulkStatut)))
+    setSelected(new Set())
+    setBulkStatut('')
+  }
+
+  const sortTh = (col: string, label: string, className = '') => (
+    <th onClick={() => toggleSort(col)}
+      className={`px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest cursor-pointer select-none whitespace-nowrap transition-colors ${sortCol === col ? 'text-[#3D553D]' : 'text-gray-400 hover:text-gray-600'} ${className}`}>
+      <span className="flex items-center gap-1">
+        {label}
+        <span className={sortCol === col ? 'text-[#5C7A5C]' : 'invisible'}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+      </span>
+    </th>
+  )
+
+  return (
+    <div className="flex flex-col gap-3">
+
+      {/* Filtres */}
+      <div className="bg-white rounded-2xl border border-[#C8D8C8] p-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
+        <div className="flex gap-1 flex-wrap">
+          {[
+            { key: 'toutes',     label: `Tout (${cands.length})` },
+            { key: 'envoye',     label: `Envoyées (${cands.filter(c => c.statut === 'envoye').length})` },
+            { key: 'en_attente', label: `Attente (${cands.filter(c => c.statut === 'en_attente').length})` },
+            { key: 'entretien',  label: `Entretiens (${cands.filter(c => c.statut === 'entretien').length})` },
+            { key: 'refus',      label: `Refus (${cands.filter(c => c.statut === 'refus').length})` },
+            { key: 'accepte',    label: `Acceptées (${cands.filter(c => c.statut === 'accepte').length})` },
+          ].map(({ key, label }) => {
+            const opt = STATUTS.find(x => x.key === key)
+            return (
+              <button key={key} onClick={() => setFilter(key)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={filter === key
+                  ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                  : { color: '#9CA3AF' }}>
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-2 sm:ml-auto">
+          {relanceCount > 0 && (
+            <button onClick={() => setOnlyRelance(v => !v)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${onlyRelance ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:text-orange-500'}`}>
+              🔔 À relancer ({relanceCount})
+            </button>
+          )}
+          <input type="text" placeholder="Rechercher..." value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="px-3 py-1.5 rounded-xl border border-[#C8D8C8] text-xs outline-none focus:border-[#5C7A5C] w-44 bg-white" />
+        </div>
+      </div>
+
+      {/* Tableau */}
+      <div className="bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
+
+        {/* Barre actions groupées */}
+        {selected.size > 0 && (
+          <div className="flex items-center gap-3 px-5 py-3 bg-[#3D553D]">
+            <span className="text-sm font-semibold text-white shrink-0">
+              {selected.size} sélectionnée{selected.size > 1 ? 's' : ''}
+            </span>
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              <select value={bulkStatut} onChange={e => setBulkStatut(e.target.value)}
+                className="text-xs rounded-lg px-2 py-1.5 outline-none bg-white/15 text-white border border-white/20">
+                <option value="">Changer le statut...</option>
+                {STATUTS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+              </select>
+              {bulkStatut && (
+                <button onClick={applyBulkStatut}
+                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                  Appliquer
+                </button>
               )}
+              <button onClick={deleteSelected}
+                className="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                Supprimer tout
+              </button>
+              <button onClick={() => setSelected(new Set())}
+                className="text-white/50 hover:text-white text-xl leading-none transition-colors">×</button>
             </div>
           </div>
-        )
-      })}
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse" style={{ minWidth: '720px' }}>
+            <thead>
+              <tr className="bg-[#F8FAF8] border-b border-[#E5E7EB]">
+                <th className="pl-5 pr-3 py-3 w-9">
+                  <input type="checkbox" checked={allSelected} onChange={toggleAll}
+                    className="w-3.5 h-3.5 rounded accent-[#5C7A5C] cursor-pointer" />
+                </th>
+                <th className="px-2 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-300 text-right w-8">#</th>
+                {sortTh('entreprise', 'Entreprise')}
+                {sortTh('poste', 'Poste')}
+                {sortTh('statut', 'Statut', 'w-36')}
+                {sortTh('date_action', 'Date', 'w-28')}
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-20">Lien</th>
+                <th className="px-3 py-3 w-10"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c, i) => {
+                const s           = getS(c.statut)
+                const relance     = isRelance(c)
+                const isSelected  = selected.has(c.id)
+                const editingStatut = editCell?.id === c.id && editCell?.col === 'statut'
+                const editingDate   = editCell?.id === c.id && editCell?.col === 'date_action'
+                const editingUrl    = editCell?.id === c.id && editCell?.col === 'url'
+
+                return (
+                  <tr key={c.id}
+                    className={`border-b border-[#F3F4F6] transition-colors group ${isSelected ? 'bg-[#F0FDF4]' : 'hover:bg-[#FAFAFA]'}`}
+                    style={{ borderLeft: `3px solid ${s.dot}` }}>
+
+                    {/* Checkbox */}
+                    <td className="pl-5 pr-3 py-3">
+                      <input type="checkbox" checked={isSelected} onChange={() => toggleOne(c.id)}
+                        className="w-3.5 h-3.5 rounded accent-[#5C7A5C] cursor-pointer" />
+                    </td>
+
+                    {/* # */}
+                    <td className="px-2 py-3 text-xs text-gray-300 font-mono text-right">{i + 1}</td>
+
+                    {/* Entreprise */}
+                    <EditableCell id={c.id} col="entreprise" value={c.entreprise}
+                      editCell={editCell} editVal={editVal}
+                      onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
+                      renderView={() => (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
+                            style={{ backgroundColor: s.bg, color: s.color }}>
+                            {c.entreprise[0]?.toUpperCase()}
+                          </div>
+                          <span className="text-sm font-bold text-gray-900 truncate">{c.entreprise}</span>
+                        </div>
+                      )} />
+
+                    {/* Poste */}
+                    <EditableCell id={c.id} col="poste" value={c.poste}
+                      editCell={editCell} editVal={editVal}
+                      onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
+                      renderView={() => <span className="text-sm text-gray-600 truncate block max-w-44">{c.poste}</span>} />
+
+                    {/* Statut */}
+                    <td className="px-4 py-3">
+                      {editingStatut ? (
+                        <select autoFocus value={editVal}
+                          onChange={e => setEditVal(e.target.value)}
+                          onBlur={commitEdit}
+                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white w-full">
+                          {STATUTS.map(st => <option key={st.key} value={st.key}>{st.label}</option>)}
+                        </select>
+                      ) : (
+                        <button onClick={() => startEdit(c.id, 'statut', c.statut)}
+                          title="Cliquer pour changer"
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all hover:opacity-80 active:scale-95"
+                          style={{ backgroundColor: s.bg, color: s.color }}>
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: s.dot }}></div>
+                          <span>{s.label}</span>
+                          {relance && <span className="shrink-0 ml-0.5">🔔</span>}
+                        </button>
+                      )}
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-4 py-3">
+                      {editingDate ? (
+                        <input autoFocus type="date" value={editVal}
+                          onChange={e => setEditVal(e.target.value)}
+                          onBlur={commitEdit} onKeyDown={handleKeyDown}
+                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white" />
+                      ) : (
+                        <button onClick={() => startEdit(c.id, 'date_action', c.date_action)}
+                          className="text-xs text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap text-left group/date flex items-center gap-1">
+                          {formatDate(c.date_action)}
+                          <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            className="opacity-0 group-hover/date:opacity-40 transition-opacity">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+
+                    {/* Notes */}
+                    <EditableCell id={c.id} col="notes" value={c.notes || ''}
+                      editCell={editCell} editVal={editVal}
+                      onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
+                      renderView={() => c.notes
+                        ? <span className="text-xs text-gray-500 truncate block max-w-52">{c.notes}</span>
+                        : <span className="text-xs text-gray-300 italic">ajouter une note...</span>}
+                      nullable />
+
+                    {/* Lien */}
+                    <td className="px-4 py-3">
+                      {editingUrl ? (
+                        <input autoFocus type="url" placeholder="https://..." value={editVal}
+                          onChange={e => setEditVal(e.target.value)}
+                          onBlur={commitEdit} onKeyDown={handleKeyDown}
+                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white w-36" />
+                      ) : c.url ? (
+                        <div className="flex items-center gap-1.5">
+                          <a href={c.url} target="_blank" rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="text-xs text-[#5C7A5C] hover:underline font-medium">↗ Voir</a>
+                          <button onClick={() => startEdit(c.id, 'url', c.url || '')}
+                            className="text-[10px] text-gray-300 hover:text-gray-500 transition-colors">✎</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => startEdit(c.id, 'url', '')}
+                          className="text-xs text-gray-300 hover:text-[#5C7A5C] transition-colors font-medium">+ lien</button>
+                      )}
+                    </td>
+
+                    {/* Supprimer */}
+                    <td className="px-3 py-3">
+                      <button onClick={() => onDelete(c.id)}
+                        className="w-6 h-6 rounded-md flex items-center justify-center text-gray-200 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
+                        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+
+            {/* Pied de tableau */}
+            {filtered.length > 0 && (
+              <tfoot>
+                <tr className="bg-[#F8FAF8] border-t-2 border-[#E5E7EB]">
+                  <td colSpan={4} className="px-5 py-3 text-xs font-bold text-gray-500">
+                    {filtered.length} candidature{filtered.length > 1 ? 's' : ''}
+                    {filtered.length !== cands.length && (
+                      <span className="text-gray-300 font-normal"> sur {cands.length}</span>
+                    )}
+                  </td>
+                  <td colSpan={5} className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {STATUTS.map(st => {
+                        const count = filtered.filter(c => c.statut === st.key).length
+                        if (!count) return null
+                        return (
+                          <span key={st.key} className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: st.bg, color: st.color }}>
+                            {count} {st.label}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+
+          {filtered.length === 0 && (
+            <div className="py-14 text-center">
+              <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -463,7 +665,7 @@ function KanbanView({ cands, onStatusChange, onEdit, onDelete }: {
 // ── Composant principal ──────────────────────────────────────
 export default function CandidaturesClient({ initial, objectif }: { initial: Candidature[]; objectif: number }) {
   const [cands, setCands]       = useState<Candidature[]>(initial)
-  const [view, setView]         = useState<'liste' | 'kanban'>('liste')
+  const [view, setView]         = useState<'liste' | 'tableau'>('liste')
   const [filter, setFilter]     = useState('toutes')
   const [search, setSearch]     = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -475,15 +677,15 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
   const [addError, setAddError] = useState('')
 
   const stats = useMemo(() => ({
-    total:      cands.length,
-    envoye:     cands.filter(c => c.statut === 'envoye').length,
-    attente:    cands.filter(c => c.statut === 'en_attente').length,
-    entretien:  cands.filter(c => c.statut === 'entretien').length,
-    refus:      cands.filter(c => c.statut === 'refus').length,
-    accepte:    cands.filter(c => c.statut === 'accepte').length,
+    total:       cands.length,
+    envoye:      cands.filter(c => c.statut === 'envoye').length,
+    attente:     cands.filter(c => c.statut === 'en_attente').length,
+    entretien:   cands.filter(c => c.statut === 'entretien').length,
+    refus:       cands.filter(c => c.statut === 'refus').length,
+    accepte:     cands.filter(c => c.statut === 'accepte').length,
     tauxReponse: cands.length > 0
       ? Math.round((cands.filter(c => c.statut !== 'envoye').length / cands.length) * 100) : 0,
-    relances:   cands.filter(isRelance).length,
+    relances:    cands.filter(isRelance).length,
   }), [cands])
 
   const level = getLevel(stats.total)
@@ -491,12 +693,15 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
   const objectifPct = Math.min(Math.round((stats.total / objectif) * 100), 100)
 
   const filtered = useMemo(() => {
+    if (view !== 'liste') return cands
     let list = cands
-    if (view === 'liste' && filter !== 'toutes') list = list.filter(c => c.statut === filter)
-    if (search) list = list.filter(c =>
-      c.entreprise.toLowerCase().includes(search.toLowerCase()) ||
-      c.poste.toLowerCase().includes(search.toLowerCase())
-    )
+    if (filter !== 'toutes') list = list.filter(c => c.statut === filter)
+    if (search) {
+      const q = search.toLowerCase()
+      list = list.filter(c =>
+        c.entreprise.toLowerCase().includes(q) || c.poste.toLowerCase().includes(q)
+      )
+    }
     return list
   }, [cands, filter, search, view])
 
@@ -517,6 +722,22 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
     await updateCandidatureStatut(id, statut)
   }
 
+  async function handleFieldUpdate(id: string, field: string, value: string) {
+    const c = cands.find(x => x.id === id)
+    if (!c) return
+    const nullVal = (f: string, v: string) => (f === 'notes' || f === 'url') ? v || null : v
+    setCands(prev => prev.map(x => x.id === id ? { ...x, [field]: nullVal(field, value) } : x))
+    if (field === 'statut') {
+      await updateCandidatureStatut(id, value)
+    } else {
+      const updated = { ...c, [field]: nullVal(field, value) }
+      await updateCandidature(id, {
+        entreprise: updated.entreprise, poste: updated.poste, statut: updated.statut,
+        date_action: updated.date_action, notes: updated.notes, url: updated.url,
+      })
+    }
+  }
+
   function handleEdit(c: Candidature) {
     setEditId(c.id)
     setEditData({ entreprise: c.entreprise, poste: c.poste, statut: c.statut, date_action: c.date_action, notes: c.notes || '', url: c.url || '' })
@@ -529,8 +750,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
     const result = await updateCandidature(editId, { ...editData, notes: editData.notes || null, url: editData.url || null })
     if (!('error' in result)) {
       setCands(prev => prev.map(c => c.id === editId ? { ...c, ...editData, notes: editData.notes || null, url: editData.url || null } : c))
-      setEditId(null)
-      setEditData(null)
+      setEditId(null); setEditData(null)
     }
     setSaving(false)
   }
@@ -560,13 +780,14 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Toggle vue */}
             <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {(['liste', 'kanban'] as const).map(v => (
+              {(['liste', 'tableau'] as const).map(v => (
                 <button key={v} onClick={() => setView(v)}
                   className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all capitalize"
-                  style={view === v ? { backgroundColor: 'white', color: '#3D553D', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#9CA3AF' }}>
-                  {v === 'liste' ? 'Liste' : 'Kanban'}
+                  style={view === v
+                    ? { backgroundColor: 'white', color: '#3D553D', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                    : { color: '#9CA3AF' }}>
+                  {v === 'liste' ? 'Liste' : 'Tableau'}
                 </button>
               ))}
             </div>
@@ -583,9 +804,9 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'Total',        value: stats.total,               color: '#3D553D', bg: '#E4EDE4' },
-            { label: 'Taux réponse', value: `${stats.tauxReponse}%`,   color: '#1D4ED8', bg: '#EFF6FF' },
-            { label: 'Entretiens',   value: stats.entretien,           color: '#1D4ED8', bg: '#EFF6FF' },
+            { label: 'Total',        value: stats.total,             color: '#3D553D', bg: '#E4EDE4' },
+            { label: 'Taux réponse', value: `${stats.tauxReponse}%`, color: '#1D4ED8', bg: '#EFF6FF' },
+            { label: 'Entretiens',   value: stats.entretien,         color: '#1D4ED8', bg: '#EFF6FF' },
             { label: stats.relances > 0 ? `À relancer (${stats.relances})` : 'Acceptées',
               value: stats.relances > 0 ? stats.relances : stats.accepte,
               color: stats.relances > 0 ? '#C2410C' : '#15803D',
@@ -630,7 +851,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
           </div>
         </div>
 
-        {/* Graphe d'activité */}
+        {/* Graphe */}
         <ActivityGraph cands={cands} />
 
         {/* Formulaire ajout */}
@@ -645,7 +866,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
           </div>
         )}
 
-        {/* Filtres + recherche (liste seulement) */}
+        {/* Filtres liste */}
         {view === 'liste' && (
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex gap-1 bg-white border border-[#C8D8C8] rounded-xl p-1 flex-wrap">
@@ -661,7 +882,9 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
                 return (
                   <button key={key} onClick={() => setFilter(key)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                    style={filter === key ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' } : { color: '#9CA3AF' }}>
+                    style={filter === key
+                      ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                      : { color: '#9CA3AF' }}>
                     {label}
                   </button>
                 )
@@ -673,14 +896,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
           </div>
         )}
 
-        {/* Recherche en kanban */}
-        {view === 'kanban' && (
-          <input type="text" placeholder="Rechercher dans le tableau..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-[#C8D8C8] bg-white text-sm outline-none focus:border-[#5C7A5C]" />
-        )}
-
-        {/* Contenu principal */}
+        {/* Contenu */}
         {cands.length === 0 ? (
           <div className="bg-white rounded-2xl border-2 border-dashed border-[#C8D8C8] p-16 text-center cursor-pointer hover:border-[#5C7A5C] transition-colors"
             onClick={() => { setShowForm(true); setAddError('') }}>
@@ -691,9 +907,8 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
               + Ajouter ma première candidature
             </div>
           </div>
-        ) : view === 'kanban' ? (
-          <KanbanView cands={filtered} onStatusChange={handleStatusChange} onEdit={handleEdit}
-            onDelete={handleDelete} />
+        ) : view === 'tableau' ? (
+          <TableauView cands={cands} onFieldUpdate={handleFieldUpdate} onDelete={handleDelete} />
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#C8D8C8] p-10 text-center">
             <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>

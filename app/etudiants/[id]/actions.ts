@@ -3,6 +3,18 @@
 import { createClient } from '../../../lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 
+export async function getCandidaturesForEtudiant(etudiantId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.user_metadata?.role !== 'admin') return []
+  const { data } = await supabase
+    .from('candidatures')
+    .select('*')
+    .eq('etudiant_id', etudiantId)
+    .order('date_action', { ascending: false })
+  return data || []
+}
+
 export async function updateEtudiant(id: string, formData: FormData) {
   const supabase = await createClient()
 
