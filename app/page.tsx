@@ -1,119 +1,206 @@
 import { createClient } from '../lib/supabase-server'
+import Link from 'next/link'
 import LogoutButton from './components/LogoutButton'
+import DashboardClient from './components/DashboardClient'
 
 async function getEtudiants() {
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('etudiants')
     .select('*')
     .order('created_at', { ascending: false })
-
-  if (error) console.error(error)
   return data || []
 }
 
 export default async function Dashboard() {
   const etudiants = await getEtudiants()
 
-  const total = etudiants.length
-  const places = etudiants.filter((e: any) => e.statut === 'place').length
-  const enRecherche = etudiants.filter((e: any) => e.statut === 'en_recherche').length
+  const total        = etudiants.length
+  const places       = etudiants.filter((e: any) => e.statut === 'place').length
+  const enRecherche  = etudiants.filter((e: any) => e.statut === 'en_recherche').length
+  const enPrep       = etudiants.filter((e: any) => e.statut === 'en_preparation').length
+  const tauxPlacement = total > 0 ? Math.round((places / total) * 100) : 0
+
+  const totalCandidatures = etudiants.reduce((sum: number, e: any) => sum + (e.nb_candidatures || 0), 0)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const in7days = new Date(today)
+  in7days.setDate(today.getDate() + 7)
+
+  const prochainEntretiens = etudiants
+    .filter((e: any) => {
+      if (!e.prochain_entretien) return false
+      const d = new Date(e.prochain_entretien)
+      return d >= today && d <= in7days
+    })
+    .sort((a: any, b: any) => new Date(a.prochain_entretien).getTime() - new Date(b.prochain_entretien).getTime())
+
+  const aRelancer = etudiants.filter((e: any) =>
+    e.statut === 'en_recherche' && (e.nb_candidatures || 0) === 0
+  )
 
   return (
     <div className="min-h-screen bg-[#D6E6D6] flex">
-      <div className="w-52 bg-white border-r border-gray-100 flex flex-col p-3 gap-1">
+
+      {/* Sidebar */}
+      <div className="w-52 bg-white border-r border-gray-100 flex flex-col p-3 gap-1 shrink-0">
         <div className="flex items-center gap-2 px-3 py-3 mb-2">
           <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
           <span className="font-semibold text-gray-900 tracking-tight">Studi</span>
         </div>
-        <NavItem label="Dashboard" active />
-        <NavItem label="Étudiants" />
-        <NavItem label="Documents" />
+        <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-[#E4EDE4] text-[#3D553D] font-medium">Dashboard</Link>
+        <Link href="/etudiants" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Étudiants</Link>
+        <Link href="#" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Documents</Link>
         <div className="px-3 pt-3 pb-1 text-[10px] font-medium text-gray-400 uppercase tracking-widest">Recrutement</div>
-        <NavItem label="Entreprises" />
-        <NavItem label="Offres" />
-        <NavItem label="Relances" />
+        <Link href="#" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Entreprises</Link>
+        <Link href="/offres" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Offres</Link>
+        <Link href="#" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Relances</Link>
       </div>
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 overflow-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Bonjour, Remi 👋</h1>
+            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Bonjour, Remi</h1>
             <p className="text-sm text-[#5C7A5C] mt-0.5">SUP-PHOTO · Promo 2024–2025</p>
           </div>
           <LogoutButton />
         </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-5">
-          <StatCard label="Étudiants" value={total.toString()} sub={`${enRecherche} en recherche`} />
-          <StatCard label="Candidatures" value="0" sub="à compléter" />
-          <StatCard label="Placés" value={places.toString()} sub="cette année" />
-          <StatCard label="À relancer" value="0" sub="inactifs +7 jours" />
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <StatCard label="Étudiants" value={total} sub={`${enPrep} en préparation`} />
+          <StatCard label="En recherche" value={enRecherche} sub={`${aRelancer.length} à relancer`} color="blue" />
+          <StatCard label="Placés" value={places} sub={`${tauxPlacement}% de la promo`} color="green" />
+          <StatCard label="Candidatures" value={totalCandidatures} sub="au total" />
         </div>
 
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-gray-900">Étudiants</h2>
-          <span className="text-xs text-[#5C7A5C] cursor-pointer">Voir tous →</span>
+        {/* Taux de placement */}
+        <div className="bg-white border border-[#C8D8C8] rounded-xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Taux de placement global</span>
+            <span className="text-sm font-bold text-gray-900">{tauxPlacement}%</span>
+          </div>
+          <div className="flex gap-1 h-3 rounded-full overflow-hidden">
+            {places > 0 && (
+              <div className="bg-green-400 rounded-l-full transition-all" style={{ width: `${(places / total) * 100}%` }}></div>
+            )}
+            {enRecherche > 0 && (
+              <div className="bg-[#5C7A5C]" style={{ width: `${(enRecherche / total) * 100}%` }}></div>
+            )}
+            {enPrep > 0 && (
+              <div className="bg-gray-200 rounded-r-full" style={{ width: `${(enPrep / total) * 100}%` }}></div>
+            )}
+          </div>
+          <div className="flex gap-4 mt-2">
+            {[
+              { label: 'Placés', color: 'bg-green-400', count: places },
+              { label: 'En recherche', color: 'bg-[#5C7A5C]', count: enRecherche },
+              { label: 'En préparation', color: 'bg-gray-200', count: enPrep },
+            ].map(({ label, color, count }) => (
+              <div key={label} className="flex items-center gap-1.5">
+                <div className={`w-2 h-2 rounded-full ${color}`}></div>
+                <span className="text-[10px] text-gray-400">{label} ({count})</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="bg-white border border-[#C8D8C8] rounded-xl overflow-hidden mb-4">
-          {etudiants.map((e: any) => (
-            <StudentRow
-              key={e.id}
-              initiales={`${e.prenom[0]}${e.nom[0]}`}
-              nom={`${e.prenom} ${e.nom}`}
-              niveau={`${e.niveau} · ${e.type_formation === 'alternance' ? 'Alternance' : 'Initial'}`}
-              statut={e.statut}
-              progression={e.score_progression}
-            />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+
+          {/* Prochains entretiens */}
+          <div className="bg-white border border-[#C8D8C8] rounded-xl p-4">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Entretiens cette semaine</h2>
+            {prochainEntretiens.length === 0 ? (
+              <p className="text-sm text-gray-300 italic">Aucun entretien prévu.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {prochainEntretiens.map((e: any) => (
+                  <Link key={e.id} href={`/etudiants/${e.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F8FAF8] transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-[#E4EDE4] flex items-center justify-center text-xs font-semibold text-[#3D553D] shrink-0">
+                      {e.prenom[0]}{e.nom[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
+                      <p className="text-[10px] text-[#5C7A5C]">
+                        {new Date(e.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* À relancer */}
+          <div className="bg-white border border-[#C8D8C8] rounded-xl p-4">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              À relancer <span className="text-red-400 ml-1">{aRelancer.length}</span>
+            </h2>
+            {aRelancer.length === 0 ? (
+              <p className="text-sm text-gray-300 italic">Tout le monde est actif.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {aRelancer.slice(0, 5).map((e: any) => (
+                  <Link key={e.id} href={`/etudiants/${e.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F8FAF8] transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-xs font-semibold text-red-400 shrink-0">
+                      {e.prenom[0]}{e.nom[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
+                      <p className="text-[10px] text-gray-400">0 candidature</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Meilleurs progressions */}
+          <div className="bg-white border border-[#C8D8C8] rounded-xl p-4">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Top progressions</h2>
+            <div className="flex flex-col gap-2">
+              {[...etudiants]
+                .sort((a: any, b: any) => (b.score_progression || 0) - (a.score_progression || 0))
+                .slice(0, 5)
+                .map((e: any) => (
+                  <Link key={e.id} href={`/etudiants/${e.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F8FAF8] transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-[#E4EDE4] flex items-center justify-center text-xs font-semibold text-[#3D553D] shrink-0">
+                      {e.prenom[0]}{e.nom[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex-1 h-1 bg-[#E4EDE4] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${e.score_progression || 0}%` }}></div>
+                        </div>
+                        <span className="text-[10px] text-gray-400">{e.score_progression || 0}%</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+            </div>
+          </div>
         </div>
+
+        {/* Liste étudiants complète avec recherche/filtres */}
+        <DashboardClient etudiants={etudiants} />
       </div>
     </div>
   )
 }
 
-function NavItem({ label, active }: { label: string; active?: boolean }) {
-  return (
-    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-all ${active ? "bg-[#E4EDE4] text-[#3D553D] font-medium" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}>
-      {label}
-    </div>
-  )
-}
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function StatCard({ label, value, sub, color }: { label: string; value: number; sub: string; color?: string }) {
+  const colors = {
+    green: 'text-green-600',
+    blue: 'text-blue-600',
+  }
+  const valueColor = color ? colors[color as keyof typeof colors] : 'text-gray-900'
   return (
     <div className="bg-white border border-[#C8D8C8] rounded-xl p-4">
       <div className="text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wide">{label}</div>
-      <div className="text-2xl font-semibold tracking-tight text-gray-900">{value}</div>
+      <div className={`text-2xl font-bold tracking-tight ${valueColor}`}>{value}</div>
       <div className="text-[11px] text-gray-400 mt-1">{sub}</div>
-    </div>
-  )
-}
-
-function StudentRow({ initiales, nom, niveau, statut, progression }: { initiales: string; nom: string; niveau: string; statut: string; progression: number }) {
-  const statutConfig: Record<string, { label: string; bg: string; text: string }> = {
-    en_preparation: { label: 'En préparation', bg: 'bg-gray-100', text: 'text-gray-600' },
-    en_recherche: { label: 'En recherche', bg: 'bg-[#E4EDE4]', text: 'text-[#3D553D]' },
-    place: { label: 'Placé', bg: 'bg-green-50', text: 'text-green-700' },
-  }
-  const config = statutConfig[statut] || statutConfig['en_preparation']
-  const barColor = statut === 'place' ? 'bg-green-500' : statut === 'en_recherche' ? 'bg-[#5C7A5C]' : 'bg-gray-300'
-
-  return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#EEF3EE] last:border-0">
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${config.bg} ${config.text}`}>{initiales}</div>
-      <div className="flex-1">
-        <div className="text-sm font-medium text-gray-900">{nom}</div>
-        <div className="text-xs text-gray-400">{niveau}</div>
-      </div>
-      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${config.bg} ${config.text}`}>{config.label}</span>
-      <div className="flex items-center gap-2">
-        <div className="w-20 h-1 bg-[#E4EDE4] rounded-full overflow-hidden">
-          <div className={`h-full rounded-full ${barColor}`} style={{ width: `${progression}%` }}></div>
-        </div>
-        <span className="text-[11px] text-gray-400 w-7 text-right">{progression}%</span>
-      </div>
     </div>
   )
 }
