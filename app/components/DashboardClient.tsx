@@ -16,10 +16,10 @@ interface Etudiant {
   prochain_entretien: string | null
 }
 
-const statutLabels: Record<string, { label: string; bg: string; text: string }> = {
-  en_preparation: { label: 'En préparation', bg: '#F3F4F6', text: '#6B7280' },
-  en_recherche:   { label: 'En recherche',   bg: '#E4EDE4', text: '#3D553D' },
-  place:          { label: 'Placé',           bg: '#F0FDF4', text: '#15803D' },
+const statutLabels: Record<string, { label: string; bg: string; text: string; bar: string }> = {
+  en_preparation: { label: 'En préparation', bg: '#F3F4F6', text: '#6B7280', bar: '#D1D5DB' },
+  en_recherche:   { label: 'En recherche',   bg: '#E4EDE4', text: '#3D553D', bar: '#5C7A5C' },
+  place:          { label: 'Placé',           bg: '#F0FDF4', text: '#15803D', bar: '#16A34A' },
 }
 
 function exportCSV(etudiants: Etudiant[]) {
@@ -111,18 +111,30 @@ export default function DashboardClient({ etudiants }: { etudiants: Etudiant[] }
       ) : (
         <div className="divide-y divide-[#F9FAF9]">
           {filtered.map(e => {
-            const s = statutLabels[e.statut] || { label: e.statut, bg: '#F3F4F6', text: '#6B7280' }
+            const s = statutLabels[e.statut] || { label: e.statut, bg: '#F3F4F6', text: '#6B7280', bar: '#D1D5DB' }
+            const urgence = e.statut === 'en_recherche' && (e.nb_candidatures ?? 0) === 0
             return (
               <Link
                 key={e.id}
                 href={`/etudiants/${e.id}`}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-[#F8FAF8] transition-colors"
+                className="flex items-center gap-4 px-4 py-3 hover:bg-[#F8FAF8] transition-colors relative overflow-hidden"
               >
-                <div className="w-8 h-8 rounded-full bg-[#E4EDE4] flex items-center justify-center text-xs font-semibold text-[#3D553D] shrink-0">
+                {/* Bande colorée à gauche */}
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-full" style={{ backgroundColor: s.bar }}></div>
+
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+                  style={{ backgroundColor: s.bg, color: s.text }}
+                >
                   {e.prenom[0]}{e.nom[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
+                    {urgence && (
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400 shrink-0">À relancer</span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400 truncate">{e.email}</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2 shrink-0">
@@ -138,11 +150,11 @@ export default function DashboardClient({ etudiants }: { etudiants: Etudiant[] }
                 </span>
                 <div className="hidden lg:flex items-center gap-2 w-24 shrink-0">
                   <div className="flex-1 h-1 bg-[#E4EDE4] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${e.score_progression ?? 0}%` }}></div>
+                    <div className="h-full rounded-full transition-all" style={{ width: `${e.score_progression ?? 0}%`, backgroundColor: s.bar }}></div>
                   </div>
                   <span className="text-[10px] text-gray-400">{e.score_progression ?? 0}%</span>
                 </div>
-                <span className="text-xs text-gray-400 shrink-0">{e.nb_candidatures ?? 0} cand.</span>
+                <span className="text-xs font-semibold shrink-0" style={{ color: s.text }}>{e.nb_candidatures ?? 0} cand.</span>
                 <svg className="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
