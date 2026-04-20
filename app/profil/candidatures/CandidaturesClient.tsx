@@ -112,52 +112,82 @@ function StatusStepper({ id, statut, onChange }: {
   )
 }
 
-// ── Graphe d'activité ────────────────────────────────────────
-function ActivityGraph({ cands }: { cands: Candidature[] }) {
-  const weeks = useMemo(() => {
-    const result = []
-    for (let i = 7; i >= 0; i--) {
-      const ref = new Date(); ref.setHours(0,0,0,0)
-      ref.setDate(ref.getDate() - ref.getDay() - i * 7)
-      const end = new Date(ref); end.setDate(end.getDate() + 6); end.setHours(23,59,59,999)
-      const count = cands.filter(c => {
-        const d = new Date(c.date_action)
-        return d >= ref && d <= end
-      }).length
-      result.push({ label: ref.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), count })
-    }
-    return result
-  }, [cands])
+// ── Graphe d'activité (mensuel) ──────────────────────────────
+const MOIS = [
+  { key: '2026-04', label: 'Avril',   short: 'Avr' },
+  { key: '2026-05', label: 'Mai',     short: 'Mai' },
+  { key: '2026-06', label: 'Juin',    short: 'Jun' },
+  { key: '2026-07', label: 'Juillet', short: 'Jul' },
+  { key: '2026-08', label: 'Août',    short: 'Aoû' },
+]
 
-  const max = Math.max(...weeks.map(w => w.count), 1)
-  const total = weeks.reduce((s, w) => s + w.count, 0)
+function ActivityGraph({ cands }: { cands: Candidature[] }) {
+  const data = useMemo(() =>
+    MOIS.map(m => ({
+      ...m,
+      count: cands.filter(c => c.date_action?.startsWith(m.key)).length,
+    }))
+  , [cands])
+
+  const max   = Math.max(...data.map(m => m.count), 1)
+  const total = data.reduce((s, m) => s + m.count, 0)
+  const now   = new Date().toISOString().slice(0, 7)
 
   return (
-    <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Activité · 8 dernières semaines</p>
-        <span className="text-xs font-bold text-[#5C7A5C]">{total} candidature{total > 1 ? 's' : ''}</span>
+    <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Activité mensuelle</p>
+          <p className="text-sm font-semibold text-gray-700 mt-0.5">Avril → Août 2026</p>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-black text-[#3D553D]">{total}</p>
+          <p className="text-xs text-gray-400">candidature{total > 1 ? 's' : ''}</p>
+        </div>
       </div>
-      <div className="flex items-end gap-1.5 h-16">
-        {weeks.map((w, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
-            <div className="relative flex-1 w-full flex items-end">
-              <div
-                className="w-full rounded-t-md transition-all duration-500 group-hover:opacity-80"
-                style={{
-                  height: `${Math.max((w.count / max) * 100, w.count > 0 ? 15 : 5)}%`,
-                  backgroundColor: w.count > 0 ? '#5C7A5C' : '#E4EDE4',
-                }}
-              ></div>
-              {w.count > 0 && (
-                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#3D553D] opacity-0 group-hover:opacity-100 transition-opacity">
-                  {w.count}
-                </span>
-              )}
+
+      <div className="flex items-end gap-4 h-36">
+        {data.map(m => {
+          const pct     = m.count > 0 ? Math.max((m.count / max) * 100, 12) : 4
+          const isCur   = m.key === now
+          const barColor = isCur ? '#3D553D' : m.count > 0 ? '#5C7A5C' : '#E4EDE4'
+
+          return (
+            <div key={m.key} className="flex-1 flex flex-col items-center gap-2">
+              {/* Valeur au dessus */}
+              <div className="h-5 flex items-end justify-center">
+                {m.count > 0 && (
+                  <span className="text-sm font-black" style={{ color: isCur ? '#3D553D' : '#5C7A5C' }}>
+                    {m.count}
+                  </span>
+                )}
+              </div>
+
+              {/* Barre */}
+              <div className="w-full flex items-end" style={{ height: '80px' }}>
+                <div
+                  className="w-full rounded-t-xl transition-all duration-700"
+                  style={{
+                    height: `${pct}%`,
+                    backgroundColor: barColor,
+                    minHeight: '4px',
+                    boxShadow: isCur ? '0 -2px 8px rgba(61,85,61,0.25)' : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Label mois */}
+              <div className="text-center">
+                <p className="text-xs font-bold" style={{ color: isCur ? '#3D553D' : '#6B7280' }}>
+                  {m.label}
+                </p>
+                {isCur && (
+                  <div className="w-1 h-1 rounded-full bg-[#5C7A5C] mx-auto mt-0.5"></div>
+                )}
+              </div>
             </div>
-            <span className="text-[8px] text-gray-400 truncate w-full text-center">{w.label}</span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -315,27 +345,110 @@ function CandidatureCard({
   )
 }
 
+// ── Carte kanban (compacte, sans stepper) ────────────────────
+function KanbanCard({ c, onStatusChange, onEdit, onDelete }: {
+  c: Candidature
+  onStatusChange: (id: string, s: string) => void
+  onEdit: (c: Candidature) => void
+  onDelete: (id: string) => void
+}) {
+  const s         = getS(c.statut)
+  const relance   = isRelance(c)
+  const curIdx    = STATUTS.findIndex(st => st.key === c.statut)
+  const prevS     = curIdx > 0 ? STATUTS[curIdx - 1] : null
+  const nextS     = curIdx < STATUTS.length - 1 ? STATUTS[curIdx + 1] : null
+
+  return (
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-3 hover:shadow-sm transition-all"
+      style={{ borderLeftWidth: '3px', borderLeftColor: s.dot }}>
+
+      {/* En-tête */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-gray-900 truncate">{c.entreprise}</p>
+          <p className="text-xs text-gray-500 truncate">{c.poste}</p>
+        </div>
+        <div className="flex gap-1 shrink-0">
+          <button onClick={() => onEdit(c)}
+            className="w-6 h-6 rounded-md flex items-center justify-center text-gray-300 hover:text-[#5C7A5C] hover:bg-[#E4EDE4] transition-colors">
+            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </button>
+          <button onClick={() => onDelete(c.id)}
+            className="w-6 h-6 rounded-md flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors">
+            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Meta */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] text-gray-400">{formatDate(c.date_action)}</span>
+        {relance && <span className="text-[9px] font-bold text-orange-500">🔔 Relancer</span>}
+      </div>
+
+      {c.notes && <p className="text-[10px] text-gray-400 truncate mb-2">{c.notes}</p>}
+      {c.url && (
+        <a href={c.url} target="_blank" rel="noopener noreferrer"
+          className="text-[10px] text-[#5C7A5C] hover:underline block mb-2">↗ Voir l'offre</a>
+      )}
+
+      {/* Déplacer vers */}
+      <div className="flex gap-1 pt-2 border-t border-[#F9FAF9]">
+        {prevS && (
+          <button onClick={() => onStatusChange(c.id, prevS.key)}
+            className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg transition-colors hover:opacity-80"
+            style={{ backgroundColor: prevS.bg, color: prevS.color }}>
+            ← {prevS.label}
+          </button>
+        )}
+        {nextS && (
+          <button onClick={() => onStatusChange(c.id, nextS.key)}
+            className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg transition-colors hover:opacity-80"
+            style={{ backgroundColor: nextS.bg, color: nextS.color }}>
+            {nextS.label} →
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Vue Kanban ───────────────────────────────────────────────
-function KanbanView({ cands, onStatusChange, onEdit, onDelete, editId, editData, onSaveEdit, onCancelEdit, onEditChange, saving }: any) {
+function KanbanView({ cands, onStatusChange, onEdit, onDelete }: {
+  cands: Candidature[]
+  onStatusChange: (id: string, s: string) => void
+  onEdit: (c: Candidature) => void
+  onDelete: (id: string) => void
+}) {
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
       {STATUTS.map(s => {
-        const col = cands.filter((c: Candidature) => c.statut === s.key)
+        const col = cands.filter(c => c.statut === s.key)
         return (
-          <div key={s.key} className="flex-shrink-0 w-64 flex flex-col gap-2">
-            <div className="flex items-center gap-2 px-1">
+          <div key={s.key} className="flex-shrink-0 w-56 flex flex-col gap-2">
+            {/* En-tête colonne */}
+            <div className="flex items-center gap-2 px-1 py-2 rounded-xl sticky top-0"
+              style={{ backgroundColor: s.bg }}>
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.dot }}></div>
-              <span className="text-xs font-bold text-gray-600">{s.label}</span>
-              <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: s.bg, color: s.color }}>{col.length}</span>
+              <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
+              <span className="ml-auto text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: s.dot, color: 'white' }}>
+                {col.length}
+              </span>
             </div>
-            <div className="flex flex-col gap-2 min-h-16">
-              {col.map((c: Candidature) => (
-                <CandidatureCard key={c.id} c={c} editId={editId} editData={editData}
-                  onStatusChange={onStatusChange} onEdit={onEdit} onSaveEdit={onSaveEdit}
-                  onCancelEdit={onCancelEdit} onDelete={onDelete} onEditChange={onEditChange} saving={saving} />
+
+            {/* Cartes */}
+            <div className="flex flex-col gap-2">
+              {col.map(c => (
+                <KanbanCard key={c.id} c={c}
+                  onStatusChange={onStatusChange} onEdit={onEdit} onDelete={onDelete} />
               ))}
               {col.length === 0 && (
-                <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl h-16 flex items-center justify-center">
+                <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl h-20 flex items-center justify-center">
                   <span className="text-xs text-gray-300">Vide</span>
                 </div>
               )}
@@ -580,8 +693,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
           </div>
         ) : view === 'kanban' ? (
           <KanbanView cands={filtered} onStatusChange={handleStatusChange} onEdit={handleEdit}
-            onDelete={handleDelete} editId={editId} editData={editData} onSaveEdit={handleSaveEdit}
-            onCancelEdit={() => { setEditId(null); setEditData(null) }} onEditChange={setEditData} saving={saving} />
+            onDelete={handleDelete} />
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#C8D8C8] p-10 text-center">
             <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
