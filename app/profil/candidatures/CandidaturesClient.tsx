@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { addCandidature, updateCandidatureStatut, updateCandidature, deleteCandidature } from '../candidature-actions'
 
@@ -50,49 +50,64 @@ function isRelance(c: Candidature) {
 const TODAY = new Date().toISOString().split('T')[0]
 const EMPTY = { entreprise: '', poste: '', statut: 'envoye', date_action: TODAY, notes: '', url: '' }
 
-// ── Dropdown statut ──────────────────────────────────────────
-function StatutDropdown({ id, statut, onSelect }: { id: string; statut: string; onSelect: (s: string) => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const s = getS(statut)
-
-  useEffect(() => {
-    function close(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
+// ── Stepper de statut ────────────────────────────────────────
+function StatusStepper({ id, statut, onChange }: {
+  id: string; statut: string; onChange: (id: string, s: string) => void
+}) {
+  const currentIdx = STATUTS.findIndex(s => s.key === statut)
 
   return (
-    <div ref={ref} className="relative shrink-0">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:opacity-80"
-        style={{ backgroundColor: s.bg, color: s.color }}
-      >
-        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
-        {s.label}
-        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="opacity-50">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7"/>
-        </svg>
-      </button>
-      {open && (
-        <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl border border-gray-100 shadow-xl z-30 overflow-hidden w-40">
-          {STATUTS.map(opt => (
-            <button
-              key={opt.key}
-              onClick={() => { onSelect(opt.key); setOpen(false) }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold hover:bg-gray-50 transition-colors"
-              style={{ color: opt.key === statut ? opt.color : '#6B7280', backgroundColor: opt.key === statut ? opt.bg : undefined }}
-            >
-              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: opt.dot }}></div>
-              {opt.label}
-              {opt.key === statut && <span className="ml-auto text-[10px]">✓</span>}
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="px-4 pb-4 pt-1">
+      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+        Avancement — clique pour changer
+      </p>
+      <div className="flex items-center">
+        {STATUTS.map((opt, idx) => {
+          const isCurrent = statut === opt.key
+          const isPast    = idx < currentIdx
+
+          return (
+            <div key={opt.key} className="flex items-center flex-1 last:flex-none">
+              {/* Bouton étape */}
+              <button
+                onClick={() => onChange(id, opt.key)}
+                title={`Marquer comme : ${opt.label}`}
+                className="flex flex-col items-center gap-1 group shrink-0"
+              >
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all border-2 group-hover:scale-110"
+                  style={
+                    isCurrent ? { backgroundColor: opt.dot, borderColor: opt.dot } :
+                    isPast    ? { backgroundColor: 'white',  borderColor: opt.dot } :
+                                { backgroundColor: 'white',  borderColor: '#E5E7EB' }
+                  }
+                >
+                  {isCurrent && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
+                  {isPast && (
+                    <svg width="10" height="10" fill="none" stroke={opt.dot} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/>
+                    </svg>
+                  )}
+                </div>
+                <span
+                  className="text-[9px] font-bold w-12 text-center leading-tight transition-colors"
+                  style={{ color: isCurrent ? opt.color : isPast ? opt.dot : '#D1D5DB' }}
+                >
+                  {opt.label === 'En attente' ? 'Attente' : opt.label}
+                </span>
+              </button>
+
+              {/* Ligne connecteur */}
+              {idx < STATUTS.length - 1 && (
+                <div
+                  className="flex-1 h-0.5 mx-1 mb-4 transition-colors"
+                  style={{ backgroundColor: idx < currentIdx ? STATUTS[idx].dot : '#E5E7EB' }}
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -233,14 +248,14 @@ function CandidatureCard({
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden transition-all hover:shadow-sm"
       style={{ borderLeftWidth: '3px', borderLeftColor: s.dot }}>
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Initiale */}
+
+      {/* Ligne principale */}
+      <div className="flex items-center gap-3 px-4 pt-3 pb-2">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
           style={{ backgroundColor: s.bg, color: s.color }}>
           {c.entreprise[0]?.toUpperCase()}
         </div>
 
-        {/* Infos */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold text-gray-900">{c.entreprise}</span>
@@ -248,7 +263,7 @@ function CandidatureCard({
             <span className="text-sm text-gray-500">{c.poste}</span>
             {relance && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 border border-orange-200">
-                À relancer
+                🔔 À relancer
               </span>
             )}
           </div>
@@ -256,20 +271,13 @@ function CandidatureCard({
             {c.notes && <p className="text-xs text-gray-400 truncate max-w-48">{c.notes}</p>}
             {c.url && (
               <a href={c.url} target="_blank" rel="noopener noreferrer"
-                className="text-xs text-[#5C7A5C] hover:underline shrink-0">
-                Voir l'offre →
-              </a>
+                className="text-xs text-[#5C7A5C] hover:underline shrink-0">↗ Voir l'offre</a>
             )}
           </div>
         </div>
 
-        {/* Date */}
         <span className="text-xs text-gray-400 shrink-0 hidden sm:block">{formatDate(c.date_action)}</span>
 
-        {/* Statut dropdown */}
-        <StatutDropdown id={c.id} statut={c.statut} onSelect={s => onStatusChange(c.id, s)} />
-
-        {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => onEdit(c)}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-[#5C7A5C] hover:bg-[#E4EDE4] transition-colors">
@@ -285,6 +293,9 @@ function CandidatureCard({
           </button>
         </div>
       </div>
+
+      {/* Stepper de statut — toujours visible */}
+      <StatusStepper id={c.id} statut={c.statut} onChange={onStatusChange} />
 
       {/* Formulaire édition inline */}
       {isEditing && editData && (
@@ -466,7 +477,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
               value: stats.relances > 0 ? stats.relances : stats.accepte,
               color: stats.relances > 0 ? '#C2410C' : '#15803D',
               bg:    stats.relances > 0 ? '#FFF7ED' : '#F0FDF4' },
-          ].map(({ label, value, color, bg }) => (
+          ].map(({ label, value, color }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
               <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{label}</p>
               <p className="text-3xl font-black tracking-tight" style={{ color }}>{value}</p>
