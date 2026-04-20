@@ -2,7 +2,7 @@ import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
 import LogoutButton from '../components/LogoutButton'
 import EditIdentite from './EditIdentite'
-import CandidatureLog from './CandidatureLog'
+import Link from 'next/link'
 
 function getStatut(statut: string) {
   const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
@@ -159,12 +159,52 @@ export default async function Profil() {
         {/* ── LIGNE 2 : tracker + infos ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-          {/* Tracker interactif — colonne principale */}
-          <div className="lg:col-span-3">
-            <CandidatureLog
-              initial={candidaturesLog || []}
-              objectif={objectif}
-            />
+          {/* Widget candidatures → page dédiée */}
+          <div className="lg:col-span-3 flex flex-col gap-3">
+            <Link href="/profil/candidatures"
+              className="bg-[#3D553D] rounded-2xl p-6 flex items-center justify-between hover:bg-[#2D4030] transition-colors group">
+              <div>
+                <p className="text-white font-bold text-lg">Mes candidatures</p>
+                <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  {candidaturesLog?.length ?? 0} candidature{(candidaturesLog?.length ?? 0) > 1 ? 's' : ''} · Cliquer pour gérer
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-4xl font-black text-white">{candidaturesLog?.length ?? 0}</p>
+                </div>
+                <svg className="w-5 h-5 text-white opacity-40 group-hover:opacity-80 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </Link>
+
+            {/* Barre objectif */}
+            <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-gray-600">Objectif de la semaine</span>
+                <span className="text-xs font-bold" style={{ color: objectifPct >= 100 ? '#16A34A' : '#5C7A5C' }}>
+                  {candidatures}/{objectif} {objectifPct >= 100 ? '✓' : ''}
+                </span>
+              </div>
+              <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
+                <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${objectifPct}%` }}></div>
+              </div>
+            </div>
+
+            {/* Mini stats */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Entretiens',  value: entretiens,  color: '#1D4ED8' },
+                { label: 'Refus',       value: refus,        color: '#9F1239' },
+                { label: 'Entreprises', value: entreprises,  color: '#6D28D9' },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="bg-white rounded-xl border border-[#C8D8C8] p-4">
+                  <p className="text-2xl font-black" style={{ color }}>{value}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Colonne droite : documents + identité + note */}
