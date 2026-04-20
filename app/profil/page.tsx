@@ -237,20 +237,33 @@ export default async function Profil() {
               <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
               <div className="flex flex-col gap-3">
                 {[
-                  { label: 'Curriculum Vitae',     s: cvStatut },
-                  { label: 'Portfolio', s: lmStatut },
-                ].map(({ label, s }) => (
-                  <div
+                  { label: 'Curriculum Vitae', s: cvStatut, url: etudiant.cv_url },
+                  { label: 'Portfolio',         s: lmStatut, url: etudiant.lettre_url },
+                ].map(({ label, s, url }) => (
+                  <Link
                     key={label}
-                    className="flex items-center justify-between p-4 rounded-xl"
+                    href="/profil/documents"
+                    className="flex items-center justify-between p-4 rounded-xl hover:opacity-80 transition-opacity cursor-pointer"
                     style={{ backgroundColor: s.bg }}
                   >
-                    <span className="text-sm font-medium text-gray-700">{label}</span>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
-                      <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">{label}</span>
+                      <span className="text-[10px] text-gray-400 font-normal">Modifier →</span>
                     </div>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      {url && (
+                        <a href={url} target="_blank" rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs font-semibold text-[#5C7A5C] hover:underline">
+                          Voir ↗
+                        </a>
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
+                        <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
