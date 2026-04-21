@@ -72,6 +72,11 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
 
   const isLoading = loading || saving
 
+  // Force Content-Disposition: inline pour que le browser affiche le PDF au lieu de le télécharger
+  function viewUrl(u: string) {
+    return u.replace('/raw/upload/', '/raw/upload/fl_inline/')
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <input
@@ -94,7 +99,7 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <a href={url} target="_blank" rel="noopener noreferrer"
+            <a href={viewUrl(url)} target="_blank" rel="noopener noreferrer"
               className="text-xs font-semibold text-[#5C7A5C] hover:underline px-3 py-1.5 bg-white rounded-lg border border-[#C8D8C8] transition-colors hover:bg-[#F0FDF4]">
               Voir ↗
             </a>
