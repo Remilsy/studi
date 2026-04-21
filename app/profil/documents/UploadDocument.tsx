@@ -29,30 +29,35 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
     setLoading(true)
     setError('')
 
+    const cloudName   = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+
     const fd = new FormData()
     fd.append('file', file)
-    fd.append('type', type)
+    fd.append('upload_preset', uploadPreset)
+    fd.append('resource_type', 'raw')
+    fd.append('folder', 'studi')
 
     try {
-      const res  = await fetch('/api/upload', { method: 'POST', body: fd })
+      const res  = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, { method: 'POST', body: fd })
       const text = await res.text()
-      let data: { url?: string; error?: string } = {}
+      let data: { secure_url?: string; error?: { message?: string } } = {}
       try { data = JSON.parse(text) } catch {
-        setError(`Réponse serveur invalide (${res.status}): ${text.slice(0, 200)}`)
+        setError(`Réponse invalide (${res.status}): ${text.slice(0, 200)}`)
         setLoading(false)
         return
       }
 
       if (!res.ok || data.error) {
-        setError(data.error ?? `Erreur ${res.status}`)
+        setError(data.error?.message ?? `Erreur Cloudinary ${res.status}`)
         setLoading(false)
         return
       }
 
       setLoading(false)
       setSaving(true)
-      await onUpload(data.url!)
-      setUrl(data.url!)
+      await onUpload(data.secure_url!)
+      setUrl(data.secure_url!)
       setSaving(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
