@@ -180,10 +180,7 @@ export default async function Dashboard() {
                     const diff = Math.ceil((d.getTime() - today.getTime()) / 86400000)
                     return (
                       <Link key={e.id} href={`/etudiants/${e.id}`}
-                        className="flex items-center gap-3 p-2.5 rounded-2xl transition-colors"
-                        style={{ ':hover': { background: 'rgba(255,255,255,0.5)' } } as any}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.5)'}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+                        className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-white/50 transition-colors"
                       >
                         <div className="w-10 h-10 rounded-2xl flex flex-col items-center justify-center shrink-0"
                           style={{ background: diff <= 1 ? 'rgba(249,115,22,0.1)' : 'rgba(59,130,246,0.1)' }}>
@@ -224,9 +221,7 @@ export default async function Dashboard() {
                 <div className="flex flex-col gap-1.5">
                   {aRelancer.slice(0, 4).map((e: any) => (
                     <Link key={e.id} href={`/etudiants/${e.id}`}
-                      className="flex items-center gap-3 p-2.5 rounded-2xl transition-colors"
-                      onMouseEnter={ev => (ev.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.5)'}
-                      onMouseLeave={ev => (ev.currentTarget as HTMLElement).style.background = 'transparent'}
+                      className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-white/50 transition-colors"
                     >
                       <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs font-black shrink-0"
                         style={{ background: 'rgba(249,115,22,0.1)', color: '#EA580C' }}>
@@ -266,9 +261,7 @@ export default async function Dashboard() {
                 const barColor = pct === 100 ? '#22C55E' : pct >= 60 ? '#8B5CF6' : '#F97316'
                 return (
                   <Link key={e.id} href={`/etudiants/${e.id}`}
-                    className="flex items-center gap-3 p-3 rounded-2xl transition-colors"
-                    onMouseEnter={ev => (ev.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.5)'}
-                    onMouseLeave={ev => (ev.currentTarget as HTMLElement).style.background = 'transparent'}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/50 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black shrink-0"
                       style={{ background: isPlace ? 'rgba(34,197,94,0.12)' : 'rgba(139,92,246,0.1)', color: isPlace ? '#16A34A' : '#7C3AED' }}>
