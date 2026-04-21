@@ -98,18 +98,17 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(160deg, #1A4028 0%, #1E4432 50%, #163C30 100%)',
+      background: 'linear-gradient(160deg, #B8DCC8 0%, #C0E0D4 50%, #B4D8CC 100%)',
     }}>
 
       {/* Orbes liquides de fond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        {/* Orbes répartis uniformément */}
-        <div style={{ position:'absolute', top:'-5%',  left:'10%',  width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle, rgba(80,210,160,0.35) 0%, transparent 60%)', filter:'blur(90px)' }}/>
-        <div style={{ position:'absolute', top:'-5%',  right:'10%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(40,180,130,0.3) 0%, transparent 60%)',  filter:'blur(90px)' }}/>
-        <div style={{ position:'absolute', top:'35%',  left:'-5%',  width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(60,220,170,0.28) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'35%',  right:'-5%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(30,200,150,0.28) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', bottom:'-5%',left:'15%',  width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(50,190,145,0.32) 0%, transparent 60%)', filter:'blur(90px)' }}/>
-        <div style={{ position:'absolute', bottom:'-5%',right:'15%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(70,215,165,0.3) 0%, transparent 60%)',  filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', top:'-5%',  left:'10%',  width:'650px', height:'650px', borderRadius:'50%', background:'radial-gradient(circle, rgba(100,220,180,0.55) 0%, transparent 60%)', filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', top:'-5%',  right:'10%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(60,200,160,0.45) 0%, transparent 60%)', filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', top:'35%',  left:'-5%',  width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(80,215,170,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', top:'35%',  right:'-5%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(50,205,165,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', bottom:'-5%',left:'15%',  width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle, rgba(90,218,175,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', bottom:'-5%',right:'15%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(70,210,168,0.45) 0%, transparent 60%)', filter:'blur(80px)' }}/>
       </div>
 
       <AdminSidebar />
@@ -118,11 +117,11 @@ export default async function Dashboard() {
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#4ADE80' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#16A34A' }}>
             {dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}
           </p>
-          <h1 className="text-3xl font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.95)' }}>Bonjour, Remi 👋</h1>
-          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Voici l'état de ta promo aujourd'hui.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Bonjour, Remi 👋</h1>
+          <p className="text-sm text-gray-500 mt-1">Voici l'état de ta promo aujourd'hui.</p>
         </div>
 
         <div className="px-8 pb-8 flex flex-col gap-5">
@@ -325,8 +324,8 @@ export default async function Dashboard() {
           {/* Liste complète */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>Tous les étudiants</p>
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{total} au total</span>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Tous les étudiants</p>
+              <span className="text-xs text-gray-400">{total} au total</span>
             </div>
             <DashboardClient etudiants={etudiants} />
           </div>
