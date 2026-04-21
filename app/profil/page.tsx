@@ -257,7 +257,7 @@ export default async function Profil() {
                       </div>
                     </div>
                     {url ? (
-                      <a href={url.replace('/raw/upload/', '/raw/upload/fl_inline/')} target="_blank" rel="noopener noreferrer"
+                      <a href={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-xs font-bold text-[#3D553D] bg-white px-3 py-2 rounded-xl border border-[#C8D8C8] hover:bg-[#F0FDF4] transition-colors shrink-0">
                         <span>📄</span>
                         <span>{btnLabel}</span>

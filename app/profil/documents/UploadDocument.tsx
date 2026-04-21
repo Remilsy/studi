@@ -72,9 +72,8 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
 
   const isLoading = loading || saving
 
-  // Force Content-Disposition: inline pour que le browser affiche le PDF au lieu de le télécharger
   function viewUrl(u: string) {
-    return u.replace('/raw/upload/', '/raw/upload/fl_inline/')
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(u)}`
   }
 
   return (
