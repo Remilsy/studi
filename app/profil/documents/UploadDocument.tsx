@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
+import { supabase } from '../../../lib/supabase'
 
 interface Props {
   type:       'cv' | 'portfolio'
@@ -29,52 +30,39 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
     setLoading(true)
     setError('')
 
-    const cloudName    = 'dw624hype'
-    const uploadPreset = 'studi_upload'
-
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('upload_preset', uploadPreset)
-    fd.append('resource_type', 'raw')
-    fd.append('type', 'upload')
-    fd.append('access_mode', 'public')
-    fd.append('folder', 'studi')
-
     try {
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, { method: 'POST', body: fd })
-      const text = await res.text()
-      let data: { secure_url?: string; error?: { message?: string } } = {}
-      try { data = JSON.parse(text) } catch {
-        setError(`Réponse invalide (${res.status}): ${text.slice(0, 200)}`)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setError('Non connecté.'); setLoading(false); return }
+
+      const path = `${user.id}/${type}_${Date.now()}.pdf`
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(path, file, { contentType: 'application/pdf', upsert: true })
+
+      if (uploadError) {
+        setError(`Erreur upload : ${uploadError.message}`)
         setLoading(false)
         return
       }
 
-      if (!res.ok || data.error) {
-        setError(data.error?.message ?? `Erreur Cloudinary ${res.status}`)
-        setLoading(false)
-        return
-      }
+      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
 
       setLoading(false)
       setSaving(true)
-      await onUpload(data.secure_url!)
-      setUrl(data.secure_url!)
+      await onUpload(publicUrl)
+      setUrl(publicUrl)
       setSaving(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       console.error('[UploadDocument]', err)
-      setError(`Erreur: ${err instanceof Error ? err.message : String(err)}`)
+      setError(`Erreur : ${err instanceof Error ? err.message : String(err)}`)
       setLoading(false)
     }
   }
 
   const isLoading = loading || saving
-
-  function viewUrl(u: string) {
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(u)}`
-  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -98,7 +86,7 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <a href={viewUrl(url)} target="_blank" rel="noopener noreferrer"
+            <a href={url} target="_blank" rel="noopener noreferrer"
               className="text-xs font-semibold text-[#5C7A5C] hover:underline px-3 py-1.5 bg-white rounded-lg border border-[#C8D8C8] transition-colors hover:bg-[#F0FDF4]">
               Voir ↗
             </a>
