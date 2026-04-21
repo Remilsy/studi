@@ -2,9 +2,9 @@
 import { useEffect, useRef } from 'react'
 
 export default function ParallaxOrbs() {
-  const groupA = useRef<HTMLDivElement>(null) // haut — descendent lentement
-  const groupB = useRef<HTMLDivElement>(null) // bas  — montent lentement
-  const groupC = useRef<HTMLDivElement>(null) // milieu — mouvement inverse léger
+  const groupA = useRef<HTMLDivElement>(null)
+  const groupB = useRef<HTMLDivElement>(null)
+  const groupC = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const container = document.getElementById('dashboard-scroll')
@@ -12,11 +12,12 @@ export default function ParallaxOrbs() {
 
     let rafId: number
     const handler = () => {
+      cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
         const y = container.scrollTop
-        if (groupA.current) groupA.current.style.transform = `translateY(${y * 0.45}px)`
-        if (groupB.current) groupB.current.style.transform = `translateY(${-y * 0.3}px)`
-        if (groupC.current) groupC.current.style.transform = `translateY(${y * 0.2}px) scale(${1 + y * 0.00008})`
+        if (groupA.current) groupA.current.style.transform = `translateY(${y * 0.5}px)`
+        if (groupB.current) groupB.current.style.transform = `translateY(${-y * 0.35}px)`
+        if (groupC.current) groupC.current.style.transform = `translateY(${y * 0.22}px)`
       })
     }
 
@@ -27,28 +28,79 @@ export default function ParallaxOrbs() {
     }
   }, [])
 
-  const orb = (color: string, opacity: number, size: number) =>
-    `radial-gradient(circle, rgba(${color},${opacity}) 0%, transparent 62%)`
-
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-      {/* Groupe A – haut */}
+    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+
+      {/* Groupe A — descend au scroll */}
       <div ref={groupA} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-        <div style={{ position:'absolute', top:'-8%',  left:'8%',   width:'620px', height:'620px', borderRadius:'50%', background: orb('80,200,160', 0.55, 620), filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'-5%',  right:'12%', width:'520px', height:'520px', borderRadius:'50%', background: orb('50,185,150', 0.45, 520), filter:'blur(80px)' }}/>
+        <div style={{
+          position: 'absolute', top: '-10%', left: '8%',
+          width: '640px', height: '640px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(80,200,155,0.6) 0%, transparent 62%)',
+          filter: 'blur(80px)',
+          animation: 'orbFloat1 12s ease-in-out infinite',
+        }}/>
+        <div style={{
+          position: 'absolute', top: '-5%', right: '12%',
+          width: '520px', height: '520px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(50,185,145,0.5) 0%, transparent 62%)',
+          filter: 'blur(80px)',
+          animation: 'orbFloat2 15s ease-in-out infinite',
+        }}/>
       </div>
 
-      {/* Groupe B – bas */}
+      {/* Groupe B — monte au scroll */}
       <div ref={groupB} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-        <div style={{ position:'absolute', bottom:'-8%', left:'12%',  width:'580px', height:'580px', borderRadius:'50%', background: orb('90,210,168', 0.5, 580), filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', bottom:'-5%', right:'10%', width:'520px', height:'520px', borderRadius:'50%', background: orb('60,195,158', 0.45, 520), filter:'blur(80px)' }}/>
+        <div style={{
+          position: 'absolute', bottom: '-10%', left: '12%',
+          width: '600px', height: '600px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(90,210,165,0.55) 0%, transparent 62%)',
+          filter: 'blur(80px)',
+          animation: 'orbFloat2 14s ease-in-out infinite',
+        }}/>
+        <div style={{
+          position: 'absolute', bottom: '-5%', right: '10%',
+          width: '540px', height: '540px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(60,195,155,0.5) 0%, transparent 62%)',
+          filter: 'blur(80px)',
+          animation: 'orbFloat1 16s ease-in-out infinite',
+        }}/>
       </div>
 
-      {/* Groupe C – milieu */}
+      {/* Groupe C — milieu, légèrement décalé */}
       <div ref={groupC} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-        <div style={{ position:'absolute', top:'30%', left:'-4%',  width:'480px', height:'480px', borderRadius:'50%', background: orb('70,205,162', 0.45, 480), filter:'blur(75px)' }}/>
-        <div style={{ position:'absolute', top:'35%', right:'-4%', width:'480px', height:'480px', borderRadius:'50%', background: orb('55,198,155', 0.42, 480), filter:'blur(75px)' }}/>
+        <div style={{
+          position: 'absolute', top: '32%', left: '-5%',
+          width: '500px', height: '500px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(70,205,160,0.48) 0%, transparent 62%)',
+          filter: 'blur(75px)',
+          animation: 'orbFloat3 18s ease-in-out infinite',
+        }}/>
+        <div style={{
+          position: 'absolute', top: '38%', right: '-5%',
+          width: '480px', height: '480px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(55,198,152,0.45) 0%, transparent 62%)',
+          filter: 'blur(75px)',
+          animation: 'orbFloat1 13s ease-in-out infinite',
+        }}/>
       </div>
+
+      <style>{`
+        @keyframes orbFloat1 {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          33%       { transform: translateY(-25px) translateX(12px); }
+          66%       { transform: translateY(18px) translateX(-10px); }
+        }
+        @keyframes orbFloat2 {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          40%       { transform: translateY(22px) translateX(-15px); }
+          70%       { transform: translateY(-16px) translateX(8px); }
+        }
+        @keyframes orbFloat3 {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%       { transform: translateY(-20px) scale(1.04); }
+        }
+      `}</style>
     </div>
   )
 }

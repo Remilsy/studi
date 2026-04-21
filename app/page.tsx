@@ -99,7 +99,7 @@ export default async function Dashboard() {
   const dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen flex" style={{
+    <div className="h-screen flex" style={{
       background: 'linear-gradient(160deg, #7AA892 0%, #85B09E 50%, #7AA896 100%)',
     }}>
 
@@ -107,7 +107,7 @@ export default async function Dashboard() {
 
       <AdminSidebar />
 
-      <div id="dashboard-scroll" className="flex-1 overflow-auto relative" style={{ zIndex: 1 }}>
+      <div id="dashboard-scroll" className="flex-1 h-full overflow-y-auto relative" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6">
