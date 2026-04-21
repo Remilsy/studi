@@ -98,15 +98,18 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(160deg, #0B1E10 0%, #0E2318 40%, #0A1E1A 100%)',
+      background: 'linear-gradient(160deg, #1A4028 0%, #1E4432 50%, #163C30 100%)',
     }}>
 
       {/* Orbes liquides de fond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div style={{ position:'absolute', top:'-10%', left:'5%',  width:'820px', height:'820px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(20,180,120,0.55) 0%, transparent 58%)', filter:'blur(100px)' }}/>
-        <div style={{ position:'absolute', bottom:'-8%', right:'8%', width:'720px', height:'720px', borderRadius:'50%', background:'radial-gradient(circle at 55% 55%, rgba(0,200,160,0.45) 0%, transparent 58%)', filter:'blur(100px)' }}/>
-        <div style={{ position:'absolute', top:'25%', right:'20%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(48,220,180,0.35) 0%, transparent 58%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'55%', left:'25%', width:'400px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle, rgba(10,160,100,0.4) 0%, transparent 58%)',  filter:'blur(80px)' }}/>
+        {/* Orbes répartis uniformément */}
+        <div style={{ position:'absolute', top:'-5%',  left:'10%',  width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle, rgba(80,210,160,0.35) 0%, transparent 60%)', filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', top:'-5%',  right:'10%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(40,180,130,0.3) 0%, transparent 60%)',  filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', top:'35%',  left:'-5%',  width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(60,220,170,0.28) 0%, transparent 60%)', filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', top:'35%',  right:'-5%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(30,200,150,0.28) 0%, transparent 60%)', filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', bottom:'-5%',left:'15%',  width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(50,190,145,0.32) 0%, transparent 60%)', filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', bottom:'-5%',right:'15%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(70,215,165,0.3) 0%, transparent 60%)',  filter:'blur(90px)' }}/>
       </div>
 
       <AdminSidebar />
