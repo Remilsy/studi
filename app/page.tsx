@@ -96,7 +96,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(140deg, #ECFDF5 0%, #F3F0FF 35%, #EFF6FF 65%, #FFF7ED 100%)',
+      background: '#EEF2EE',
     }}>
 
       {/* Orbes liquides de fond */}
@@ -131,9 +131,6 @@ export default async function Dashboard() {
               { label: 'Candidatures', value: totalCands,  sub: 'au total',                        color: '#7C3AED', shadow: '0 12px 50px rgba(139,92,246,0.22)',   icon: '📨' },
             ].map(({ label, value, sub, color, shadow, icon }) => (
               <GlassCard key={label} shadow={shadow} className="p-5 flex flex-col gap-4">
-                {/* Tache de couleur en fond */}
-                <div style={{ position:'absolute', top:-20, right:-20, width:100, height:100, borderRadius:'50%', background:`radial-gradient(circle, ${color}22 0%, transparent 70%)`, pointerEvents:'none' }}/>
-
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-2xl flex items-center justify-center text-base shrink-0"
                     style={{ background: `${color}18` }}>
