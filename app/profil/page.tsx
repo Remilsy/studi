@@ -234,36 +234,42 @@ export default async function Profil() {
 
             {/* Documents */}
             <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase">Documents</p>
+                <Link href="/profil/documents"
+                  className="text-xs text-[#5C7A5C] font-semibold hover:underline">
+                  Gérer →
+                </Link>
+              </div>
               <div className="flex flex-col gap-3">
                 {[
-                  { label: 'Curriculum Vitae', s: cvStatut, url: etudiant.cv_url },
-                  { label: 'Portfolio',         s: lmStatut, url: etudiant.lettre_url },
-                ].map(({ label, s, url }) => (
-                  <Link
-                    key={label}
-                    href="/profil/documents"
-                    className="flex items-center justify-between p-4 rounded-xl hover:opacity-80 transition-opacity cursor-pointer"
-                    style={{ backgroundColor: s.bg }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">{label}</span>
-                      <span className="text-[10px] text-gray-400 font-normal">Modifier →</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {url && (
-                        <a href={url} target="_blank" rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="text-xs font-semibold text-[#5C7A5C] hover:underline">
-                          Voir ↗
-                        </a>
-                      )}
-                      <div className="flex items-center gap-1.5">
+                  { label: 'Curriculum Vitae', btnLabel: 'Voir le CV',        s: cvStatut, url: etudiant.cv_url },
+                  { label: 'Portfolio',         btnLabel: 'Voir le Portfolio', s: lmStatut, url: etudiant.lettre_url },
+                ].map(({ label, btnLabel, s, url }) => (
+                  <div key={label}
+                    className="flex items-center justify-between p-4 rounded-xl"
+                    style={{ backgroundColor: s.bg }}>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">{label}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
-                        <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
+                        <span className="text-xs font-medium" style={{ color: s.color }}>{s.label}</span>
                       </div>
                     </div>
-                  </Link>
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs font-bold text-[#3D553D] bg-white px-3 py-2 rounded-xl border border-[#C8D8C8] hover:bg-[#F0FDF4] transition-colors shrink-0">
+                        <span>📄</span>
+                        <span>{btnLabel}</span>
+                        <span>↗</span>
+                      </a>
+                    ) : (
+                      <Link href="/profil/documents"
+                        className="text-xs font-bold text-gray-400 bg-white px-3 py-2 rounded-xl border border-gray-200 hover:border-[#C8D8C8] hover:text-[#3D553D] transition-colors shrink-0">
+                        Déposer →
+                      </Link>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
