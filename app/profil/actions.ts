@@ -15,6 +15,22 @@ export async function updateProfil(formData: FormData) {
 
   if (error) return { error: 'Erreur lors de la sauvegarde' }
 
+  // Recalcule score_progression
+  const { data: e } = await supabase
+    .from('etudiants')
+    .select('cv_statut, lettre_statut, nb_candidatures')
+    .eq('email', user.email)
+    .single()
+  if (e) {
+    let score = 0
+    if (formData.get('telephone')) score += 20
+    if (formData.get('linkedin'))  score += 20
+    if (e.cv_statut     === 'depose') score += 20
+    if (e.lettre_statut === 'depose') score += 20
+    if ((e.nb_candidatures || 0) > 0) score += 20
+    await supabase.from('etudiants').update({ score_progression: score }).eq('email', user.email)
+  }
+
   revalidatePath('/profil')
   return { success: true }
 }

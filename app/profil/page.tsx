@@ -35,13 +35,7 @@ export default async function Profil() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: etudiant }, { data: offres }, { data: candidaturesLog }, { data: relancesData }] = await Promise.all([
-    supabase.from('etudiants').select('*').eq('email', user.email).single(),
-    supabase.from('offres').select('*').eq('active', true).order('created_at', { ascending: false }),
-    supabase.from('candidatures').select('*').order('created_at', { ascending: false }),
-    supabase.from('relances').select('*').order('created_at', { ascending: false }),
-  ])
-  const relancesNonLues = (relancesData || []).filter((r: any) => !r.lu)
+  const { data: etudiant } = await supabase.from('etudiants').select('*').eq('email', user.email).single()
 
   if (!etudiant) {
     return (
@@ -53,6 +47,12 @@ export default async function Profil() {
       </div>
     )
   }
+
+  const [{ data: offres }, { data: candidaturesLog }, { data: relancesData }] = await Promise.all([
+    supabase.from('offres').select('*').eq('active', true).order('created_at', { ascending: false }),
+    supabase.from('candidatures').select('*').eq('etudiant_id', etudiant.id).order('created_at', { ascending: false }),
+    supabase.from('relances').select('*').eq('etudiant_id', etudiant.id).order('created_at', { ascending: false }),
+  ])
 
   const statut      = getStatut(etudiant.statut)
   const cvStatut    = getDocStatut(etudiant.cv_statut)

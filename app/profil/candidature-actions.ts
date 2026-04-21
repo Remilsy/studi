@@ -18,6 +18,22 @@ async function syncStats(supabase: any, etudiantId: string, userEmail: string) {
     nb_entretiens:           cands.filter((c: any) => c.statut === 'entretien' || c.statut === 'accepte').length,
     nb_entreprises:          new Set(cands.map((c: any) => c.entreprise.trim().toLowerCase())).size,
   }).eq('email', userEmail)
+
+  // Recalcule score_progression
+  const { data: e } = await supabase
+    .from('etudiants')
+    .select('telephone, linkedin, cv_statut, lettre_statut')
+    .eq('email', userEmail)
+    .single()
+  if (e) {
+    let score = 0
+    if (e.telephone) score += 20
+    if (e.linkedin)  score += 20
+    if (e.cv_statut     === 'depose') score += 20
+    if (e.lettre_statut === 'depose') score += 20
+    if (cands.length > 0)             score += 20
+    await supabase.from('etudiants').update({ score_progression: score }).eq('email', userEmail)
+  }
 }
 
 export async function addCandidature(data: {

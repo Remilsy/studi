@@ -327,15 +327,23 @@ export default function EtudiantDetail() {
             <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
             <div className="flex flex-col gap-3">
               {[
-                { label: 'Curriculum Vitae',     cfg: cv },
-                { label: 'Portfolio', cfg: lm },
-              ].map(({ label, cfg }) => (
+                { label: 'Curriculum Vitae', cfg: cv, url: etudiant.cv_url },
+                { label: 'Portfolio',         cfg: lm, url: etudiant.lettre_url },
+              ].map(({ label, cfg, url }) => (
                 <div key={label} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: cfg.bg }}>
-                  <span className="text-sm font-medium text-gray-700">{label}</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cfg.dot }}></div>
-                    <span className="text-xs font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cfg.dot }}></div>
+                      <span className="text-xs font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                    </div>
                   </div>
+                  {url && (
+                    <a href={url} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-bold text-[#3D553D] bg-white px-3 py-1.5 rounded-xl border border-[#C8D8C8] hover:bg-[#F0FDF4] transition-colors shrink-0">
+                      Voir ↗
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
@@ -625,7 +633,7 @@ export default function EtudiantDetail() {
                     </select>
                   </div>
                   <div>
-                    <label className={labelCls}>Statut lettre de motivation</label>
+                    <label className={labelCls}>Statut Portfolio</label>
                     <select name="lettre_statut" defaultValue={etudiant.lettre_statut ?? 'a_deposer'} className={inputCls}>
                       <option value="a_deposer">Non déposée</option>
                       <option value="depose">Déposée</option>
