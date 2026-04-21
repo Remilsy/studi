@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
   try {
     const url = await uploadPDF(buffer, publicId)
     return NextResponse.json({ url })
-  } catch {
+  } catch (err) {
+    console.error('[upload] Cloudinary error:', err)
     return NextResponse.json({ error: 'Erreur lors de l\'upload, réessaie.' }, { status: 500 })
   }
 }

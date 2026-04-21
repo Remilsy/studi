@@ -50,7 +50,8 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
       setSaving(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch {
+    } catch (err) {
+      console.error('[UploadDocument]', err)
       setError('Erreur réseau, réessaie.')
       setLoading(false)
     }

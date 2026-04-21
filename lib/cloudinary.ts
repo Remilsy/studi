@@ -7,20 +7,14 @@ cloudinary.config({
 })
 
 export async function uploadPDF(buffer: Buffer, publicId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      {
-        resource_type: 'raw',
-        format:        'pdf',
-        public_id:     publicId,
-        overwrite:     true,
-      },
-      (error, result) => {
-        if (error || !result) return reject(error ?? new Error('Upload failed'))
-        resolve(result.secure_url)
-      }
-    ).end(buffer)
+  const dataURI = `data:application/pdf;base64,${buffer.toString('base64')}`
+  const result = await cloudinary.uploader.upload(dataURI, {
+    resource_type: 'raw',
+    format:        'pdf',
+    public_id:     publicId,
+    overwrite:     true,
   })
+  return result.secure_url
 }
 
 export async function deletePDF(publicId: string) {
