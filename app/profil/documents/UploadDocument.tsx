@@ -36,6 +36,8 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
     fd.append('file', file)
     fd.append('upload_preset', uploadPreset)
     fd.append('resource_type', 'raw')
+    fd.append('type', 'upload')
+    fd.append('access_mode', 'public')
     fd.append('folder', 'studi')
 
     try {
