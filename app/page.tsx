@@ -2,6 +2,7 @@ import { createClient } from '../lib/supabase-server'
 import Link from 'next/link'
 import DashboardClient from './components/DashboardClient'
 import AdminSidebar from './components/AdminSidebar'
+import ParallaxOrbs from './components/ParallaxOrbs'
 
 function calcProgression(e: any) {
   let s = 0
@@ -40,13 +41,14 @@ function DonutChart({ pct }: { pct: number }) {
 }
 
 /* Carte verre avec highlight spéculaire au sommet */
-function GlassCard({ children, shadow, className = '' }: {
+function GlassCard({ children, shadow, className = '', delay = '0ms' }: {
   children: React.ReactNode
   shadow?: string
   className?: string
+  delay?: string
 }) {
   return (
-    <div className={`relative overflow-hidden ${className}`} style={{
+    <div className={`card-enter card-hover relative overflow-hidden ${className}`} style={{ animationDelay: delay,
       background: 'linear-gradient(145deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.38) 100%)',
       backdropFilter: 'blur(60px)',
       WebkitBackdropFilter: 'blur(60px)',
@@ -98,22 +100,14 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(160deg, #B8DCC8 0%, #C0E0D4 50%, #B4D8CC 100%)',
+      background: 'linear-gradient(160deg, #9DBDAF 0%, #A5C4B8 50%, #9BBFB2 100%)',
     }}>
 
-      {/* Orbes liquides de fond */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div style={{ position:'absolute', top:'-5%',  left:'10%',  width:'650px', height:'650px', borderRadius:'50%', background:'radial-gradient(circle, rgba(100,220,180,0.55) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'-5%',  right:'10%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(60,200,160,0.45) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'35%',  left:'-5%',  width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(80,215,170,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'35%',  right:'-5%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(50,205,165,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', bottom:'-5%',left:'15%',  width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle, rgba(90,218,175,0.5) 0%, transparent 60%)',  filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', bottom:'-5%',right:'15%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(70,210,168,0.45) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-      </div>
+      <ParallaxOrbs />
 
       <AdminSidebar />
 
-      <div className="flex-1 overflow-auto relative" style={{ zIndex: 1 }}>
+      <div id="dashboard-scroll" className="flex-1 overflow-auto relative" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6">
@@ -133,8 +127,8 @@ export default async function Dashboard() {
               { label: 'En recherche', value: enRecherche, sub: `${aRelancer.length} sans candidature`, color: '#2563EB', shadow: '0 12px 50px rgba(59,130,246,0.22)',   icon: '🔍' },
               { label: 'Placés',       value: places,      sub: `${taux}% de placement`,           color: '#059669', shadow: '0 12px 50px rgba(16,185,129,0.22)',   icon: '✅' },
               { label: 'Candidatures', value: totalCands,  sub: 'au total',                        color: '#7C3AED', shadow: '0 12px 50px rgba(139,92,246,0.22)',   icon: '📨' },
-            ].map(({ label, value, sub, color, shadow, icon }) => (
-              <GlassCard key={label} shadow={shadow} className="p-5 flex flex-col gap-4">
+            ].map(({ label, value, sub, color, shadow, icon }, i) => (
+              <GlassCard key={label} shadow={shadow} className="p-5 flex flex-col gap-4" delay={`${i * 80}ms`}>
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-2xl flex items-center justify-center text-base shrink-0"
                     style={{ background: `${color}18` }}>
@@ -160,7 +154,7 @@ export default async function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             {/* Donut placement */}
-            <GlassCard shadow="0 12px 50px rgba(34,197,94,0.18)" className="p-6 flex flex-col gap-5">
+            <GlassCard shadow="0 12px 50px rgba(34,197,94,0.18)" className="p-6 flex flex-col gap-5" delay="320ms">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: '#22C55E' }}/>
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#16A34A' }}>Taux de placement</p>
@@ -190,7 +184,7 @@ export default async function Dashboard() {
             </GlassCard>
 
             {/* Entretiens */}
-            <GlassCard shadow="0 12px 50px rgba(59,130,246,0.18)" className="p-6 flex flex-col gap-3">
+            <GlassCard shadow="0 12px 50px rgba(59,130,246,0.18)" className="p-6 flex flex-col gap-3" delay="400ms">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ background: '#3B82F6' }}/>
@@ -236,7 +230,7 @@ export default async function Dashboard() {
             </GlassCard>
 
             {/* À relancer */}
-            <GlassCard shadow="0 12px 50px rgba(249,115,22,0.18)" className="p-6 flex flex-col gap-3">
+            <GlassCard shadow="0 12px 50px rgba(249,115,22,0.18)" className="p-6 flex flex-col gap-3" delay="480ms">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ background: '#F97316' }}/>
@@ -284,7 +278,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Top progressions */}
-          <GlassCard shadow="0 12px 50px rgba(139,92,246,0.14)" className="p-6">
+          <GlassCard shadow="0 12px 50px rgba(139,92,246,0.14)" className="p-6" delay="560ms">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: '#8B5CF6' }}/>
