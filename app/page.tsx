@@ -47,18 +47,20 @@ function GlassCard({ children, shadow, className = '' }: {
 }) {
   return (
     <div className={`relative overflow-hidden ${className}`} style={{
-      background: 'rgba(255,255,255,0.42)',
-      backdropFilter: 'blur(40px)',
-      WebkitBackdropFilter: 'blur(40px)',
-      border: '1px solid rgba(255,255,255,0.72)',
+      background: 'linear-gradient(145deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.28) 100%)',
+      backdropFilter: 'blur(60px)',
+      WebkitBackdropFilter: 'blur(60px)',
+      border: '1px solid rgba(255,255,255,0.65)',
       borderRadius: '28px',
-      boxShadow: shadow ?? '0 8px 40px rgba(0,0,0,0.07)',
+      boxShadow: shadow
+        ? `${shadow}, inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.04)`
+        : 'inset 0 1px 0 rgba(255,255,255,0.7)',
     }}>
-      {/* Highlight spéculaire */}
+      {/* Highlight spéculaire angulaire */}
       <div style={{
-        position: 'absolute', top: 0, left: '8%', right: '8%', height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
-        pointerEvents: 'none',
+        position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)',
+        pointerEvents: 'none', borderRadius: '28px 28px 0 0',
       }}/>
       {children}
     </div>
@@ -96,15 +98,15 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: '#EEF2EE',
+      background: 'linear-gradient(160deg, #B8C4BE 0%, #BFC3CC 100%)',
     }}>
 
       {/* Orbes liquides de fond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div style={{ position:'absolute', top:'-15%', left:'10%', width:'780px', height:'780px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(74,222,128,0.28) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', bottom:'-10%', right:'5%', width:'680px', height:'680px', borderRadius:'50%', background:'radial-gradient(circle at 60% 60%, rgba(139,92,246,0.22) 0%, transparent 60%)', filter:'blur(80px)' }}/>
-        <div style={{ position:'absolute', top:'30%', right:'25%', width:'420px', height:'420px', borderRadius:'50%', background:'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 60%)', filter:'blur(60px)' }}/>
-        <div style={{ position:'absolute', top:'60%', left:'30%', width:'340px', height:'340px', borderRadius:'50%', background:'radial-gradient(circle, rgba(249,115,22,0.13) 0%, transparent 60%)', filter:'blur(60px)' }}/>
+        <div style={{ position:'absolute', top:'-15%', left:'10%', width:'800px', height:'800px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(120,200,140,0.45) 0%, transparent 58%)', filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', bottom:'-10%', right:'5%', width:'700px', height:'700px', borderRadius:'50%', background:'radial-gradient(circle at 60% 60%, rgba(160,130,220,0.38) 0%, transparent 58%)', filter:'blur(90px)' }}/>
+        <div style={{ position:'absolute', top:'30%', right:'25%', width:'450px', height:'450px', borderRadius:'50%', background:'radial-gradient(circle, rgba(100,150,220,0.28) 0%, transparent 58%)', filter:'blur(70px)' }}/>
+        <div style={{ position:'absolute', top:'60%', left:'30%', width:'360px', height:'360px', borderRadius:'50%', background:'radial-gradient(circle, rgba(240,150,80,0.25) 0%, transparent 58%)', filter:'blur(70px)' }}/>
       </div>
 
       <AdminSidebar />
