@@ -47,7 +47,7 @@ function GlassCard({ children, shadow, className = '' }: {
 }) {
   return (
     <div className={`relative overflow-hidden ${className}`} style={{
-      background: 'linear-gradient(145deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.28) 100%)',
+      background: 'linear-gradient(145deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.38) 100%)',
       backdropFilter: 'blur(60px)',
       WebkitBackdropFilter: 'blur(60px)',
       border: '1px solid rgba(255,255,255,0.65)',
@@ -98,15 +98,15 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(160deg, #B8C4BE 0%, #BFC3CC 100%)',
+      background: 'linear-gradient(160deg, #0B1E10 0%, #0E2318 40%, #0A1E1A 100%)',
     }}>
 
       {/* Orbes liquides de fond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div style={{ position:'absolute', top:'-15%', left:'10%', width:'800px', height:'800px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(120,200,140,0.45) 0%, transparent 58%)', filter:'blur(90px)' }}/>
-        <div style={{ position:'absolute', bottom:'-10%', right:'5%', width:'700px', height:'700px', borderRadius:'50%', background:'radial-gradient(circle at 60% 60%, rgba(160,130,220,0.38) 0%, transparent 58%)', filter:'blur(90px)' }}/>
-        <div style={{ position:'absolute', top:'30%', right:'25%', width:'450px', height:'450px', borderRadius:'50%', background:'radial-gradient(circle, rgba(100,150,220,0.28) 0%, transparent 58%)', filter:'blur(70px)' }}/>
-        <div style={{ position:'absolute', top:'60%', left:'30%', width:'360px', height:'360px', borderRadius:'50%', background:'radial-gradient(circle, rgba(240,150,80,0.25) 0%, transparent 58%)', filter:'blur(70px)' }}/>
+        <div style={{ position:'absolute', top:'-10%', left:'5%',  width:'820px', height:'820px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(20,180,120,0.55) 0%, transparent 58%)', filter:'blur(100px)' }}/>
+        <div style={{ position:'absolute', bottom:'-8%', right:'8%', width:'720px', height:'720px', borderRadius:'50%', background:'radial-gradient(circle at 55% 55%, rgba(0,200,160,0.45) 0%, transparent 58%)', filter:'blur(100px)' }}/>
+        <div style={{ position:'absolute', top:'25%', right:'20%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(48,220,180,0.35) 0%, transparent 58%)', filter:'blur(80px)' }}/>
+        <div style={{ position:'absolute', top:'55%', left:'25%', width:'400px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle, rgba(10,160,100,0.4) 0%, transparent 58%)',  filter:'blur(80px)' }}/>
       </div>
 
       <AdminSidebar />
@@ -115,11 +115,11 @@ export default async function Dashboard() {
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#16A34A' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#4ADE80' }}>
             {dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}
           </p>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Bonjour, Remi 👋</h1>
-          <p className="text-sm text-gray-400 mt-1">Voici l'état de ta promo aujourd'hui.</p>
+          <h1 className="text-3xl font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.95)' }}>Bonjour, Remi 👋</h1>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Voici l'état de ta promo aujourd'hui.</p>
         </div>
 
         <div className="px-8 pb-8 flex flex-col gap-5">
@@ -322,8 +322,8 @@ export default async function Dashboard() {
           {/* Liste complète */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Tous les étudiants</p>
-              <span className="text-xs text-gray-400">{total} au total</span>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>Tous les étudiants</p>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{total} au total</span>
             </div>
             <DashboardClient etudiants={etudiants} />
           </div>
