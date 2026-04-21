@@ -35,24 +35,30 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
 
     try {
       const res  = await fetch('/api/upload', { method: 'POST', body: fd })
-      const data = await res.json()
+      const text = await res.text()
+      let data: { url?: string; error?: string } = {}
+      try { data = JSON.parse(text) } catch {
+        setError(`Réponse serveur invalide (${res.status}): ${text.slice(0, 200)}`)
+        setLoading(false)
+        return
+      }
 
       if (!res.ok || data.error) {
-        setError(data.error ?? 'Erreur lors de l\'upload.')
+        setError(data.error ?? `Erreur ${res.status}`)
         setLoading(false)
         return
       }
 
       setLoading(false)
       setSaving(true)
-      await onUpload(data.url)
-      setUrl(data.url)
+      await onUpload(data.url!)
+      setUrl(data.url!)
       setSaving(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       console.error('[UploadDocument]', err)
-      setError('Erreur réseau, réessaie.')
+      setError(`Erreur: ${err instanceof Error ? err.message : String(err)}`)
       setLoading(false)
     }
   }
