@@ -29,8 +29,16 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
     setLoading(true)
     setError('')
 
-    const cloudName   = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+    const cloudName    = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+
+    console.log('[upload] cloud_name:', cloudName, '| preset:', uploadPreset)
+
+    if (!cloudName || !uploadPreset) {
+      setError(`Variables d'env manquantes — cloud: "${cloudName}", preset: "${uploadPreset}"`)
+      setLoading(false)
+      return
+    }
 
     const fd = new FormData()
     fd.append('file', file)
