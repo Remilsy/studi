@@ -4,6 +4,16 @@ import LogoutButton from './components/LogoutButton'
 import DashboardClient from './components/DashboardClient'
 import AdminSidebar from './components/AdminSidebar'
 
+function calcProgression(e: any) {
+  let s = 0
+  if (e.telephone) s += 20
+  if (e.linkedin)  s += 20
+  if (e.cv_statut     === 'depose') s += 20
+  if (e.lettre_statut === 'depose') s += 20
+  if ((e.nb_candidatures || 0) > 0) s += 20
+  return s
+}
+
 async function getEtudiants() {
   const supabase = await createClient()
   const { data } = await supabase
@@ -149,9 +159,11 @@ export default async function Dashboard() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Top progressions</h2>
             <div className="flex flex-col gap-2">
               {[...etudiants]
-                .sort((a: any, b: any) => (b.score_progression || 0) - (a.score_progression || 0))
+                .sort((a: any, b: any) => calcProgression(b) - calcProgression(a))
                 .slice(0, 5)
-                .map((e: any) => (
+                .map((e: any) => {
+                  const pct = calcProgression(e)
+                  return (
                   <Link key={e.id} href={`/etudiants/${e.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F8FAF8] transition-colors">
                     <div className="w-7 h-7 rounded-full bg-[#E4EDE4] flex items-center justify-center text-xs font-semibold text-[#3D553D] shrink-0">
                       {e.prenom[0]}{e.nom[0]}
@@ -160,13 +172,13 @@ export default async function Dashboard() {
                       <p className="text-xs font-semibold text-gray-900 truncate">{e.prenom} {e.nom}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <div className="flex-1 h-1 bg-[#E4EDE4] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${e.score_progression || 0}%` }}></div>
+                          <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${pct}%` }}></div>
                         </div>
-                        <span className="text-[10px] text-gray-400">{e.score_progression || 0}%</span>
+                        <span className="text-[10px] text-gray-400">{pct}%</span>
                       </div>
                     </div>
                   </Link>
-                ))}
+                )})}
             </div>
           </div>
         </div>

@@ -118,6 +118,16 @@ export default function EtudiantDetail() {
     </div>
   )
 
+  const progression = (() => {
+    let score = 0
+    if (etudiant.telephone) score += 20
+    if (etudiant.linkedin)  score += 20
+    if (etudiant.cv_statut     === 'depose') score += 20
+    if (etudiant.lettre_statut === 'depose') score += 20
+    if ((etudiant.nb_candidatures || 0) > 0) score += 20
+    return score
+  })()
+
   const s = statutConfig[etudiant.statut] || statutConfig['en_preparation']
   const cv = docConfig[etudiant.cv_statut] || docConfig['a_deposer']
   const lm = docConfig[etudiant.lettre_statut] || docConfig['a_deposer']
@@ -216,10 +226,10 @@ export default function EtudiantDetail() {
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>PROGRESSION</span>
-                <span className="text-sm font-bold text-white">{etudiant.score_progression ?? 0}%</span>
+                <span className="text-sm font-bold text-white">{progression}%</span>
               </div>
               <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                <div className="h-full rounded-full" style={{ width: `${etudiant.score_progression ?? 0}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}></div>
+                <div className="h-full rounded-full" style={{ width: `${progression}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}></div>
               </div>
             </div>
 
