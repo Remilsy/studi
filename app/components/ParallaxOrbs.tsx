@@ -14,9 +14,9 @@ export default function ParallaxOrbs() {
     const handler = () => {
       rafId = requestAnimationFrame(() => {
         const y = container.scrollTop
-        if (groupA.current) groupA.current.style.transform = `translateY(${y * 0.18}px)`
-        if (groupB.current) groupB.current.style.transform = `translateY(${-y * 0.12}px)`
-        if (groupC.current) groupC.current.style.transform = `translateY(${y * 0.08}px)`
+        if (groupA.current) groupA.current.style.transform = `translateY(${y * 0.45}px)`
+        if (groupB.current) groupB.current.style.transform = `translateY(${-y * 0.3}px)`
+        if (groupC.current) groupC.current.style.transform = `translateY(${y * 0.2}px) scale(${1 + y * 0.00008})`
       })
     }
 

@@ -100,7 +100,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex" style={{
-      background: 'linear-gradient(160deg, #9DBDAF 0%, #A5C4B8 50%, #9BBFB2 100%)',
+      background: 'linear-gradient(160deg, #7AA892 0%, #85B09E 50%, #7AA896 100%)',
     }}>
 
       <ParallaxOrbs />
