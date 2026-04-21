@@ -82,7 +82,7 @@ export default function UploadDocument({ type, label, currentUrl, onUpload }: Pr
               <p className="text-sm font-bold text-green-700">
                 {saved ? 'Sauvegardé ✓' : `${label} déposé ✓`}
               </p>
-              <p className="text-xs text-green-600 break-all">{url}</p>
+              <p className="text-xs text-green-600">PDF déposé</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
