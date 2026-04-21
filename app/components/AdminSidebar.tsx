@@ -35,19 +35,25 @@ export default function AdminSidebar() {
   const active = (href: string) => href === '/' ? p === '/' : p === href || p.startsWith(href + '/')
 
   return (
-    <div className="w-56 flex flex-col shrink-0 min-h-screen sticky top-0" style={{ backgroundColor: '#131F13' }}>
+    <div className="w-56 flex flex-col shrink-0 min-h-screen sticky top-0"
+      style={{ background: 'linear-gradient(180deg, #0D0A1E 0%, #0A150A 100%)' }}>
+
       {/* Logo */}
-      <div className="px-5 py-5 mb-2">
+      <div className="px-5 py-5 mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black" style={{ backgroundColor: '#2D4A2D', color: '#A3C4A3' }}>
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-sm font-black shrink-0"
+            style={{ background: 'linear-gradient(135deg, #22C55E, #8B5CF6)', color: '#fff', boxShadow: '0 4px 12px rgba(139,92,246,0.4)' }}>
             S
           </div>
           <div>
             <p className="text-sm font-bold text-white tracking-tight">Studi</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>SUP-PHOTO</p>
+            <p className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.25)' }}>SUP-PHOTO</p>
           </div>
         </div>
       </div>
+
+      {/* Divider */}
+      <div className="mx-5 mb-3 h-px" style={{ background: 'rgba(255,255,255,0.06)' }}/>
 
       {/* Nav */}
       <nav className="flex-1 px-3 flex flex-col gap-0.5">
@@ -55,25 +61,32 @@ export default function AdminSidebar() {
           const isActive = active(href)
           return (
             <Link key={href} href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all"
               style={isActive
-                ? { backgroundColor: '#2D4A2D', color: '#A3C4A3' }
-                : { color: 'rgba(255,255,255,0.45)' }
+                ? {
+                    background: 'rgba(139,92,246,0.18)',
+                    color: '#A78BFA',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                  }
+                : { color: 'rgba(255,255,255,0.35)' }
               }
-              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)' }}
-              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}
+              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.75)' }}
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)' }}
             >
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {icon}
               </svg>
               {label}
+              {isActive && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: '#A78BFA' }}/>
+              )}
             </Link>
           )
         })}
       </nav>
 
       {/* Bottom */}
-      <div className="p-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="p-3 mx-2 mb-2 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <LogoutButton />
       </div>
     </div>
