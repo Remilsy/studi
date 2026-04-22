@@ -1,6 +1,6 @@
 import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
-import LogoutButton from '../components/LogoutButton'
+import ProfileMenu from '../components/ProfileMenu'
 import EditIdentite from './EditIdentite'
 import Link from 'next/link'
 import RelancesWidget from './RelancesWidget'
@@ -107,7 +107,7 @@ export default async function Profil() {
               style={{ color: 'var(--dash-header-sub)' }}>
               Offres
             </Link>
-            <LogoutButton />
+            <ProfileMenu prenom={etudiant.prenom} nom={etudiant.nom} email={etudiant.email} />
           </div>
         </div>
       </div>
