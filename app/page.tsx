@@ -86,6 +86,9 @@ const statutActivite: Record<string, { label: string; color: string; bg: string 
 
 export default async function Dashboard() {
   const { etudiants, activite } = await getData()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const adminName = user?.user_metadata?.prenom || user?.email?.split('@')[0] || 'Admin'
 
   const total       = etudiants.length
   const places      = etudiants.filter((e: any) => e.statut === 'place').length
@@ -132,7 +135,7 @@ export default async function Dashboard() {
               <p className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--dash-header-date)' }}>
                 {dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}
               </p>
-              <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--dash-header-title)' }}>Bonjour, Remi 👋</h1>
+              <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--dash-header-title)' }}>Bonjour, {adminName} 👋</h1>
               <p className="text-sm mt-1" style={{ color: 'var(--dash-header-sub)' }}>Voici l'état de ta promo aujourd'hui.</p>
             </div>
             <ThemeSwitcher />
