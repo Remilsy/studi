@@ -121,8 +121,51 @@ function AdminProfileButton() {
           overflow: 'hidden',
         }}>
 
+          {/* Identité */}
+          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, #5C7A5C, #3D553D)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontSize: 14, fontWeight: 700,
+              }}>
+                {initiale}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Administrateur</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{email}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={{ padding: '8px 8px 4px' }}>
+            <button
+              onClick={async () => {
+                await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
+                alert('Un email de réinitialisation a été envoyé.')
+              }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 10px', borderRadius: 10, cursor: 'pointer',
+                background: 'transparent', border: 'none', transition: 'background .12s',
+                fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.6)',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+              Changer le mot de passe
+            </button>
+          </div>
+
+          <div style={{ margin: '0 10px', height: 1, background: 'rgba(255,255,255,0.07)' }}/>
+
           {/* Thème */}
-          <div style={{ padding: '14px 14px 10px' }}>
+          <div style={{ padding: '12px 14px 10px' }}>
             <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.25)', marginBottom: 10 }}>
               Apparence
             </p>
