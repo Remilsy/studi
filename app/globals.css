@@ -1,8 +1,51 @@
 @import "tailwindcss";
 
-:root {
+:root, [data-theme="normal"] {
   --background: #ffffff;
   --foreground: #171717;
+  --dash-bg: linear-gradient(160deg, #7AA892 0%, #85B09E 50%, #7AA896 100%);
+  --dash-card-from: rgba(255,255,255,0.62);
+  --dash-card-to: rgba(255,255,255,0.38);
+  --dash-card-border: rgba(255,255,255,0.65);
+  --dash-card-specular: rgba(255,255,255,0.22);
+  --dash-card-inset: rgba(255,255,255,0.7);
+  --dash-header-date: #16A34A;
+  --dash-header-title: #111827;
+  --dash-header-sub: #6B7280;
+  --dash-section-label: rgba(0,0,0,0.38);
+  --dash-hover: rgba(255,255,255,0.5);
+}
+
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  --dash-bg: #E8F0E8;
+  --dash-card-from: rgba(255,255,255,0.93);
+  --dash-card-to: rgba(255,255,255,0.82);
+  --dash-card-border: rgba(0,0,0,0.07);
+  --dash-card-specular: rgba(255,255,255,0.6);
+  --dash-card-inset: rgba(255,255,255,0.95);
+  --dash-header-date: #16A34A;
+  --dash-header-title: #111827;
+  --dash-header-sub: #6B7280;
+  --dash-section-label: rgba(0,0,0,0.35);
+  --dash-hover: rgba(0,0,0,0.03);
+}
+
+[data-theme="dark"] {
+  --background: #0f1f0f;
+  --foreground: #e8f0e8;
+  --dash-bg: linear-gradient(160deg, #0C1A10 0%, #0F2218 50%, #0C1E18 100%);
+  --dash-card-from: rgba(255,255,255,0.86);
+  --dash-card-to: rgba(255,255,255,0.72);
+  --dash-card-border: rgba(255,255,255,0.5);
+  --dash-card-specular: rgba(255,255,255,0.35);
+  --dash-card-inset: rgba(255,255,255,0.8);
+  --dash-header-date: #4ADE80;
+  --dash-header-title: rgba(255,255,255,0.93);
+  --dash-header-sub: rgba(255,255,255,0.5);
+  --dash-section-label: rgba(255,255,255,0.38);
+  --dash-hover: rgba(255,255,255,0.08);
 }
 
 @theme inline {
