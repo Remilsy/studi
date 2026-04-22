@@ -6,43 +6,17 @@ import { supabase } from '../../lib/supabase'
 type Status = 'loading' | 'ready' | 'invalid' | 'success'
 
 export default function ResetPassword() {
-  const [status, setStatus]   = useState<Status>('loading')
+  const [status, setStatus]     = useState<Status>('loading')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
 
   useEffect(() => {
-    async function init() {
-      // PKCE flow: Supabase envoie ?code=xxx dans l'URL
-      const params = new URLSearchParams(window.location.search)
-      const code   = params.get('code')
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-        if (error) { setStatus('invalid'); return }
-        setStatus('ready')
-        return
-      }
-
-      // Fallback: vérifier si une session recovery est déjà active (hash flow)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setStatus('ready')
-      } else {
-        // Écouter l'événement PASSWORD_RECOVERY (hash flow legacy)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-          if (event === 'PASSWORD_RECOVERY') setStatus('ready')
-        })
-        // Timeout : si rien après 3s, le lien est invalide
-        const t = setTimeout(() => {
-          setStatus('invalid')
-          subscription.unsubscribe()
-        }, 3000)
-        return () => { clearTimeout(t); subscription.unsubscribe() }
-      }
-    }
-    init()
+    // La callback /auth/callback a déjà échangé le code et posé la session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setStatus(session ? 'ready' : 'invalid')
+    })
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -71,9 +45,9 @@ export default function ResetPassword() {
         </div>
 
         {status === 'loading' && (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <p style={{ fontSize: 13, color: '#9CA3AF' }}>Vérification du lien…</p>
-          </div>
+          <p style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', padding: '24px 0' }}>
+            Vérification…
+          </p>
         )}
 
         {status === 'invalid' && (
@@ -114,56 +88,33 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>
-                Nouveau mot de passe
-              </label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>Nouveau mot de passe</label>
               <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                style={{
-                  width: '100%', padding: '9px 12px', borderRadius: 8,
-                  border: '1px solid #E5EBE5', fontSize: 13, color: '#111827',
-                  outline: 'none', boxSizing: 'border-box',
-                }}
+                type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #E5EBE5', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>
-                Confirmer
-              </label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>Confirmer</label>
               <input
-                type="password"
-                value={confirm}
-                onChange={e => setConfirm(e.target.value)}
-                placeholder="••••••••"
-                required
-                style={{
-                  width: '100%', padding: '9px 12px', borderRadius: 8,
-                  border: '1px solid #E5EBE5', fontSize: 13, color: '#111827',
-                  outline: 'none', boxSizing: 'border-box',
-                }}
+                type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
+                placeholder="••••••••" required
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #E5EBE5', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
             {error && (
-              <p style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', padding: '8px 12px', borderRadius: 8 }}>
-                {error}
-              </p>
+              <p style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: '10px 0', borderRadius: 8, background: '#5C7A5C',
-                color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
-                border: 'none', opacity: loading ? 0.6 : 1, transition: 'opacity .15s',
-              }}
-            >
+            <button type="submit" disabled={loading} style={{
+              padding: '10px 0', borderRadius: 8, background: '#5C7A5C',
+              color: '#fff', fontSize: 13, fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              border: 'none', opacity: loading ? 0.6 : 1,
+            }}>
               {loading ? 'Enregistrement…' : 'Enregistrer le mot de passe'}
             </button>
           </form>

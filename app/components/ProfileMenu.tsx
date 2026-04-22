@@ -45,7 +45,7 @@ export default function ProfileMenu({ prenom, nom, email }: Props) {
 
   async function handleReset() {
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     })
     setResetSent(true)
     setTimeout(() => setResetSent(false), 4000)
