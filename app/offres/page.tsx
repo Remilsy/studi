@@ -1,6 +1,7 @@
 import { createClient } from '../../lib/supabase-server'
 import { redirect } from 'next/navigation'
 import AdminSidebar from '../components/AdminSidebar'
+import ParallaxOrbs from '../components/ParallaxOrbs'
 import OffresClient from './OffresClient'
 import OffresEtudiantView from './OffresEtudiantView'
 
@@ -21,10 +22,13 @@ export default async function Offres() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D6E6D6] flex">
+    <div className="h-screen flex relative" style={{ background: 'var(--dash-bg)' }}>
+      <ParallaxOrbs />
       <AdminSidebar />
-      <div className="flex-1 p-6">
-        <OffresClient offres={offres || []} />
+      <div id="dashboard-scroll" className="flex-1 h-full overflow-y-auto" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="p-6">
+          <OffresClient offres={offres || []} />
+        </div>
       </div>
     </div>
   )

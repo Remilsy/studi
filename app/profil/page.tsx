@@ -4,20 +4,30 @@ import LogoutButton from '../components/LogoutButton'
 import EditIdentite from './EditIdentite'
 import Link from 'next/link'
 import RelancesWidget from './RelancesWidget'
+import ParallaxOrbs from '../components/ParallaxOrbs'
+
+const glass = {
+  background: 'linear-gradient(145deg, var(--dash-card-from) 0%, var(--dash-card-to) 100%)',
+  backdropFilter: 'blur(60px)',
+  WebkitBackdropFilter: 'blur(60px)',
+  border: '1px solid var(--dash-card-border)',
+  borderRadius: '20px',
+  boxShadow: 'inset 0 1px 0 var(--dash-card-inset)',
+} as const
 
 function getStatut(statut: string) {
   const map: Record<string, { label: string; dot: string; text: string; bg: string }> = {
-    en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#6B7280', bg: '#F9FAFB' },
-    en_recherche:   { label: 'En recherche',   dot: '#5C7A5C', text: '#3D553D', bg: '#E4EDE4' },
-    place:          { label: 'Placé',           dot: '#16A34A', text: '#15803D', bg: '#F0FDF4' },
+    en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#6B7280', bg: 'rgba(156,163,175,0.1)' },
+    en_recherche:   { label: 'En recherche',   dot: '#5C7A5C', text: '#3D553D', bg: 'rgba(92,122,92,0.12)'  },
+    place:          { label: 'Placé',           dot: '#16A34A', text: '#15803D', bg: 'rgba(34,197,94,0.12)'  },
   }
   return map[statut] || map['en_preparation']
 }
 
 function getDocStatut(val: string | null) {
-  if (val === 'depose')          return { label: 'Déposé',          color: '#15803D', bg: '#F0FDF4', dot: '#16A34A' }
-  if (val === 'a_mettre_a_jour') return { label: 'À mettre à jour', color: '#C2410C', bg: '#FFF7ED', dot: '#F97316' }
-  return                                { label: 'Non déposé',       color: '#9CA3AF', bg: '#F3F4F6', dot: '#D1D5DB' }
+  if (val === 'depose')          return { label: 'Déposé',          color: '#15803D', bg: 'rgba(34,197,94,0.12)',  dot: '#16A34A' }
+  if (val === 'a_mettre_a_jour') return { label: 'À mettre à jour', color: '#C2410C', bg: 'rgba(249,115,22,0.12)', dot: '#F97316' }
+  return                                { label: 'Non déposé',       color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', dot: '#D1D5DB' }
 }
 
 function getProgression(e: Record<string, unknown>) {
@@ -39,10 +49,11 @@ export default async function Profil() {
 
   if (!etudiant) {
     return (
-      <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-8 text-center max-w-sm w-full">
-          <h2 className="text-base font-semibold text-gray-900 mb-1">Aucune fiche trouvée</h2>
-          <p className="text-sm text-gray-400">Contacte ton responsable.</p>
+      <div className="h-screen flex items-center justify-center p-6 relative" style={{ background: 'var(--dash-bg)' }}>
+        <ParallaxOrbs />
+        <div style={{ ...glass, padding: '32px', textAlign: 'center', maxWidth: '360px', position: 'relative', zIndex: 1 }}>
+          <h2 className="text-base font-semibold mb-1" style={{ color: 'var(--dash-header-title)' }}>Aucune fiche trouvée</h2>
+          <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Contacte ton responsable.</p>
         </div>
       </div>
     )
@@ -68,28 +79,32 @@ export default async function Profil() {
   const objectif     = etudiant.objectif_candidatures || 5
   const objectifPct  = Math.min(Math.round((candidatures / objectif) * 100), 100)
 
-
   return (
-    <div className="min-h-screen bg-[#D6E6D6]">
+    <div className="h-screen overflow-y-auto relative" id="dashboard-scroll" style={{ background: 'var(--dash-bg)' }}>
+      <ParallaxOrbs />
 
       {/* Navbar */}
-      <div className="bg-white border-b border-[#C8D8C8]">
+      <div className="sticky top-0 z-20"
+        style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}>
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
-            <span className="font-semibold text-gray-900 text-sm tracking-tight">Studi</span>
+            <div className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #22C55E, #8B5CF6)' }}></div>
+            <span className="font-semibold text-sm tracking-tight" style={{ color: 'var(--dash-header-title)' }}>Studi</span>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/profil/documents"
-              className="text-xs text-gray-500 hover:text-[#3D553D] font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-[#E4EDE4]">
+              className="text-xs font-medium transition-colors px-3 py-1.5 rounded-lg"
+              style={{ color: 'var(--dash-header-sub)' }}>
               Documents
             </Link>
             <Link href="/profil/candidatures"
-              className="text-xs text-gray-500 hover:text-[#3D553D] font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-[#E4EDE4]">
+              className="text-xs font-medium transition-colors px-3 py-1.5 rounded-lg"
+              style={{ color: 'var(--dash-header-sub)' }}>
               Candidatures
             </Link>
             <Link href="/offres"
-              className="text-xs text-gray-500 hover:text-[#3D553D] font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-[#E4EDE4]">
+              className="text-xs font-medium transition-colors px-3 py-1.5 rounded-lg"
+              style={{ color: 'var(--dash-header-sub)' }}>
               Offres
             </Link>
             <LogoutButton />
@@ -97,94 +112,88 @@ export default async function Profil() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-4">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 flex flex-col gap-4">
 
-        {/* ── RELANCES ── */}
+        {/* RELANCES */}
         {(relancesData || []).length > 0 && (
           <RelancesWidget initial={relancesData as any} />
         )}
 
-        {/* ── HERO ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
+        {/* HERO */}
+        <div style={{ ...glass, overflow: 'hidden' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5">
 
-          {/* Gauche — identité */}
-          <div className="lg:col-span-2 bg-[#3D553D] p-8 flex flex-col gap-6">
-            <div>
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-[#3D553D] mb-5"
-                style={{ background: '#D6E6D6' }}
-              >
-                {initiale}
+            {/* Gauche */}
+            <div className="lg:col-span-2 p-8 flex flex-col gap-6"
+              style={{ background: 'linear-gradient(180deg, #1a3a1a 0%, #0f2a0f 100%)' }}>
+              <div>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mb-5"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.9)' }}>
+                  {initiale}
+                </div>
+                <h1 className="text-white font-bold text-2xl tracking-tight">{etudiant.prenom} {etudiant.nom}</h1>
+                <p className="text-white text-sm mt-1" style={{ opacity: 0.4 }}>{etudiant.email}</p>
+                <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statut.dot }}></div>
+                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{statut.label}</span>
+                </div>
               </div>
-              <h1 className="text-white font-bold text-2xl tracking-tight">{etudiant.prenom} {etudiant.nom}</h1>
-              <p className="text-white text-sm mt-1" style={{ opacity: 0.4 }}>{etudiant.email}</p>
-              <div
-                className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full"
-                style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
-              >
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statut.dot }}></div>
-                <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{statut.label}</span>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>PROFIL COMPLÉTÉ</span>
+                  <span className="text-sm font-bold text-white">{progression}%</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${progression}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}></div>
+                </div>
+                <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  {progression < 100 ? 'Complète ton profil pour maximiser tes chances' : 'Profil complet !'}
+                </p>
               </div>
             </div>
 
-            <div className="border-t border-white" style={{ borderColor: 'rgba(255,255,255,0.1)', paddingTop: '24px' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>PROFIL COMPLÉTÉ</span>
-                <span className="text-sm font-bold text-white">{progression}%</span>
+            {/* Droite */}
+            <div className="lg:col-span-3 p-8 flex flex-col justify-between gap-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-6" style={{ color: 'var(--dash-section-label)' }}>Vue d'ensemble</p>
+                <div className="grid grid-cols-3 gap-6">
+                  {[
+                    { label: 'Candidatures', value: candidatures, sub: `objectif : ${objectif}`,             color: '#3D553D' },
+                    { label: 'Entretiens',   value: entretiens,   sub: etudiant.prochain_entretien ? new Date(etudiant.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Aucun planifié', color: '#1D4ED8' },
+                    { label: 'Entreprises',  value: entreprises,  sub: 'contactées',                         color: '#6D28D9' },
+                  ].map(({ label, value, sub, color }) => (
+                    <div key={label}>
+                      <p className="text-5xl font-bold tracking-tight" style={{ color }}>{value}</p>
+                      <p className="text-sm font-semibold mt-1" style={{ color: 'var(--dash-header-title)' }}>{label}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--dash-header-sub)' }}>{sub}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${progression}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}
-                ></div>
-              </div>
-              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                {progression < 100 ? 'Complète ton profil pour maximiser tes chances' : 'Profil complet !'}
-              </p>
-            </div>
-          </div>
 
-          {/* Droite — stats */}
-          <div className="lg:col-span-3 p-8 flex flex-col justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-6">Vue d'ensemble</p>
-              <div className="grid grid-cols-3 gap-6">
-                {[
-                  { label: 'Candidatures', value: candidatures, sub: `objectif : ${objectif}`,             color: '#3D553D' },
-                  { label: 'Entretiens',   value: entretiens,   sub: etudiant.prochain_entretien ? new Date(etudiant.prochain_entretien).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Aucun planifié', color: '#1D4ED8' },
-                  { label: 'Entreprises',  value: entreprises,  sub: 'contactées',                         color: '#6D28D9' },
-                ].map(({ label, value, sub, color }) => (
-                  <div key={label}>
-                    <p className="text-5xl font-bold tracking-tight" style={{ color }}>{value}</p>
-                    <p className="text-sm font-semibold text-gray-800 mt-1">{label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-t border-[#F3F4F6] pt-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-700">Objectif de la semaine</span>
-                <span className="text-xs text-gray-400">{candidatures} / {objectif} candidatures</span>
-              </div>
-              <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#5C7A5C] rounded-full"
-                  style={{ width: `${objectifPct}%` }}
-                ></div>
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '20px' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold" style={{ color: 'var(--dash-header-title)' }}>Objectif de la semaine</span>
+                  <span className="text-xs" style={{ color: 'var(--dash-header-sub)' }}>{candidatures} / {objectif} candidatures</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${objectifPct}%`, background: 'linear-gradient(90deg, #5C7A5C, #22C55E)' }}></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── LIGNE 2 : tracker + infos ── */}
+        {/* LIGNE 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-          {/* Widget candidatures → page dédiée */}
+          {/* Candidatures */}
           <div className="lg:col-span-3 flex flex-col gap-3">
             <Link href="/profil/candidatures"
-              className="bg-[#3D553D] rounded-2xl p-6 flex items-center justify-between hover:bg-[#2D4030] transition-colors group">
+              className="rounded-2xl p-6 flex items-center justify-between group transition-all"
+              style={{ background: 'linear-gradient(135deg, #1a3a1a 0%, #0f2a0f 100%)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div>
                 <p className="text-white font-bold text-lg">Mes candidatures</p>
                 <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -201,43 +210,40 @@ export default async function Profil() {
               </div>
             </Link>
 
-            {/* Barre objectif */}
-            <div className="bg-white rounded-2xl border border-[#C8D8C8] px-5 py-4">
+            <div style={{ ...glass, padding: '16px 20px' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-600">Objectif de la semaine</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--dash-header-title)' }}>Objectif de la semaine</span>
                 <span className="text-xs font-bold" style={{ color: objectifPct >= 100 ? '#16A34A' : '#5C7A5C' }}>
                   {candidatures}/{objectif} {objectifPct >= 100 ? '✓' : ''}
                 </span>
               </div>
-              <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
-                <div className="h-full bg-[#5C7A5C] rounded-full" style={{ width: `${objectifPct}%` }}></div>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
+                <div className="h-full rounded-full" style={{ width: `${objectifPct}%`, background: 'linear-gradient(90deg, #5C7A5C, #22C55E)' }}></div>
               </div>
             </div>
 
-            {/* Mini stats */}
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: 'Entretiens',  value: entretiens,  color: '#1D4ED8' },
                 { label: 'Refus',       value: refus,        color: '#9F1239' },
                 { label: 'Entreprises', value: entreprises,  color: '#6D28D9' },
               ].map(({ label, value, color }) => (
-                <div key={label} className="bg-white rounded-xl border border-[#C8D8C8] p-4">
+                <div key={label} style={{ ...glass, padding: '16px' }}>
                   <p className="text-2xl font-black" style={{ color }}>{value}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--dash-header-sub)' }}>{label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Colonne droite : documents + identité + note */}
+          {/* Droite */}
           <div className="lg:col-span-2 flex flex-col gap-4">
 
             {/* Documents */}
-            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+            <div style={{ ...glass, padding: '24px' }}>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase">Documents</p>
-                <Link href="/profil/documents"
-                  className="text-xs text-[#5C7A5C] font-semibold hover:underline">
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Documents</p>
+                <Link href="/profil/documents" className="text-xs font-semibold hover:underline" style={{ color: '#5C7A5C' }}>
                   Gérer →
                 </Link>
               </div>
@@ -246,11 +252,9 @@ export default async function Profil() {
                   { label: 'Curriculum Vitae', btnLabel: 'Voir le CV',        s: cvStatut, url: etudiant.cv_url },
                   { label: 'Portfolio',         btnLabel: 'Voir le Portfolio', s: lmStatut, url: etudiant.lettre_url },
                 ].map(({ label, btnLabel, s, url }) => (
-                  <div key={label}
-                    className="flex items-center justify-between p-4 rounded-xl"
-                    style={{ backgroundColor: s.bg }}>
+                  <div key={label} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: s.bg }}>
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">{label}</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--dash-header-title)' }}>{label}</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
                         <span className="text-xs font-medium" style={{ color: s.color }}>{s.label}</span>
@@ -258,14 +262,14 @@ export default async function Profil() {
                     </div>
                     {url ? (
                       <a href={url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs font-bold text-[#3D553D] bg-white px-3 py-2 rounded-xl border border-[#C8D8C8] hover:bg-[#F0FDF4] transition-colors shrink-0">
-                        <span>📄</span>
-                        <span>{btnLabel}</span>
-                        <span>↗</span>
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+                        style={{ background: 'rgba(255,255,255,0.8)', color: '#3D553D', border: '1px solid rgba(255,255,255,0.9)' }}>
+                        <span>📄</span><span>{btnLabel}</span><span>↗</span>
                       </a>
                     ) : (
                       <Link href="/profil/documents"
-                        className="text-xs font-bold text-gray-400 bg-white px-3 py-2 rounded-xl border border-gray-200 hover:border-[#C8D8C8] hover:text-[#3D553D] transition-colors shrink-0">
+                        className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+                        style={{ background: 'rgba(255,255,255,0.7)', color: '#9CA3AF', border: '1px solid rgba(255,255,255,0.9)' }}>
                         Déposer →
                       </Link>
                     )}
@@ -275,9 +279,9 @@ export default async function Profil() {
             </div>
 
             {/* Identité */}
-            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+            <div style={{ ...glass, padding: '24px' }}>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase">Identité</p>
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Identité</p>
                 <EditIdentite telephone={etudiant.telephone} linkedin={etudiant.linkedin} />
               </div>
               <div className="flex flex-col">
@@ -287,57 +291,57 @@ export default async function Profil() {
                   { label: 'Âge',       value: `${etudiant.age} ans` },
                   { label: 'Tél.',      value: etudiant.telephone || null },
                 ].map(({ label, value }) => (
-                  <div key={label} className="flex items-center justify-between py-2.5 border-b border-[#F3F4F6] last:border-0">
-                    <span className="text-xs text-gray-400">{label}</span>
-                    <span className={`text-sm font-semibold ${value ? 'text-gray-900' : 'text-gray-300'}`}>
+                  <div key={label} className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                    <span className="text-xs" style={{ color: 'var(--dash-section-label)' }}>{label}</span>
+                    <span className="text-sm font-semibold" style={{ color: value ? 'var(--dash-header-title)' : 'var(--dash-section-label)' }}>
                       {value || '—'}
                     </span>
                   </div>
                 ))}
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-xs text-gray-400">LinkedIn</span>
+                  <span className="text-xs" style={{ color: 'var(--dash-section-label)' }}>LinkedIn</span>
                   {etudiant.linkedin ? (
                     <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer"
-                      className="text-sm font-semibold text-[#5C7A5C]">
+                      className="text-sm font-semibold" style={{ color: '#5C7A5C' }}>
                       Voir le profil
                     </a>
                   ) : (
-                    <span className="text-sm font-semibold text-gray-300">—</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--dash-section-label)' }}>—</span>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Note responsable */}
-            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-3">Note de ton responsable</p>
+            <div style={{ ...glass, padding: '24px' }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--dash-section-label)' }}>Note de ton responsable</p>
               {etudiant.notes_responsable ? (
-                <p className="text-sm text-gray-700 leading-relaxed">{etudiant.notes_responsable}</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--dash-header-title)' }}>{etudiant.notes_responsable}</p>
               ) : (
-                <p className="text-sm text-gray-300 italic">Aucune note pour l'instant.</p>
+                <p className="text-sm italic" style={{ color: 'var(--dash-section-label)' }}>Aucune note pour l'instant.</p>
               )}
             </div>
 
             {/* Offres */}
-            <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Offres d'emploi</p>
+            <div style={{ ...glass, padding: '24px' }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--dash-section-label)' }}>Offres d'emploi</p>
               {!offres || offres.length === 0 ? (
-                <p className="text-sm text-gray-300 italic">Aucune offre disponible.</p>
+                <p className="text-sm italic" style={{ color: 'var(--dash-section-label)' }}>Aucune offre disponible.</p>
               ) : (
                 <div className="flex flex-col gap-3">
                   {offres.map((offre: any) => (
-                    <div key={offre.id} className="p-3 rounded-xl bg-[#F8FAF8] border border-[#EEF3EE]">
+                    <div key={offre.id} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.5)' }}>
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">{offre.titre}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{offre.entreprise}{offre.localisation ? ` · ${offre.localisation}` : ''}</p>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--dash-header-title)' }}>{offre.titre}</p>
+                          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-header-sub)' }}>{offre.entreprise}{offre.localisation ? ` · ${offre.localisation}` : ''}</p>
                         </div>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#E4EDE4] text-[#3D553D] shrink-0">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: 'rgba(92,122,92,0.15)', color: '#3D553D' }}>
                           {offre.type_contrat.toUpperCase()}
                         </span>
                       </div>
                       {offre.description && (
-                        <p className="text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2">{offre.description}</p>
+                        <p className="text-xs mt-2 leading-relaxed line-clamp-2" style={{ color: 'var(--dash-section-label)' }}>{offre.description}</p>
                       )}
                     </div>
                   ))}

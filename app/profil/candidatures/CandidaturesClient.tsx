@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { addCandidature, updateCandidatureStatut, updateCandidature, deleteCandidature } from '../candidature-actions'
+import ParallaxOrbs from '../../components/ParallaxOrbs'
 
 interface Candidature {
   id: string
@@ -15,20 +16,42 @@ interface Candidature {
 }
 
 const STATUTS = [
-  { key: 'envoye',     label: 'Envoyée',    color: '#3D553D', bg: '#E4EDE4', dot: '#5C7A5C'  },
-  { key: 'en_attente', label: 'En attente', color: '#C2410C', bg: '#FFF7ED', dot: '#F97316'  },
-  { key: 'entretien',  label: 'Entretien',  color: '#1D4ED8', bg: '#EFF6FF', dot: '#3B82F6'  },
-  { key: 'refus',      label: 'Refus',      color: '#9F1239', bg: '#FFF1F2', dot: '#F43F5E'  },
-  { key: 'accepte',    label: 'Acceptée',   color: '#15803D', bg: '#F0FDF4', dot: '#16A34A'  },
+  { key: 'envoye',     label: 'Envoyée',    color: '#3D553D', bg: 'rgba(92,122,92,0.12)',  dot: '#5C7A5C'  },
+  { key: 'en_attente', label: 'En attente', color: '#C2410C', bg: 'rgba(249,115,22,0.12)', dot: '#F97316'  },
+  { key: 'entretien',  label: 'Entretien',  color: '#1D4ED8', bg: 'rgba(59,130,246,0.12)', dot: '#3B82F6'  },
+  { key: 'refus',      label: 'Refus',      color: '#9F1239', bg: 'rgba(244,63,94,0.12)',  dot: '#F43F5E'  },
+  { key: 'accepte',    label: 'Acceptée',   color: '#15803D', bg: 'rgba(34,197,94,0.12)',  dot: '#16A34A'  },
 ]
+
+const glass = {
+  background: 'linear-gradient(145deg, var(--dash-card-from) 0%, var(--dash-card-to) 100%)',
+  backdropFilter: 'blur(60px)',
+  WebkitBackdropFilter: 'blur(60px)',
+  border: '1px solid var(--dash-card-border)',
+  borderRadius: '20px',
+  boxShadow: 'inset 0 1px 0 var(--dash-card-inset)',
+} as const
+
+const ctrlBase: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.7)',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255,255,255,0.9)',
+  color: '#111827',
+  borderRadius: '12px',
+  padding: '8px 12px',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
+}
 
 function getS(key: string) { return STATUTS.find(s => s.key === key) || STATUTS[0] }
 
 function getLevel(n: number) {
-  if (n >= 20) return { label: 'Or',      emoji: '🥇', color: '#92400E', bg: '#FEF3C7', next: null }
-  if (n >= 10) return { label: 'Argent',  emoji: '🥈', color: '#475569', bg: '#F1F5F9', next: 20   }
-  if (n >= 5)  return { label: 'Bronze',  emoji: '🥉', color: '#92400E', bg: '#FEF9EE', next: 10   }
-  return             { label: 'Débutant', emoji: '⭐',  color: '#6B7280', bg: '#F9FAFB', next: 5    }
+  if (n >= 20) return { label: 'Or',      emoji: '🥇', color: '#92400E', bg: 'rgba(254,243,199,0.6)', next: null }
+  if (n >= 10) return { label: 'Argent',  emoji: '🥈', color: '#475569', bg: 'rgba(241,245,249,0.6)', next: 20   }
+  if (n >= 5)  return { label: 'Bronze',  emoji: '🥉', color: '#92400E', bg: 'rgba(254,249,238,0.6)', next: 10   }
+  return             { label: 'Débutant', emoji: '⭐',  color: '#6B7280', bg: 'rgba(249,250,251,0.6)', next: 5    }
 }
 
 function formatDate(str: string) {
@@ -57,7 +80,7 @@ function StatusStepper({ id, statut, onChange }: {
   const currentIdx = STATUTS.findIndex(s => s.key === statut)
   return (
     <div className="px-4 pb-4 pt-1">
-      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+      <p className="text-[9px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--dash-section-label)' }}>
         Avancement — clique pour changer
       </p>
       <div className="flex items-center">
@@ -66,19 +89,14 @@ function StatusStepper({ id, statut, onChange }: {
           const isPast    = idx < currentIdx
           return (
             <div key={opt.key} className="flex items-center flex-1 last:flex-none">
-              <button
-                onClick={() => onChange(id, opt.key)}
-                title={`Marquer comme : ${opt.label}`}
-                className="flex flex-col items-center gap-1 group shrink-0"
-              >
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all border-2 group-hover:scale-110"
+              <button onClick={() => onChange(id, opt.key)} title={`Marquer comme : ${opt.label}`}
+                className="flex flex-col items-center gap-1 group shrink-0">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center transition-all border-2 group-hover:scale-110"
                   style={
                     isCurrent ? { backgroundColor: opt.dot, borderColor: opt.dot } :
-                    isPast    ? { backgroundColor: 'white',  borderColor: opt.dot } :
-                                { backgroundColor: 'white',  borderColor: '#E5E7EB' }
-                  }
-                >
+                    isPast    ? { backgroundColor: 'rgba(255,255,255,0.8)', borderColor: opt.dot } :
+                                { backgroundColor: 'rgba(255,255,255,0.4)', borderColor: 'rgba(0,0,0,0.12)' }
+                  }>
                   {isCurrent && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
                   {isPast && (
                     <svg width="10" height="10" fill="none" stroke={opt.dot} viewBox="0 0 24 24">
@@ -86,18 +104,14 @@ function StatusStepper({ id, statut, onChange }: {
                     </svg>
                   )}
                 </div>
-                <span
-                  className="text-[9px] font-bold w-12 text-center leading-tight transition-colors"
-                  style={{ color: isCurrent ? opt.color : isPast ? opt.dot : '#D1D5DB' }}
-                >
+                <span className="text-[9px] font-bold w-12 text-center leading-tight transition-colors"
+                  style={{ color: isCurrent ? opt.color : isPast ? opt.dot : 'rgba(0,0,0,0.2)' }}>
                   {opt.label === 'En attente' ? 'Attente' : opt.label}
                 </span>
               </button>
               {idx < STATUTS.length - 1 && (
-                <div
-                  className="flex-1 h-0.5 mx-1 mb-4 transition-colors"
-                  style={{ backgroundColor: idx < currentIdx ? STATUTS[idx].dot : '#E5E7EB' }}
-                />
+                <div className="flex-1 h-0.5 mx-1 mb-4 transition-colors"
+                  style={{ backgroundColor: idx < currentIdx ? STATUTS[idx].dot : 'rgba(0,0,0,0.1)' }} />
               )}
             </div>
           )
@@ -107,7 +121,7 @@ function StatusStepper({ id, statut, onChange }: {
   )
 }
 
-// ── Graphe d'activité (mensuel) ──────────────────────────────
+// ── Graphe d'activité ────────────────────────────────────────
 const MOIS = [
   { key: '2026-04', label: 'Avril' },
   { key: '2026-05', label: 'Mai' },
@@ -126,22 +140,22 @@ function ActivityGraph({ cands }: { cands: Candidature[] }) {
   const now   = new Date().toISOString().slice(0, 7)
 
   return (
-    <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
+    <div style={{ ...glass, padding: '24px' }}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Activité mensuelle</p>
-          <p className="text-sm font-semibold text-gray-700 mt-0.5">Avril → Août 2026</p>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Activité mensuelle</p>
+          <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--dash-header-title)' }}>Avril → Août 2026</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black text-[#3D553D]">{total}</p>
-          <p className="text-xs text-gray-400">candidature{total > 1 ? 's' : ''}</p>
+          <p className="text-2xl font-black" style={{ color: '#3D553D' }}>{total}</p>
+          <p className="text-xs" style={{ color: 'var(--dash-header-sub)' }}>candidature{total > 1 ? 's' : ''}</p>
         </div>
       </div>
       <div className="flex items-end gap-4 h-36">
         {data.map(m => {
           const pct      = m.count > 0 ? Math.max((m.count / max) * 100, 12) : 4
           const isCur    = m.key === now
-          const barColor = isCur ? '#3D553D' : m.count > 0 ? '#5C7A5C' : '#E4EDE4'
+          const barColor = isCur ? '#3D553D' : m.count > 0 ? '#5C7A5C' : 'rgba(0,0,0,0.08)'
           return (
             <div key={m.key} className="flex-1 flex flex-col items-center gap-2">
               <div className="h-5 flex items-end justify-center">
@@ -157,7 +171,7 @@ function ActivityGraph({ cands }: { cands: Candidature[] }) {
                     boxShadow: isCur ? '0 -2px 8px rgba(61,85,61,0.25)' : 'none' }} />
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold" style={{ color: isCur ? '#3D553D' : '#6B7280' }}>{m.label}</p>
+                <p className="text-xs font-bold" style={{ color: isCur ? '#3D553D' : 'var(--dash-header-sub)' }}>{m.label}</p>
                 {isCur && <div className="w-1 h-1 rounded-full bg-[#5C7A5C] mx-auto mt-0.5"></div>}
               </div>
             </div>
@@ -173,50 +187,49 @@ function CandidatureForm({ title, values, onChange, onSubmit, onCancel, submitti
   title: string; values: typeof EMPTY; onChange: (f: typeof EMPTY) => void
   onSubmit: (e: React.FormEvent) => void; onCancel: () => void; submitting: boolean; error: string
 }) {
-  const inp = "w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#5C7A5C] transition-colors bg-white text-gray-900"
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Entreprise *</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Entreprise *</label>
           <input autoFocus type="text" required placeholder="Apple, LVMH..." value={values.entreprise}
-            onChange={e => onChange({ ...values, entreprise: e.target.value })} className={inp} />
+            onChange={e => onChange({ ...values, entreprise: e.target.value })} style={ctrlBase} />
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Poste *</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Poste *</label>
           <input type="text" required placeholder="Photographe, Designer..." value={values.poste}
-            onChange={e => onChange({ ...values, poste: e.target.value })} className={inp} />
+            onChange={e => onChange({ ...values, poste: e.target.value })} style={ctrlBase} />
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Statut</label>
-          <select value={values.statut} onChange={e => onChange({ ...values, statut: e.target.value })} className={inp}>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Statut</label>
+          <select value={values.statut} onChange={e => onChange({ ...values, statut: e.target.value })} style={ctrlBase}>
             {STATUTS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Date</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Date</label>
           <input type="date" value={values.date_action}
-            onChange={e => onChange({ ...values, date_action: e.target.value })} className={inp} />
+            onChange={e => onChange({ ...values, date_action: e.target.value })} style={ctrlBase} />
         </div>
         <div className="sm:col-span-2">
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Lien de l'offre <span className="font-normal text-gray-300">(optionnel)</span></label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Lien de l'offre <span className="font-normal" style={{ color: 'var(--dash-section-label)' }}>(optionnel)</span></label>
           <input type="url" placeholder="https://..." value={values.url}
-            onChange={e => onChange({ ...values, url: e.target.value })} className={inp} />
+            onChange={e => onChange({ ...values, url: e.target.value })} style={ctrlBase} />
         </div>
         <div className="sm:col-span-2">
-          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Notes <span className="font-normal text-gray-300">(contact, source...)</span></label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Notes <span className="font-normal" style={{ color: 'var(--dash-section-label)' }}>(contact, source...)</span></label>
           <input type="text" placeholder="Via LinkedIn · Contact : Marie Dupont" value={values.notes}
-            onChange={e => onChange({ ...values, notes: e.target.value })} className={inp} />
+            onChange={e => onChange({ ...values, notes: e.target.value })} style={ctrlBase} />
         </div>
       </div>
-      {error && <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+      {error && <p className="text-xs px-3 py-2 rounded-lg" style={{ color: '#EF4444', background: 'rgba(239,68,68,0.1)' }}>{error}</p>}
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onCancel}
-          className="px-4 py-2 rounded-xl text-sm text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">
+          style={{ ...ctrlBase, width: 'auto', padding: '8px 16px', cursor: 'pointer' }}>
           Annuler
         </button>
         <button type="submit" disabled={submitting}
-          className="px-5 py-2 rounded-xl text-sm font-bold bg-[#3D553D] text-white hover:bg-[#2D4030] transition-colors disabled:opacity-50 active:scale-95">
+          style={{ ...ctrlBase, width: 'auto', padding: '8px 20px', background: 'rgba(61,85,61,0.85)', color: 'white', fontWeight: 700, cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
           {submitting ? 'Sauvegarde...' : title}
         </button>
       </div>
@@ -224,7 +237,7 @@ function CandidatureForm({ title, values, onChange, onSubmit, onCancel, submitti
   )
 }
 
-// ── Carte candidature (vue liste) ────────────────────────────
+// ── Carte candidature ────────────────────────────────────────
 function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEdit, onCancelEdit, onDelete, onEditChange, saving }: {
   c: Candidature; editId: string | null; editData: typeof EMPTY | null
   onStatusChange: (id: string, s: string) => void; onEdit: (c: Candidature) => void
@@ -236,8 +249,7 @@ function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEd
   const isEditing = editId === c.id
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden transition-all hover:shadow-sm"
-      style={{ borderLeftWidth: '3px', borderLeftColor: s.dot }}>
+    <div style={{ ...glass, borderLeft: `3px solid ${s.dot}`, overflow: 'hidden' }}>
       <div className="flex items-center gap-3 px-4 pt-3 pb-2">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
           style={{ backgroundColor: s.bg, color: s.color }}>
@@ -245,33 +257,39 @@ function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEd
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-gray-900">{c.entreprise}</span>
-            <span className="text-gray-300 text-xs">·</span>
-            <span className="text-sm text-gray-500">{c.poste}</span>
+            <span className="text-sm font-bold" style={{ color: 'var(--dash-header-title)' }}>{c.entreprise}</span>
+            <span style={{ color: 'var(--dash-section-label)' }} className="text-xs">·</span>
+            <span className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>{c.poste}</span>
             {relance && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 border border-orange-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(249,115,22,0.1)', color: '#EA580C', border: '1px solid rgba(249,115,22,0.3)' }}>
                 🔔 À relancer
               </span>
             )}
           </div>
           <div className="flex items-center gap-3 mt-0.5">
-            {c.notes && <p className="text-xs text-gray-400 truncate max-w-48">{c.notes}</p>}
+            {c.notes && <p className="text-xs truncate max-w-48" style={{ color: 'var(--dash-section-label)' }}>{c.notes}</p>}
             {c.url && (
               <a href={c.url} target="_blank" rel="noopener noreferrer"
-                className="text-xs text-[#5C7A5C] hover:underline shrink-0">↗ Voir l'offre</a>
+                className="text-xs hover:underline shrink-0" style={{ color: '#5C7A5C' }}>↗ Voir l'offre</a>
             )}
           </div>
         </div>
-        <span className="text-xs text-gray-400 shrink-0 hidden sm:block">{formatDate(c.date_action)}</span>
+        <span className="text-xs shrink-0 hidden sm:block" style={{ color: 'var(--dash-section-label)' }}>{formatDate(c.date_action)}</span>
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => onEdit(c)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-[#5C7A5C] hover:bg-[#E4EDE4] transition-colors">
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+            style={{ color: 'rgba(0,0,0,0.2)' }}
+            onMouseEnter={ev => { (ev.currentTarget as HTMLElement).style.color = '#5C7A5C'; (ev.currentTarget as HTMLElement).style.background = 'rgba(92,122,92,0.12)' }}
+            onMouseLeave={ev => { (ev.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.2)'; (ev.currentTarget as HTMLElement).style.background = 'transparent' }}>
             <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
           </button>
           <button onClick={() => onDelete(c.id)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors">
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+            style={{ color: 'rgba(0,0,0,0.2)' }}
+            onMouseEnter={ev => { (ev.currentTarget as HTMLElement).style.color = '#F43F5E'; (ev.currentTarget as HTMLElement).style.background = 'rgba(244,63,94,0.1)' }}
+            onMouseLeave={ev => { (ev.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.2)'; (ev.currentTarget as HTMLElement).style.background = 'transparent' }}>
             <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
@@ -280,7 +298,7 @@ function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEd
       </div>
       <StatusStepper id={c.id} statut={c.statut} onChange={onStatusChange} />
       {isEditing && editData && (
-        <div className="border-t border-[#F3F4F6] px-4 py-4 bg-[#FAFAFA]">
+        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.15)' }}>
           <CandidatureForm title="Sauvegarder" values={editData} onChange={onEditChange}
             onSubmit={onSaveEdit} onCancel={onCancelEdit} submitting={saving} error="" />
         </div>
@@ -289,7 +307,7 @@ function CandidatureCard({ c, editId, editData, onStatusChange, onEdit, onSaveEd
   )
 }
 
-// ── Cellule éditable (tableau) ───────────────────────────────
+// ── Cellule éditable ─────────────────────────────────────────
 function EditableCell({ id, col, value, editCell, editVal, onStart, onChange, onCommit, onKeyDown, renderView, nullable = false }: {
   id: string; col: string; value: string
   editCell: { id: string; col: string } | null; editVal: string
@@ -306,12 +324,12 @@ function EditableCell({ id, col, value, editCell, editVal, onStart, onChange, on
           onChange={e => onChange(e.target.value)}
           onBlur={onCommit} onKeyDown={onKeyDown}
           placeholder={nullable ? '—' : ''}
-          className="w-full text-sm rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white my-1.5" />
+          style={{ ...ctrlBase, padding: '6px 8px', fontSize: '12px', borderRadius: '8px', marginTop: '6px', marginBottom: '6px' }} />
       ) : (
         <div className="py-3 flex items-center gap-1.5">
           {renderView()}
           <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            className="shrink-0 opacity-0 group-hover/cell:opacity-40 transition-opacity text-gray-400">
+            className="shrink-0 opacity-0 group-hover/cell:opacity-40 transition-opacity" style={{ color: 'var(--dash-section-label)' }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
           </svg>
         </div>
@@ -399,19 +417,19 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
 
   const sortTh = (col: string, label: string, className = '') => (
     <th onClick={() => toggleSort(col)}
-      className={`px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest cursor-pointer select-none whitespace-nowrap transition-colors ${sortCol === col ? 'text-[#3D553D]' : 'text-gray-400 hover:text-gray-600'} ${className}`}>
+      className={`px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest cursor-pointer select-none whitespace-nowrap transition-colors ${className}`}
+      style={{ color: sortCol === col ? '#3D553D' : 'var(--dash-section-label)' }}>
       <span className="flex items-center gap-1">
         {label}
-        <span className={sortCol === col ? 'text-[#5C7A5C]' : 'invisible'}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+        <span style={{ color: '#5C7A5C', visibility: sortCol === col ? 'visible' : 'hidden' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>
       </span>
     </th>
   )
 
   return (
     <div className="flex flex-col gap-3">
-
       {/* Filtres */}
-      <div className="bg-white rounded-2xl border border-[#C8D8C8] p-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
+      <div style={{ ...glass, padding: '12px' }} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
         <div className="flex gap-1 flex-wrap">
           {[
             { key: 'toutes',     label: `Tout (${cands.length})` },
@@ -426,7 +444,7 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
               <button key={key} onClick={() => setFilter(key)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                 style={filter === key
-                  ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                  ? { backgroundColor: opt?.bg || 'rgba(92,122,92,0.12)', color: opt?.color || '#3D553D' }
                   : { color: '#9CA3AF' }}>
                 {label}
               </button>
@@ -436,43 +454,48 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
         <div className="flex items-center gap-2 sm:ml-auto">
           {relanceCount > 0 && (
             <button onClick={() => setOnlyRelance(v => !v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${onlyRelance ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:text-orange-500'}`}>
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+              style={onlyRelance
+                ? { background: 'rgba(249,115,22,0.15)', color: '#EA580C' }
+                : { color: '#9CA3AF' }}>
               🔔 À relancer ({relanceCount})
             </button>
           )}
           <input type="text" placeholder="Rechercher..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-[#C8D8C8] text-xs outline-none focus:border-[#5C7A5C] w-44 bg-white" />
+            style={{ ...ctrlBase, width: '176px', padding: '6px 12px', fontSize: '12px' }} />
         </div>
       </div>
 
       {/* Tableau */}
-      <div className="bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
-
-        {/* Barre actions groupées */}
+      <div style={{ ...glass, overflow: 'hidden' }}>
         {selected.size > 0 && (
-          <div className="flex items-center gap-3 px-5 py-3 bg-[#3D553D]">
+          <div className="flex items-center gap-3 px-5 py-3"
+            style={{ background: 'linear-gradient(135deg, #1a3a1a, #0f2a0f)' }}>
             <span className="text-sm font-semibold text-white shrink-0">
               {selected.size} sélectionnée{selected.size > 1 ? 's' : ''}
             </span>
             <div className="flex items-center gap-2 ml-auto flex-wrap">
               <select value={bulkStatut} onChange={e => setBulkStatut(e.target.value)}
-                className="text-xs rounded-lg px-2 py-1.5 outline-none bg-white/15 text-white border border-white/20">
+                className="text-xs rounded-lg px-2 py-1.5 outline-none"
+                style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
                 <option value="">Changer le statut...</option>
                 {STATUTS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
               {bulkStatut && (
                 <button onClick={applyBulkStatut}
-                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                  className="text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.2)' }}>
                   Appliquer
                 </button>
               )}
               <button onClick={deleteSelected}
-                className="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                className="text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                style={{ background: 'rgba(244,63,94,0.7)' }}>
                 Supprimer tout
               </button>
               <button onClick={() => setSelected(new Set())}
-                className="text-white/50 hover:text-white text-xl leading-none transition-colors">×</button>
+                className="text-xl leading-none transition-colors" style={{ color: 'rgba(255,255,255,0.5)' }}>×</button>
             </div>
           </div>
         )}
@@ -480,45 +503,47 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse" style={{ minWidth: '720px' }}>
             <thead>
-              <tr className="bg-[#F8FAF8] border-b border-[#E5E7EB]">
+              <tr style={{ background: 'rgba(0,0,0,0.04)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                 <th className="pl-5 pr-3 py-3 w-9">
                   <input type="checkbox" checked={allSelected} onChange={toggleAll}
                     className="w-3.5 h-3.5 rounded accent-[#5C7A5C] cursor-pointer" />
                 </th>
-                <th className="px-2 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-300 text-right w-8">#</th>
+                <th className="px-2 py-3 text-[10px] font-bold uppercase tracking-widest text-right w-8"
+                  style={{ color: 'var(--dash-section-label)' }}>#</th>
                 {sortTh('entreprise', 'Entreprise')}
                 {sortTh('poste', 'Poste')}
                 {sortTh('statut', 'Statut', 'w-36')}
                 {sortTh('date_action', 'Date', 'w-28')}
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-20">Lien</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Notes</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest w-20" style={{ color: 'var(--dash-section-label)' }}>Lien</th>
                 <th className="px-3 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((c, i) => {
-                const s           = getS(c.statut)
-                const relance     = isRelance(c)
-                const isSelected  = selected.has(c.id)
+                const s             = getS(c.statut)
+                const relance       = isRelance(c)
+                const isSelected    = selected.has(c.id)
                 const editingStatut = editCell?.id === c.id && editCell?.col === 'statut'
                 const editingDate   = editCell?.id === c.id && editCell?.col === 'date_action'
                 const editingUrl    = editCell?.id === c.id && editCell?.col === 'url'
 
                 return (
-                  <tr key={c.id}
-                    className={`border-b border-[#F3F4F6] transition-colors group ${isSelected ? 'bg-[#F0FDF4]' : 'hover:bg-[#FAFAFA]'}`}
-                    style={{ borderLeft: `3px solid ${s.dot}` }}>
+                  <tr key={c.id} className="group transition-colors"
+                    style={{
+                      borderBottom: '1px solid rgba(0,0,0,0.04)',
+                      borderLeft: `3px solid ${s.dot}`,
+                      background: isSelected ? 'rgba(34,197,94,0.07)' : 'transparent',
+                    }}
+                    onMouseEnter={ev => { if (!isSelected) (ev.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)' }}
+                    onMouseLeave={ev => { if (!isSelected) (ev.currentTarget as HTMLElement).style.background = 'transparent' }}>
 
-                    {/* Checkbox */}
                     <td className="pl-5 pr-3 py-3">
                       <input type="checkbox" checked={isSelected} onChange={() => toggleOne(c.id)}
                         className="w-3.5 h-3.5 rounded accent-[#5C7A5C] cursor-pointer" />
                     </td>
+                    <td className="px-2 py-3 text-xs font-mono text-right" style={{ color: 'var(--dash-section-label)' }}>{i + 1}</td>
 
-                    {/* # */}
-                    <td className="px-2 py-3 text-xs text-gray-300 font-mono text-right">{i + 1}</td>
-
-                    {/* Entreprise */}
                     <EditableCell id={c.id} col="entreprise" value={c.entreprise}
                       editCell={editCell} editVal={editVal}
                       onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
@@ -528,23 +553,21 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
                             style={{ backgroundColor: s.bg, color: s.color }}>
                             {c.entreprise[0]?.toUpperCase()}
                           </div>
-                          <span className="text-sm font-bold text-gray-900 truncate">{c.entreprise}</span>
+                          <span className="text-sm font-bold truncate" style={{ color: 'var(--dash-header-title)' }}>{c.entreprise}</span>
                         </div>
                       )} />
 
-                    {/* Poste */}
                     <EditableCell id={c.id} col="poste" value={c.poste}
                       editCell={editCell} editVal={editVal}
                       onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
-                      renderView={() => <span className="text-sm text-gray-600 truncate block max-w-44">{c.poste}</span>} />
+                      renderView={() => <span className="text-sm truncate block max-w-44" style={{ color: 'var(--dash-header-sub)' }}>{c.poste}</span>} />
 
-                    {/* Statut */}
                     <td className="px-4 py-3">
                       {editingStatut ? (
                         <select autoFocus value={editVal}
                           onChange={e => setEditVal(e.target.value)}
                           onBlur={commitEdit}
-                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white w-full">
+                          style={{ ...ctrlBase, padding: '6px 8px', fontSize: '12px', borderRadius: '8px' }}>
                           {STATUTS.map(st => <option key={st.key} value={st.key}>{st.label}</option>)}
                         </select>
                       ) : (
@@ -559,16 +582,16 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
                       )}
                     </td>
 
-                    {/* Date */}
                     <td className="px-4 py-3">
                       {editingDate ? (
                         <input autoFocus type="date" value={editVal}
                           onChange={e => setEditVal(e.target.value)}
                           onBlur={commitEdit} onKeyDown={handleKeyDown}
-                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white" />
+                          style={{ ...ctrlBase, padding: '6px 8px', fontSize: '12px', borderRadius: '8px', width: 'auto' }} />
                       ) : (
                         <button onClick={() => startEdit(c.id, 'date_action', c.date_action)}
-                          className="text-xs text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap text-left group/date flex items-center gap-1">
+                          className="text-xs transition-colors whitespace-nowrap text-left group/date flex items-center gap-1"
+                          style={{ color: 'var(--dash-header-sub)' }}>
                           {formatDate(c.date_action)}
                           <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             className="opacity-0 group-hover/date:opacity-40 transition-opacity">
@@ -578,40 +601,41 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
                       )}
                     </td>
 
-                    {/* Notes */}
                     <EditableCell id={c.id} col="notes" value={c.notes || ''}
                       editCell={editCell} editVal={editVal}
                       onStart={startEdit} onChange={setEditVal} onCommit={commitEdit} onKeyDown={handleKeyDown}
                       renderView={() => c.notes
-                        ? <span className="text-xs text-gray-500 truncate block max-w-52">{c.notes}</span>
-                        : <span className="text-xs text-gray-300 italic">ajouter une note...</span>}
+                        ? <span className="text-xs truncate block max-w-52" style={{ color: 'var(--dash-header-sub)' }}>{c.notes}</span>
+                        : <span className="text-xs italic" style={{ color: 'var(--dash-section-label)' }}>ajouter une note...</span>}
                       nullable />
 
-                    {/* Lien */}
                     <td className="px-4 py-3">
                       {editingUrl ? (
                         <input autoFocus type="url" placeholder="https://..." value={editVal}
                           onChange={e => setEditVal(e.target.value)}
                           onBlur={commitEdit} onKeyDown={handleKeyDown}
-                          className="text-xs rounded-lg border border-[#5C7A5C] outline-none px-2 py-1.5 bg-white w-36" />
+                          style={{ ...ctrlBase, padding: '6px 8px', fontSize: '12px', borderRadius: '8px', width: '144px' }} />
                       ) : c.url ? (
                         <div className="flex items-center gap-1.5">
                           <a href={c.url} target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="text-xs text-[#5C7A5C] hover:underline font-medium">↗ Voir</a>
+                            className="text-xs font-medium hover:underline" style={{ color: '#5C7A5C' }}>↗ Voir</a>
                           <button onClick={() => startEdit(c.id, 'url', c.url || '')}
-                            className="text-[10px] text-gray-300 hover:text-gray-500 transition-colors">✎</button>
+                            className="text-[10px] transition-colors" style={{ color: 'var(--dash-section-label)' }}>✎</button>
                         </div>
                       ) : (
                         <button onClick={() => startEdit(c.id, 'url', '')}
-                          className="text-xs text-gray-300 hover:text-[#5C7A5C] transition-colors font-medium">+ lien</button>
+                          className="text-xs font-medium transition-colors"
+                          style={{ color: 'var(--dash-section-label)' }}>+ lien</button>
                       )}
                     </td>
 
-                    {/* Supprimer */}
                     <td className="px-3 py-3">
                       <button onClick={() => onDelete(c.id)}
-                        className="w-6 h-6 rounded-md flex items-center justify-center text-gray-200 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
+                        className="w-6 h-6 rounded-md flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                        style={{ color: 'rgba(0,0,0,0.15)' }}
+                        onMouseEnter={ev => { (ev.currentTarget as HTMLElement).style.color = '#F43F5E'; (ev.currentTarget as HTMLElement).style.background = 'rgba(244,63,94,0.1)' }}
+                        onMouseLeave={ev => { (ev.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.15)'; (ev.currentTarget as HTMLElement).style.background = 'transparent' }}>
                         <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
@@ -622,14 +646,13 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
               })}
             </tbody>
 
-            {/* Pied de tableau */}
             {filtered.length > 0 && (
               <tfoot>
-                <tr className="bg-[#F8FAF8] border-t-2 border-[#E5E7EB]">
-                  <td colSpan={4} className="px-5 py-3 text-xs font-bold text-gray-500">
+                <tr style={{ background: 'rgba(0,0,0,0.04)', borderTop: '2px solid rgba(0,0,0,0.08)' }}>
+                  <td colSpan={4} className="px-5 py-3 text-xs font-bold" style={{ color: 'var(--dash-header-sub)' }}>
                     {filtered.length} candidature{filtered.length > 1 ? 's' : ''}
                     {filtered.length !== cands.length && (
-                      <span className="text-gray-300 font-normal"> sur {cands.length}</span>
+                      <span style={{ color: 'var(--dash-section-label)', fontWeight: 400 }}> sur {cands.length}</span>
                     )}
                   </td>
                   <td colSpan={5} className="px-4 py-3">
@@ -653,7 +676,7 @@ function TableauView({ cands, onFieldUpdate, onDelete }: {
 
           {filtered.length === 0 && (
             <div className="py-14 text-center">
-              <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
+              <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Aucune candidature pour ce filtre.</p>
             </div>
           )}
         </div>
@@ -761,93 +784,97 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
   }
 
   return (
-    <div className="min-h-screen bg-[#D6E6D6]">
+    <div className="h-screen overflow-y-auto relative" id="dashboard-scroll" style={{ background: 'var(--dash-bg)' }}>
+      <ParallaxOrbs />
 
       {/* Navbar */}
-      <div className="bg-white border-b border-[#C8D8C8]">
+      <div className="sticky top-0 z-20"
+        style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}>
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/profil"
-              className="flex items-center gap-2 bg-[#E4EDE4] hover:bg-[#D6E6D6] text-[#3D553D] px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+              style={{ background: 'rgba(92,122,92,0.15)', color: '#3D553D' }}>
               <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
               </svg>
               Mon profil
             </Link>
-            <div className="flex items-center gap-2 hidden sm:flex">
-              <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
-              <span className="font-semibold text-gray-900 text-sm">Studi</span>
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #22C55E, #8B5CF6)' }}></div>
+              <span className="font-semibold text-sm" style={{ color: 'var(--dash-header-title)' }}>Studi</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <div className="flex p-0.5 rounded-lg" style={{ background: 'rgba(0,0,0,0.08)' }}>
               {(['liste', 'tableau'] as const).map(v => (
                 <button key={v} onClick={() => setView(v)}
                   className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all capitalize"
                   style={view === v
-                    ? { backgroundColor: 'white', color: '#3D553D', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                    ? { backgroundColor: 'rgba(255,255,255,0.85)', color: '#3D553D', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
                     : { color: '#9CA3AF' }}>
                   {v === 'liste' ? 'Liste' : 'Tableau'}
                 </button>
               ))}
             </div>
             <button onClick={() => { setShowForm(true); setAddError('') }}
-              className="flex items-center gap-1.5 bg-[#3D553D] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#2D4030] transition-colors active:scale-95">
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold active:scale-95 transition-all"
+              style={{ background: 'linear-gradient(135deg, #3D553D, #2D4030)', color: 'white' }}>
               <span className="text-lg leading-none">+</span> Nouvelle
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col gap-4">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-6 flex flex-col gap-4">
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'Total',        value: stats.total,             color: '#3D553D', bg: '#E4EDE4' },
-            { label: 'Taux réponse', value: `${stats.tauxReponse}%`, color: '#1D4ED8', bg: '#EFF6FF' },
-            { label: 'Entretiens',   value: stats.entretien,         color: '#1D4ED8', bg: '#EFF6FF' },
+            { label: 'Total',        value: stats.total,             color: '#3D553D' },
+            { label: 'Taux réponse', value: `${stats.tauxReponse}%`, color: '#1D4ED8' },
+            { label: 'Entretiens',   value: stats.entretien,         color: '#1D4ED8' },
             { label: stats.relances > 0 ? `À relancer (${stats.relances})` : 'Acceptées',
               value: stats.relances > 0 ? stats.relances : stats.accepte,
-              color: stats.relances > 0 ? '#C2410C' : '#15803D',
-              bg:    stats.relances > 0 ? '#FFF7ED' : '#F0FDF4' },
+              color: stats.relances > 0 ? '#C2410C' : '#15803D' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="bg-white rounded-2xl border border-[#C8D8C8] p-5">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{label}</p>
+            <div key={label} style={{ ...glass, padding: '20px' }}>
+              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--dash-section-label)' }}>{label}</p>
               <p className="text-3xl font-black tracking-tight" style={{ color }}>{value}</p>
             </div>
           ))}
         </div>
 
         {/* Niveau + objectif */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] p-5 flex flex-col sm:flex-row gap-5">
+        <div style={{ ...glass, padding: '20px' }} className="flex flex-col sm:flex-row gap-5">
           <div className="flex items-center gap-4 flex-1">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ backgroundColor: level.bg }}>
               {level.emoji}
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-gray-500">Niveau {level.label}</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--dash-header-sub)' }}>Niveau {level.label}</span>
                 {level.next && <span className="text-xs" style={{ color: level.color }}>{stats.total}/{level.next}</span>}
               </div>
-              <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${levelPct}%`, backgroundColor: level.color }}></div>
               </div>
-              {level.next && <p className="text-[10px] text-gray-400 mt-1">{level.next - stats.total} avant le niveau suivant</p>}
+              {level.next && <p className="text-[10px] mt-1" style={{ color: 'var(--dash-section-label)' }}>{level.next - stats.total} avant le niveau suivant</p>}
             </div>
           </div>
-          <div className="w-px bg-[#F3F4F6] hidden sm:block"></div>
+          <div className="w-px hidden sm:block" style={{ background: 'rgba(0,0,0,0.06)' }}></div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-gray-500">Objectif semaine</span>
+              <span className="text-xs font-semibold" style={{ color: 'var(--dash-header-sub)' }}>Objectif semaine</span>
               <span className="text-xs font-bold" style={{ color: objectifPct >= 100 ? '#16A34A' : '#5C7A5C' }}>
                 {stats.total}/{objectif} {objectifPct >= 100 ? '✓' : ''}
               </span>
             </div>
-            <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${objectifPct}%`, backgroundColor: objectifPct >= 100 ? '#16A34A' : '#5C7A5C' }}></div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
+              <div className="h-full rounded-full transition-all"
+                style={{ width: `${objectifPct}%`, background: objectifPct >= 100 ? 'linear-gradient(90deg, #16A34A, #22C55E)' : 'linear-gradient(90deg, #5C7A5C, #22C55E)' }}></div>
             </div>
-            {objectifPct >= 100 && <p className="text-[10px] text-green-600 font-semibold mt-1">Objectif atteint !</p>}
+            {objectifPct >= 100 && <p className="text-[10px] font-semibold mt-1 text-green-600">Objectif atteint !</p>}
           </div>
         </div>
 
@@ -856,10 +883,10 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
 
         {/* Formulaire ajout */}
         {showForm && (
-          <div className="bg-white rounded-2xl border-2 border-[#5C7A5C] p-6">
+          <div style={{ ...glass, padding: '24px', borderLeft: '3px solid #5C7A5C' }}>
             <div className="flex items-center justify-between mb-5">
-              <p className="text-sm font-bold text-gray-900">Nouvelle candidature</p>
-              <button onClick={() => setShowForm(false)} className="text-gray-300 hover:text-gray-500 text-xl">×</button>
+              <p className="text-sm font-bold" style={{ color: 'var(--dash-header-title)' }}>Nouvelle candidature</p>
+              <button onClick={() => setShowForm(false)} className="text-xl" style={{ color: 'var(--dash-section-label)' }}>×</button>
             </div>
             <CandidatureForm title="+ Ajouter" values={form} onChange={setForm}
               onSubmit={handleAdd} onCancel={() => setShowForm(false)} submitting={adding} error={addError} />
@@ -869,7 +896,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
         {/* Filtres liste */}
         {view === 'liste' && (
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex gap-1 bg-white border border-[#C8D8C8] rounded-xl p-1 flex-wrap">
+            <div className="flex gap-1 p-1 rounded-xl flex-wrap" style={{ ...glass }}>
               {[
                 { key: 'toutes',     label: `Toutes (${stats.total})` },
                 { key: 'envoye',     label: `Envoyées (${stats.envoye})` },
@@ -883,7 +910,7 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
                   <button key={key} onClick={() => setFilter(key)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                     style={filter === key
-                      ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                      ? { backgroundColor: opt?.bg || 'rgba(92,122,92,0.12)', color: opt?.color || '#3D553D' }
                       : { color: '#9CA3AF' }}>
                     {label}
                   </button>
@@ -892,26 +919,27 @@ export default function CandidaturesClient({ initial, objectif }: { initial: Can
             </div>
             <input type="text" placeholder="Rechercher..." value={search}
               onChange={e => setSearch(e.target.value)}
-              className="flex-1 px-4 py-2 rounded-xl border border-[#C8D8C8] bg-white text-sm outline-none focus:border-[#5C7A5C]" />
+              style={{ ...ctrlBase, flex: 1, padding: '8px 16px' }} />
           </div>
         )}
 
         {/* Contenu */}
         {cands.length === 0 ? (
-          <div className="bg-white rounded-2xl border-2 border-dashed border-[#C8D8C8] p-16 text-center cursor-pointer hover:border-[#5C7A5C] transition-colors"
+          <div style={{ ...glass, padding: '64px', textAlign: 'center', borderStyle: 'dashed', cursor: 'pointer' }}
             onClick={() => { setShowForm(true); setAddError('') }}>
             <p className="text-5xl mb-4">📋</p>
-            <p className="text-base font-bold text-gray-800 mb-1">Commence à tracker tes candidatures</p>
-            <p className="text-sm text-gray-400 mb-5">Chaque candidature te rapproche de ton objectif</p>
-            <div className="inline-flex items-center gap-2 bg-[#3D553D] text-white px-5 py-2.5 rounded-xl text-sm font-semibold">
+            <p className="text-base font-bold mb-1" style={{ color: 'var(--dash-header-title)' }}>Commence à tracker tes candidatures</p>
+            <p className="text-sm mb-5" style={{ color: 'var(--dash-header-sub)' }}>Chaque candidature te rapproche de ton objectif</p>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+              style={{ background: 'linear-gradient(135deg, #3D553D, #2D4030)' }}>
               + Ajouter ma première candidature
             </div>
           </div>
         ) : view === 'tableau' ? (
           <TableauView cands={cands} onFieldUpdate={handleFieldUpdate} onDelete={handleDelete} />
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-10 text-center">
-            <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
+          <div style={{ ...glass, padding: '40px', textAlign: 'center' }}>
+            <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Aucune candidature pour ce filtre.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">

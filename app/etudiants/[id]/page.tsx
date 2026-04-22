@@ -5,13 +5,14 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabase'
 import { updateEtudiant, getCandidaturesForEtudiant } from './actions'
+import ParallaxOrbs from '../../components/ParallaxOrbs'
 
 const CAND_STATUTS = [
-  { key: 'envoye',     label: 'Envoyée',    color: '#3D553D', bg: '#E4EDE4', dot: '#5C7A5C' },
-  { key: 'en_attente', label: 'En attente', color: '#C2410C', bg: '#FFF7ED', dot: '#F97316' },
-  { key: 'entretien',  label: 'Entretien',  color: '#1D4ED8', bg: '#EFF6FF', dot: '#3B82F6' },
-  { key: 'refus',      label: 'Refus',      color: '#9F1239', bg: '#FFF1F2', dot: '#F43F5E' },
-  { key: 'accepte',    label: 'Acceptée',   color: '#15803D', bg: '#F0FDF4', dot: '#16A34A' },
+  { key: 'envoye',     label: 'Envoyée',    color: '#3D553D', bg: 'rgba(92,122,92,0.12)',   dot: '#5C7A5C'  },
+  { key: 'en_attente', label: 'En attente', color: '#C2410C', bg: 'rgba(249,115,22,0.12)',  dot: '#F97316'  },
+  { key: 'entretien',  label: 'Entretien',  color: '#1D4ED8', bg: 'rgba(59,130,246,0.12)',  dot: '#3B82F6'  },
+  { key: 'refus',      label: 'Refus',      color: '#9F1239', bg: 'rgba(244,63,94,0.12)',   dot: '#F43F5E'  },
+  { key: 'accepte',    label: 'Acceptée',   color: '#15803D', bg: 'rgba(34,197,94,0.12)',   dot: '#16A34A'  },
 ]
 const MOIS_GRAPH = [
   { key: '2026-04', label: 'Avr' },
@@ -35,15 +36,37 @@ function fmtDate(str: string) {
 }
 
 const statutConfig: Record<string, { label: string; dot: string; text: string; bg: string; border: string }> = {
-  en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB' },
-  en_recherche:   { label: 'En recherche',   dot: '#5C7A5C', text: '#3D553D', bg: '#E4EDE4', border: '#5C7A5C' },
-  place:          { label: 'Placé',           dot: '#16A34A', text: '#15803D', bg: '#F0FDF4', border: '#16A34A' },
+  en_preparation: { label: 'En préparation', dot: '#9CA3AF', text: '#6B7280', bg: 'rgba(156,163,175,0.1)', border: '#E5E7EB' },
+  en_recherche:   { label: 'En recherche',   dot: '#5C7A5C', text: '#3D553D', bg: 'rgba(92,122,92,0.12)',  border: '#5C7A5C' },
+  place:          { label: 'Placé',           dot: '#16A34A', text: '#15803D', bg: 'rgba(34,197,94,0.12)',  border: '#16A34A' },
 }
 
 const docConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  depose:          { label: 'Déposé',          color: '#15803D', bg: '#F0FDF4', dot: '#16A34A' },
-  a_mettre_a_jour: { label: 'À mettre à jour', color: '#C2410C', bg: '#FFF7ED', dot: '#F97316' },
-  a_deposer:       { label: 'Non déposé',       color: '#9CA3AF', bg: '#F3F4F6', dot: '#D1D5DB' },
+  depose:          { label: 'Déposé',          color: '#15803D', bg: 'rgba(34,197,94,0.12)',  dot: '#16A34A' },
+  a_mettre_a_jour: { label: 'À mettre à jour', color: '#C2410C', bg: 'rgba(249,115,22,0.12)', dot: '#F97316' },
+  a_deposer:       { label: 'Non déposé',       color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', dot: '#D1D5DB' },
+}
+
+const glass = {
+  background: 'linear-gradient(145deg, var(--dash-card-from) 0%, var(--dash-card-to) 100%)',
+  backdropFilter: 'blur(60px)',
+  WebkitBackdropFilter: 'blur(60px)',
+  border: '1px solid var(--dash-card-border)',
+  borderRadius: '20px',
+  boxShadow: 'inset 0 1px 0 var(--dash-card-inset)',
+} as const
+
+const ctrl: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.7)',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255,255,255,0.9)',
+  color: '#111827',
+  borderRadius: '12px',
+  padding: '8px 12px',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
 }
 
 export default function EtudiantDetail() {
@@ -108,13 +131,13 @@ export default function EtudiantDetail() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center">
-      <p className="text-sm text-gray-400">Chargement...</p>
+    <div className="h-screen flex items-center justify-center" style={{ background: 'var(--dash-bg)' }}>
+      <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Chargement...</p>
     </div>
   )
   if (!etudiant) return (
-    <div className="min-h-screen bg-[#D6E6D6] flex items-center justify-center">
-      <p className="text-sm text-gray-400">Étudiant introuvable.</p>
+    <div className="h-screen flex items-center justify-center" style={{ background: 'var(--dash-bg)' }}>
+      <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Étudiant introuvable.</p>
     </div>
   )
 
@@ -135,49 +158,47 @@ export default function EtudiantDetail() {
   const objectif = etudiant.objectif_candidatures ?? 5
   const objectifPct = Math.min(Math.round((nbCandidatures / objectif) * 100), 100)
   const urgence = etudiant.statut === 'en_recherche' && nbCandidatures === 0
-  const inputCls = "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 outline-none focus:border-[#5C7A5C] transition-colors bg-white"
-  const labelCls = "text-xs font-medium text-gray-500 mb-1.5 block"
 
-  const prochainEntretien = etudiant.prochain_entretien
-    ? new Date(etudiant.prochain_entretien)
-    : null
+  const prochainEntretien = etudiant.prochain_entretien ? new Date(etudiant.prochain_entretien) : null
   const today = new Date(); today.setHours(0,0,0,0)
   const entretienDemain = prochainEntretien
     ? Math.ceil((prochainEntretien.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     : null
 
   return (
-    <div className="min-h-screen bg-[#D6E6D6]">
+    <div className="h-screen overflow-y-auto relative" id="dashboard-scroll" style={{ background: 'var(--dash-bg)' }}>
+      <ParallaxOrbs />
 
       {/* Navbar */}
-      <div className="bg-white border-b border-[#C8D8C8]">
+      <div className="sticky top-0 z-20"
+        style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}>
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">← Dashboard</Link>
-            <span className="text-gray-200">|</span>
+            <Link href="/" className="text-xs transition-colors" style={{ color: 'var(--dash-header-sub)' }}
+              onMouseEnter={ev => (ev.currentTarget as HTMLElement).style.color = 'var(--dash-header-title)'}
+              onMouseLeave={ev => (ev.currentTarget as HTMLElement).style.color = 'var(--dash-header-sub)'}>
+              ← Dashboard
+            </Link>
+            <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#5C7A5C]"></div>
-              <span className="font-semibold text-gray-900 text-sm tracking-tight">Studi</span>
+              <div className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #22C55E, #8B5CF6)' }}></div>
+              <span className="font-semibold text-sm tracking-tight" style={{ color: 'var(--dash-header-title)' }}>Studi</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {saved && (
-              <span className="text-xs text-[#5C7A5C] font-medium bg-[#E4EDE4] px-3 py-1 rounded-full">
+              <span className="text-xs font-medium px-3 py-1 rounded-full" style={{ background: 'rgba(34,197,94,0.15)', color: '#15803D' }}>
                 Sauvegardé
               </span>
             )}
             {!editing ? (
-              <button
-                onClick={() => setEditing(true)}
-                className="bg-[#5C7A5C] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#4A6A4A] transition-colors"
-              >
+              <button onClick={() => setEditing(true)}
+                style={{ ...ctrl, width: 'auto', padding: '6px 16px', fontWeight: 600, cursor: 'pointer', fontSize: '12px' }}>
                 Modifier la fiche
               </button>
             ) : (
-              <button
-                onClick={() => setEditing(false)}
-                className="px-4 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={() => setEditing(false)}
+                style={{ ...ctrl, width: 'auto', padding: '6px 16px', cursor: 'pointer', fontSize: '12px' }}>
                 Annuler
               </button>
             )}
@@ -185,156 +206,142 @@ export default function EtudiantDetail() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-4">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8 flex flex-col gap-4">
 
-        {/* ── HERO ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
+        {/* HERO */}
+        <div style={{ ...glass, overflow: 'hidden' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5">
 
-          {/* Gauche */}
-          <div className="lg:col-span-2 bg-[#3D553D] p-8 flex flex-col gap-5">
-            <div>
-              <div className="w-14 h-14 rounded-2xl bg-[#D6E6D6] flex items-center justify-center text-xl font-bold text-[#3D553D] mb-4">
-                {etudiant.prenom[0]}{etudiant.nom[0]}
-              </div>
-              <h1 className="text-white font-bold text-2xl tracking-tight">{etudiant.prenom} {etudiant.nom}</h1>
-              <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{etudiant.email}</p>
-              <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                {etudiant.niveau} · {etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial'}
-              </p>
-
-              <div className="flex items-center gap-2 mt-3">
-                <div
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
-                >
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.label}</span>
+            {/* Gauche */}
+            <div className="lg:col-span-2 p-8 flex flex-col gap-5"
+              style={{ background: 'linear-gradient(180deg, #1a3a1a 0%, #0f2a0f 100%)' }}>
+              <div>
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold mb-4"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.9)' }}>
+                  {etudiant.prenom[0]}{etudiant.nom[0]}
                 </div>
-                {urgence && (
-                  <div
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                    style={{ backgroundColor: 'rgba(239,68,68,0.2)' }}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                    <span className="text-xs font-medium text-red-300">À relancer</span>
+                <h1 className="text-white font-bold text-2xl tracking-tight">{etudiant.prenom} {etudiant.nom}</h1>
+                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{etudiant.email}</p>
+                <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {etudiant.niveau} · {etudiant.type_formation === 'alternance' ? 'Alternance' : 'Initial'}
+                </p>
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></div>
+                    <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.label}</span>
+                  </div>
+                  {urgence && (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(239,68,68,0.2)' }}>
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                      <span className="text-xs font-medium text-red-300">À relancer</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>PROGRESSION</span>
+                  <span className="text-sm font-bold text-white">{progression}%</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${progression}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}></div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }} className="flex flex-col gap-2">
+                {etudiant.telephone && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Tél.</span>
+                    <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{etudiant.telephone}</span>
+                  </div>
+                )}
+                {etudiant.linkedin && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>LinkedIn</span>
+                    <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Voir le profil →</a>
+                  </div>
+                )}
+                {etudiant.age && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Âge</span>
+                    <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{etudiant.age} ans</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Progression */}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>PROGRESSION</span>
-                <span className="text-sm font-bold text-white">{progression}%</span>
-              </div>
-              <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                <div className="h-full rounded-full" style={{ width: `${progression}%`, backgroundColor: 'rgba(255,255,255,0.6)' }}></div>
-              </div>
-            </div>
-
-            {/* Contact */}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }} className="flex flex-col gap-2">
-              {etudiant.telephone && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Tél.</span>
-                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{etudiant.telephone}</span>
-                </div>
-              )}
-              {etudiant.linkedin && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>LinkedIn</span>
-                  <a href={etudiant.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    Voir le profil →
-                  </a>
-                </div>
-              )}
-              {etudiant.age && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Âge</span>
-                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{etudiant.age} ans</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Droite — stats */}
-          <div className="lg:col-span-3 p-8 flex flex-col gap-6">
-
-            {/* Prochain entretien mis en avant */}
-            {prochainEntretien && (
-              <div
-                className="rounded-xl p-4 flex items-center gap-4"
-                style={{ backgroundColor: entretienDemain !== null && entretienDemain <= 2 ? '#FFF7ED' : '#F0F7FF', border: `1px solid ${entretienDemain !== null && entretienDemain <= 2 ? '#FED7AA' : '#BFDBFE'}` }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0"
-                  style={{ backgroundColor: entretienDemain !== null && entretienDemain <= 2 ? '#F97316' : '#3B82F6' }}
-                >
-                  <span className="text-white text-xs font-bold leading-none">{prochainEntretien.getDate()}</span>
-                  <span className="text-white text-[9px] leading-none mt-0.5 uppercase">
-                    {prochainEntretien.toLocaleDateString('fr-FR', { month: 'short' })}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: entretienDemain !== null && entretienDemain <= 2 ? '#C2410C' : '#1D4ED8' }}>
-                    Prochain entretien
-                  </p>
-                  <p className="text-xs" style={{ color: entretienDemain !== null && entretienDemain <= 2 ? '#EA580C' : '#3B82F6' }}>
-                    {entretienDemain === 0 ? "Aujourd'hui !" : entretienDemain === 1 ? 'Demain' : `Dans ${entretienDemain} jours`}
-                    {' · '}{prochainEntretien.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Stats candidatures */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Candidatures</p>
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                {[
-                  { label: 'Envoyées',    value: nbCandidatures,                        color: '#3D553D' },
-                  { label: 'Entretiens',  value: etudiant.nb_entretiens ?? 0,            color: '#1D4ED8' },
-                  { label: 'Entreprises', value: etudiant.nb_entreprises ?? 0,           color: '#6D28D9' },
-                ].map(({ label, value, color }) => (
-                  <div key={label}>
-                    <p className="text-4xl font-bold tracking-tight" style={{ color }}>{value}</p>
-                    <p className="text-xs font-semibold text-gray-500 mt-1">{label}</p>
+            {/* Droite */}
+            <div className="lg:col-span-3 p-8 flex flex-col gap-6">
+              {prochainEntretien && (
+                <div className="rounded-xl p-4 flex items-center gap-4"
+                  style={{ backgroundColor: entretienDemain !== null && entretienDemain <= 2 ? 'rgba(249,115,22,0.1)' : 'rgba(59,130,246,0.1)', border: `1px solid ${entretienDemain !== null && entretienDemain <= 2 ? '#FED7AA' : '#BFDBFE'}` }}>
+                  <div className="w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0"
+                    style={{ backgroundColor: entretienDemain !== null && entretienDemain <= 2 ? '#F97316' : '#3B82F6' }}>
+                    <span className="text-white text-xs font-bold leading-none">{prochainEntretien.getDate()}</span>
+                    <span className="text-white text-[9px] leading-none mt-0.5 uppercase">
+                      {prochainEntretien.toLocaleDateString('fr-FR', { month: 'short' })}
+                    </span>
                   </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'En attente', value: etudiant.nb_candidatures_attente ?? 0, bg: '#FFF7ED', color: '#C2410C' },
-                  { label: 'Refus',      value: etudiant.nb_candidatures_refus ?? 0,   bg: '#FFF1F2', color: '#9F1239' },
-                ].map(({ label, value, bg, color }) => (
-                  <div key={label} className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ backgroundColor: bg }}>
-                    <span className="text-xs font-medium" style={{ color }}>{label}</span>
-                    <span className="text-xl font-bold" style={{ color }}>{value}</span>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: entretienDemain !== null && entretienDemain <= 2 ? '#C2410C' : '#1D4ED8' }}>
+                      Prochain entretien
+                    </p>
+                    <p className="text-xs" style={{ color: entretienDemain !== null && entretienDemain <= 2 ? '#EA580C' : '#3B82F6' }}>
+                      {entretienDemain === 0 ? "Aujourd'hui !" : entretienDemain === 1 ? 'Demain' : `Dans ${entretienDemain} jours`}
+                      {' · '}{prochainEntretien.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
 
-            {/* Objectif semaine */}
-            <div className="border-t border-[#F3F4F6] pt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-600">Objectif de la semaine</span>
-                <span className="text-xs text-gray-400">{nbCandidatures} / {objectif} candidatures</span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--dash-section-label)' }}>Candidatures</p>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  {[
+                    { label: 'Envoyées',    value: nbCandidatures,                color: '#3D553D' },
+                    { label: 'Entretiens',  value: etudiant.nb_entretiens ?? 0,   color: '#1D4ED8' },
+                    { label: 'Entreprises', value: etudiant.nb_entreprises ?? 0,  color: '#6D28D9' },
+                  ].map(({ label, value, color }) => (
+                    <div key={label}>
+                      <p className="text-4xl font-bold tracking-tight" style={{ color }}>{value}</p>
+                      <p className="text-xs font-semibold mt-1" style={{ color: 'var(--dash-header-sub)' }}>{label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'En attente', value: etudiant.nb_candidatures_attente ?? 0, bg: 'rgba(249,115,22,0.1)', color: '#C2410C' },
+                    { label: 'Refus',      value: etudiant.nb_candidatures_refus ?? 0,   bg: 'rgba(244,63,94,0.1)',  color: '#9F1239' },
+                  ].map(({ label, value, bg, color }) => (
+                    <div key={label} className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ backgroundColor: bg }}>
+                      <span className="text-xs font-medium" style={{ color }}>{label}</span>
+                      <span className="text-xl font-bold" style={{ color }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="h-2 bg-[#E4EDE4] rounded-full overflow-hidden">
-                <div className="h-full bg-[#5C7A5C] rounded-full transition-all" style={{ width: `${objectifPct}%` }}></div>
+
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '16px' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold" style={{ color: 'var(--dash-header-title)' }}>Objectif de la semaine</span>
+                  <span className="text-xs" style={{ color: 'var(--dash-header-sub)' }}>{nbCandidatures} / {objectif} candidatures</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
+                  <div className="h-full rounded-full transition-all" style={{ width: `${objectifPct}%`, background: 'linear-gradient(90deg, #5C7A5C, #22C55E)' }}></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── LIGNE 2 ── */}
+        {/* LIGNE 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* Documents */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Documents</p>
+          <div style={{ ...glass, padding: '24px' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--dash-section-label)' }}>Documents</p>
             <div className="flex flex-col gap-3">
               {[
                 { label: 'Curriculum Vitae', cfg: cv, url: etudiant.cv_url },
@@ -342,7 +349,7 @@ export default function EtudiantDetail() {
               ].map(({ label, cfg, url }) => (
                 <div key={label} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: cfg.bg }}>
                   <div>
-                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--dash-header-title)' }}>{label}</span>
                     <div className="flex items-center gap-1.5 mt-1">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cfg.dot }}></div>
                       <span className="text-xs font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
@@ -350,7 +357,8 @@ export default function EtudiantDetail() {
                   </div>
                   {url && (
                     <a href={url} target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-bold text-[#3D553D] bg-white px-3 py-1.5 rounded-xl border border-[#C8D8C8] hover:bg-[#F0FDF4] transition-colors shrink-0">
+                      className="text-xs font-bold px-3 py-1.5 rounded-xl transition-colors shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.8)', color: '#3D553D', border: '1px solid rgba(255,255,255,0.9)' }}>
                       Voir ↗
                     </a>
                   )}
@@ -360,24 +368,22 @@ export default function EtudiantDetail() {
           </div>
 
           {/* Statut */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">Statut</p>
+          <div style={{ ...glass, padding: '24px' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--dash-section-label)' }}>Statut</p>
             <div className="flex flex-col gap-2">
               {Object.entries(statutConfig).map(([key, cfg]) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-3 p-3 rounded-xl"
+                <div key={key} className="flex items-center gap-3 p-3 rounded-xl transition-all"
                   style={{
                     backgroundColor: etudiant.statut === key ? cfg.bg : 'transparent',
                     border: `1px solid ${etudiant.statut === key ? cfg.border : 'transparent'}`,
-                  }}
-                >
+                  }}>
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cfg.dot }}></div>
                   <span className="text-sm font-medium" style={{ color: etudiant.statut === key ? cfg.text : '#9CA3AF' }}>
                     {cfg.label}
                   </span>
                   {etudiant.statut === key && (
-                    <div className="ml-auto w-4 h-4 rounded-full bg-white flex items-center justify-center" style={{ border: `1px solid ${cfg.border}` }}>
+                    <div className="ml-auto w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${cfg.border}` }}>
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.dot }}></div>
                     </div>
                   )}
@@ -387,50 +393,46 @@ export default function EtudiantDetail() {
           </div>
 
           {/* Note responsable */}
-          <div className="bg-white rounded-2xl border border-[#C8D8C8] p-6">
-            <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-3">Note responsable</p>
+          <div style={{ ...glass, padding: '24px' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--dash-section-label)' }}>Note responsable</p>
             {etudiant.notes_responsable ? (
-              <p className="text-sm text-gray-700 leading-relaxed">{etudiant.notes_responsable}</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--dash-header-title)' }}>{etudiant.notes_responsable}</p>
             ) : (
-              <p className="text-sm text-gray-300 italic">Aucune note. Clique sur "Modifier la fiche" pour en ajouter une.</p>
+              <p className="text-sm italic" style={{ color: 'var(--dash-section-label)' }}>Aucune note. Clique sur "Modifier la fiche" pour en ajouter une.</p>
             )}
           </div>
         </div>
 
-        {/* ── CANDIDATURES ── */}
-        <div className="bg-white rounded-2xl border border-[#C8D8C8] overflow-hidden">
+        {/* CANDIDATURES */}
+        <div style={{ ...glass, overflow: 'hidden' }}>
 
-          {/* En-tête + stats */}
-          <div className="p-6 border-b border-[#F3F4F6]">
+          {/* En-tête */}
+          <div className="p-6" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-1">Suivi des candidatures</p>
-                <p className="text-2xl font-black text-gray-900">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--dash-section-label)' }}>Suivi des candidatures</p>
+                <p className="text-2xl font-black" style={{ color: 'var(--dash-header-title)' }}>
                   {candStats.total}
-                  <span className="text-sm font-normal text-gray-400 ml-2">candidature{candStats.total > 1 ? 's' : ''}</span>
+                  <span className="text-sm font-normal ml-2" style={{ color: 'var(--dash-header-sub)' }}>candidature{candStats.total > 1 ? 's' : ''}</span>
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label: 'Taux réponse', value: `${candStats.tauxReponse}%`, color: '#1D4ED8', bg: '#EFF6FF' },
-                  { label: 'Entretiens',   value: candStats.entretien,          color: '#1D4ED8', bg: '#EFF6FF' },
-                  ...(candStats.relances > 0 ? [{ label: 'À relancer', value: candStats.relances, color: '#C2410C', bg: '#FFF7ED' }] : []),
-                  ...(candStats.accepte > 0  ? [{ label: 'Acceptées',  value: candStats.accepte,  color: '#15803D', bg: '#F0FDF4' }] : []),
+                  { label: 'Taux réponse', value: `${candStats.tauxReponse}%`, color: '#1D4ED8', bg: 'rgba(59,130,246,0.12)' },
+                  { label: 'Entretiens',   value: candStats.entretien,          color: '#1D4ED8', bg: 'rgba(59,130,246,0.12)' },
+                  ...(candStats.relances > 0 ? [{ label: 'À relancer', value: candStats.relances, color: '#C2410C', bg: 'rgba(249,115,22,0.12)' }] : []),
+                  ...(candStats.accepte > 0  ? [{ label: 'Acceptées',  value: candStats.accepte,  color: '#15803D', bg: 'rgba(34,197,94,0.12)' }] : []),
                 ].map(({ label, value, color, bg }) => (
                   <div key={label} className="px-4 py-2.5 rounded-xl text-center" style={{ backgroundColor: bg }}>
                     <p className="text-xl font-black" style={{ color }}>{value}</p>
-                    <p className="text-[10px] font-semibold text-gray-400 mt-0.5">{label}</p>
+                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: 'var(--dash-section-label)' }}>{label}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Mini graphe mensuel */}
             {candStats.total > 0 && (() => {
-              const data = MOIS_GRAPH.map(m => ({
-                ...m,
-                count: candidatures.filter(c => c.date_action?.startsWith(m.key)).length,
-              }))
+              const data = MOIS_GRAPH.map(m => ({ ...m, count: candidatures.filter(c => c.date_action?.startsWith(m.key)).length }))
               const max = Math.max(...data.map(m => m.count), 1)
               const now = new Date().toISOString().slice(0, 7)
               return (
@@ -446,10 +448,10 @@ export default function EtudiantDetail() {
                         <div className="w-full flex items-end" style={{ height: '44px' }}>
                           <div className="w-full rounded-t-lg transition-all"
                             style={{ height: `${pct}%`, minHeight: '3px',
-                              backgroundColor: isCur ? '#3D553D' : m.count > 0 ? '#A3BFA3' : '#E4EDE4',
+                              backgroundColor: isCur ? '#3D553D' : m.count > 0 ? '#A3BFA3' : 'rgba(0,0,0,0.07)',
                               boxShadow: isCur ? '0 -2px 6px rgba(61,85,61,0.2)' : 'none' }} />
                         </div>
-                        <p className="text-[10px] font-semibold" style={{ color: isCur ? '#3D553D' : '#9CA3AF' }}>{m.label}</p>
+                        <p className="text-[10px] font-semibold" style={{ color: isCur ? '#3D553D' : 'var(--dash-section-label)' }}>{m.label}</p>
                       </div>
                     )
                   })}
@@ -457,7 +459,6 @@ export default function EtudiantDetail() {
               )
             })()}
 
-            {/* Répartition par statut */}
             {candStats.total > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-4">
                 {CAND_STATUTS.map(st => {
@@ -475,9 +476,9 @@ export default function EtudiantDetail() {
             )}
           </div>
 
-          {/* Filtres + recherche */}
+          {/* Filtres */}
           {candStats.total > 0 && (
-            <div className="px-5 py-3 border-b border-[#F3F4F6] flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="px-5 py-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
               <div className="flex gap-1 flex-wrap">
                 {[
                   { key: 'toutes',     label: `Toutes (${candStats.total})` },
@@ -492,7 +493,7 @@ export default function EtudiantDetail() {
                     <button key={key} onClick={() => setCandFilter(key)}
                       className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                       style={candFilter === key
-                        ? { backgroundColor: opt?.bg || '#E4EDE4', color: opt?.color || '#3D553D' }
+                        ? { backgroundColor: opt?.bg || 'rgba(92,122,92,0.12)', color: opt?.color || '#3D553D' }
                         : { color: '#9CA3AF' }}>
                       {label}
                     </button>
@@ -501,7 +502,8 @@ export default function EtudiantDetail() {
               </div>
               <input type="text" placeholder="Rechercher..." value={candSearch}
                 onChange={e => setCandSearch(e.target.value)}
-                className="sm:ml-auto px-3 py-1.5 rounded-xl border border-[#C8D8C8] text-xs outline-none focus:border-[#5C7A5C] w-44 bg-white" />
+                style={{ ...ctrl, width: '176px', padding: '6px 12px', fontSize: '12px' }}
+                className="sm:ml-auto" />
             </div>
           )}
 
@@ -509,62 +511,59 @@ export default function EtudiantDetail() {
           {candStats.total === 0 ? (
             <div className="py-16 text-center">
               <p className="text-3xl mb-3">📋</p>
-              <p className="text-sm font-semibold text-gray-500">Aucune candidature enregistrée</p>
-              <p className="text-xs text-gray-400 mt-1">L'étudiant n'a pas encore commencé à tracker ses candidatures.</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--dash-header-sub)' }}>Aucune candidature enregistrée</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--dash-section-label)' }}>L'étudiant n'a pas encore commencé à tracker ses candidatures.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ minWidth: '640px' }}>
                 <thead>
-                  <tr className="bg-[#F8FAF8] border-b border-[#E5E7EB]">
-                    <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Entreprise</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Poste</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-36">Statut</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-28">Date</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 w-20">Lien</th>
+                  <tr style={{ background: 'rgba(0,0,0,0.04)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                    <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Entreprise</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Poste</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest w-36" style={{ color: 'var(--dash-section-label)' }}>Statut</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest w-28" style={{ color: 'var(--dash-section-label)' }}>Date</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Notes</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest w-20" style={{ color: 'var(--dash-section-label)' }}>Lien</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {candFiltered.map((c, i) => {
-                    const s = getCS(c.statut)
+                  {candFiltered.map((c) => {
+                    const cs = getCS(c.statut)
                     const relance = isCRelance(c)
                     return (
-                      <tr key={c.id}
-                        className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors"
-                        style={{ borderLeft: `3px solid ${s.dot}` }}>
+                      <tr key={c.id} className="hover:bg-white/20 transition-colors"
+                        style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', borderLeft: `3px solid ${cs.dot}` }}>
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
-                              style={{ backgroundColor: s.bg, color: s.color }}>
+                              style={{ backgroundColor: cs.bg, color: cs.color }}>
                               {c.entreprise[0]?.toUpperCase()}
                             </div>
-                            <span className="text-sm font-bold text-gray-900">{c.entreprise}</span>
+                            <span className="text-sm font-bold" style={{ color: 'var(--dash-header-title)' }}>{c.entreprise}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 max-w-44 truncate">{c.poste}</td>
+                        <td className="px-4 py-3 text-sm max-w-44 truncate" style={{ color: 'var(--dash-header-sub)' }}>{c.poste}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
                             <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                              style={{ backgroundColor: s.bg, color: s.color }}>
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }}></span>
-                              {s.label}
+                              style={{ backgroundColor: cs.bg, color: cs.color }}>
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cs.dot }}></span>
+                              {cs.label}
                             </span>
                             {relance && (
-                              <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-200">
-                                🔔
-                              </span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(249,115,22,0.1)', color: '#EA580C', border: '1px solid rgba(249,115,22,0.3)' }}>🔔</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.date_action)}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500 max-w-52 truncate">
-                          {c.notes || <span className="text-gray-300">—</span>}
+                        <td className="px-4 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--dash-header-sub)' }}>{fmtDate(c.date_action)}</td>
+                        <td className="px-4 py-3 text-xs max-w-52 truncate" style={{ color: 'var(--dash-header-sub)' }}>
+                          {c.notes || <span style={{ color: 'var(--dash-section-label)' }}>—</span>}
                         </td>
                         <td className="px-4 py-3">
                           {c.url
-                            ? <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#5C7A5C] hover:underline font-medium">↗ Voir</a>
-                            : <span className="text-gray-300 text-xs">—</span>
+                            ? <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium hover:underline" style={{ color: '#5C7A5C' }}>↗ Voir</a>
+                            : <span className="text-xs" style={{ color: 'var(--dash-section-label)' }}>—</span>
                           }
                         </td>
                       </tr>
@@ -573,13 +572,11 @@ export default function EtudiantDetail() {
                 </tbody>
                 {candFiltered.length > 0 && (
                   <tfoot>
-                    <tr className="bg-[#F8FAF8] border-t-2 border-[#E5E7EB]">
-                      <td colSpan={6} className="px-5 py-3 text-xs font-bold text-gray-500">
+                    <tr style={{ background: 'rgba(0,0,0,0.04)', borderTop: '2px solid rgba(0,0,0,0.08)' }}>
+                      <td colSpan={6} className="px-5 py-3 text-xs font-bold" style={{ color: 'var(--dash-header-sub)' }}>
                         {candFiltered.length} candidature{candFiltered.length > 1 ? 's' : ''}
-                        {candFiltered.length !== candStats.total && <span className="text-gray-300 font-normal"> sur {candStats.total}</span>}
-                        {candStats.relances > 0 && (
-                          <span className="ml-3 text-orange-500">🔔 {candStats.relances} à relancer</span>
-                        )}
+                        {candFiltered.length !== candStats.total && <span style={{ color: 'var(--dash-section-label)', fontWeight: 400 }}> sur {candStats.total}</span>}
+                        {candStats.relances > 0 && <span className="ml-3 text-orange-500">🔔 {candStats.relances} à relancer</span>}
                       </td>
                     </tr>
                   </tfoot>
@@ -587,64 +584,60 @@ export default function EtudiantDetail() {
               </table>
               {candFiltered.length === 0 && (
                 <div className="py-10 text-center">
-                  <p className="text-sm text-gray-400">Aucune candidature pour ce filtre.</p>
+                  <p className="text-sm" style={{ color: 'var(--dash-header-sub)' }}>Aucune candidature pour ce filtre.</p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* ── MODE ÉDITION ── */}
+        {/* MODE ÉDITION */}
         {editing && (
-          <div className="bg-white rounded-2xl border border-[#5C7A5C] p-6">
-            <p className="text-xs font-semibold text-[#5C7A5C] tracking-widest uppercase mb-5">Mode édition</p>
+          <div style={{ ...glass, padding: '24px', borderLeft: '3px solid #5C7A5C' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-5" style={{ color: '#5C7A5C' }}>Mode édition</p>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Statut & Progression */}
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut & Progression</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Statut & Progression</p>
                   <div>
-                    <label className={labelCls}>Statut</label>
-                    <select name="statut" defaultValue={etudiant.statut} className={inputCls}>
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Statut</label>
+                    <select name="statut" defaultValue={etudiant.statut} style={ctrl}>
                       <option value="en_preparation">En préparation</option>
                       <option value="en_recherche">En recherche</option>
                       <option value="place">Placé</option>
                     </select>
                   </div>
                   <div>
-                    <label className={labelCls}>Score de progression ({scoreVal}%)</label>
-                    <input
-                      type="range" name="score_progression"
-                      min={0} max={100} defaultValue={etudiant.score_progression ?? 0}
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Score de progression ({scoreVal}%)</label>
+                    <input type="range" name="score_progression" min={0} max={100}
+                      defaultValue={etudiant.score_progression ?? 0}
                       onChange={e => setScoreVal(parseInt(e.target.value))}
-                      className="w-full accent-[#5C7A5C]"
-                    />
+                      className="w-full accent-[#5C7A5C]" />
                   </div>
                   <div>
-                    <label className={labelCls}>Objectif candidatures / semaine</label>
-                    <input type="number" name="objectif_candidatures" defaultValue={etudiant.objectif_candidatures ?? 5} min={1} className={inputCls} />
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Objectif candidatures / semaine</label>
+                    <input type="number" name="objectif_candidatures" defaultValue={etudiant.objectif_candidatures ?? 5} min={1} style={ctrl} />
                   </div>
                   <div>
-                    <label className={labelCls}>Prochain entretien</label>
-                    <input type="date" name="prochain_entretien" defaultValue={etudiant.prochain_entretien ?? ''} className={inputCls} />
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Prochain entretien</label>
+                    <input type="date" name="prochain_entretien" defaultValue={etudiant.prochain_entretien ?? ''} style={ctrl} />
                   </div>
                 </div>
 
-                {/* Documents */}
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Documents</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Documents</p>
                   <div>
-                    <label className={labelCls}>Statut CV</label>
-                    <select name="cv_statut" defaultValue={etudiant.cv_statut ?? 'a_deposer'} className={inputCls}>
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Statut CV</label>
+                    <select name="cv_statut" defaultValue={etudiant.cv_statut ?? 'a_deposer'} style={ctrl}>
                       <option value="a_deposer">Non déposé</option>
                       <option value="depose">Déposé</option>
                       <option value="a_mettre_a_jour">À mettre à jour</option>
                     </select>
                   </div>
                   <div>
-                    <label className={labelCls}>Statut Portfolio</label>
-                    <select name="lettre_statut" defaultValue={etudiant.lettre_statut ?? 'a_deposer'} className={inputCls}>
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>Statut Portfolio</label>
+                    <select name="lettre_statut" defaultValue={etudiant.lettre_statut ?? 'a_deposer'} style={ctrl}>
                       <option value="a_deposer">Non déposée</option>
                       <option value="depose">Déposée</option>
                       <option value="a_mettre_a_jour">À mettre à jour</option>
@@ -652,9 +645,8 @@ export default function EtudiantDetail() {
                   </div>
                 </div>
 
-                {/* Candidatures */}
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Candidatures</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Candidatures</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { name: 'nb_candidatures',         label: 'Envoyées',    val: etudiant.nb_candidatures ?? 0 },
@@ -664,31 +656,28 @@ export default function EtudiantDetail() {
                       { name: 'nb_entreprises',          label: 'Entreprises', val: etudiant.nb_entreprises ?? 0 },
                     ].map(({ name, label, val }) => (
                       <div key={name}>
-                        <label className={labelCls}>{label}</label>
-                        <input type="number" name={name} defaultValue={val} min={0} className={inputCls} />
+                        <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--dash-header-sub)' }}>{label}</label>
+                        <input type="number" name={name} defaultValue={val} min={0} style={ctrl} />
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Note */}
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Note responsable</p>
-                  <textarea
-                    name="notes_responsable"
-                    defaultValue={etudiant.notes_responsable ?? ''}
-                    rows={7}
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--dash-section-label)' }}>Note responsable</p>
+                  <textarea name="notes_responsable" defaultValue={etudiant.notes_responsable ?? ''} rows={7}
                     placeholder="Observations, points d'attention, suivi..."
-                    className={`${inputCls} resize-none`}
-                  />
+                    style={{ ...ctrl, resize: 'none' }} />
                 </div>
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => setEditing(false)} className="px-5 py-2 rounded-xl text-sm text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">
+                <button type="button" onClick={() => setEditing(false)}
+                  style={{ ...ctrl, width: 'auto', padding: '8px 20px', cursor: 'pointer' }}>
                   Annuler
                 </button>
-                <button type="submit" disabled={saving} className="bg-[#5C7A5C] text-white px-8 py-2 rounded-xl text-sm font-medium hover:bg-[#4A6A4A] transition-colors disabled:opacity-50">
+                <button type="submit" disabled={saving}
+                  style={{ ...ctrl, width: 'auto', padding: '8px 32px', background: 'rgba(61,85,61,0.85)', color: 'white', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
                   {saving ? 'Sauvegarde...' : 'Sauvegarder'}
                 </button>
               </div>
