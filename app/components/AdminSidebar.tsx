@@ -6,10 +6,10 @@ import { supabase } from '../../lib/supabase'
 
 type Theme = 'normal' | 'light' | 'dark'
 
-const themes: { id: Theme; icon: string; label: string }[] = [
-  { id: 'light',  icon: '☀️', label: 'Clair'  },
-  { id: 'normal', icon: '🌿', label: 'Normal' },
-  { id: 'dark',   icon: '🌙', label: 'Sombre' },
+const themes: { id: Theme; label: string }[] = [
+  { id: 'light',  label: 'Clair'  },
+  { id: 'normal', label: 'Normal' },
+  { id: 'dark',   label: 'Sombre' },
 ]
 
 const nav = [
@@ -40,10 +40,11 @@ const nav = [
 ]
 
 function AdminProfileButton() {
-  const [open, setOpen]   = useState(false)
-  const [theme, setTheme] = useState<Theme>('normal')
-  const [email, setEmail] = useState('')
-  const ref               = useRef<HTMLDivElement>(null)
+  const [open, setOpen]           = useState(false)
+  const [theme, setTheme]         = useState<Theme>('normal')
+  const [email, setEmail]         = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const ref                       = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const saved = (localStorage.getItem('dash-theme') as Theme) || 'normal'
@@ -53,11 +54,11 @@ function AdminProfileButton() {
   }, [])
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function onDown(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
   }, [])
 
   function applyTheme(t: Theme) {
@@ -66,12 +67,18 @@ function AdminProfileButton() {
     document.documentElement.setAttribute('data-theme', t)
   }
 
+  async function handleReset() {
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    setResetSent(true)
+    setTimeout(() => setResetSent(false), 4000)
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
-
-  const initiale = email ? email[0].toUpperCase() : '?'
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -79,141 +86,123 @@ function AdminProfileButton() {
       <button
         onClick={() => setOpen(v => !v)}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-          padding: '8px 10px', borderRadius: 14, cursor: 'pointer',
-          background: open ? 'rgba(139,92,246,0.15)' : 'transparent',
-          border: 'none', transition: 'background .15s',
+          width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+          padding: '7px 10px', borderRadius: 10, cursor: 'pointer',
+          background: open ? 'rgba(255,255,255,0.08)' : 'transparent',
+          border: '1px solid ' + (open ? 'rgba(255,255,255,0.1)' : 'transparent'),
+          transition: 'all .12s',
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+        onMouseEnter={e => { if (!open) { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' } }}
+        onMouseLeave={e => { if (!open) { (e.currentTarget as HTMLElement).style.background = 'transparent' } }}
       >
-        <div style={{
-          width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg, #5C7A5C, #3D553D)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'white', fontSize: 12, fontWeight: 700,
-        }}>
-          {initiale}
-        </div>
         <div style={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Admin
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Administrateur
           </p>
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {email}
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {email || '—'}
           </p>
         </div>
-        <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.3)" viewBox="0 0 24 24" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .15s' }}>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+        <svg width="11" height="11" fill="none" stroke="rgba(255,255,255,0.25)" viewBox="0 0 24 24"
+          style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .12s' }}>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
 
       {/* Dropdown — opens upward */}
       {open && (
         <div style={{
-          position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, right: 0,
+          position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, right: 0,
           zIndex: 100,
-          background: 'linear-gradient(145deg, rgba(20,30,20,0.97) 0%, rgba(13,20,13,0.97) 100%)',
-          backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 16,
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+          background: 'rgba(18,22,18,0.98)',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.09)',
+          borderRadius: 12,
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.5)',
           overflow: 'hidden',
         }}>
 
           {/* Identité */}
-          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                background: 'linear-gradient(135deg, #5C7A5C, #3D553D)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontSize: 14, fontWeight: 700,
-              }}>
-                {initiale}
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Administrateur</p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{email}</p>
-              </div>
-            </div>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Administrateur</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{email}</p>
           </div>
 
           {/* Actions */}
-          <div style={{ padding: '8px 8px 4px' }}>
-            <button
-              onClick={async () => {
-                await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
-                alert('Un email de réinitialisation a été envoyé.')
-              }}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 10px', borderRadius: 10, cursor: 'pointer',
-                background: 'transparent', border: 'none', transition: 'background .12s',
-                fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.6)',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-              </svg>
-              Changer le mot de passe
-            </button>
+          <div style={{ padding: '5px 6px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <DarkMenuItem
+              icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>}
+              label={resetSent ? 'Email envoyé ✓' : 'Changer le mot de passe'}
+              onClick={handleReset}
+              color={resetSent ? '#4ADE80' : 'rgba(255,255,255,0.6)'}
+            />
           </div>
 
-          <div style={{ margin: '0 10px', height: 1, background: 'rgba(255,255,255,0.07)' }}/>
-
           {/* Thème */}
-          <div style={{ padding: '12px 14px 10px' }}>
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.25)', marginBottom: 10 }}>
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'rgba(255,255,255,0.2)', marginBottom: 8 }}>
               Apparence
             </p>
-            <div style={{ display: 'flex', gap: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 3 }}>
-              {themes.map(({ id, icon, label }) => (
+            <div style={{ display: 'flex', gap: 3 }}>
+              {themes.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => applyTheme(id)}
                   style={{
-                    flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                    padding: '6px 4px', borderRadius: 8, fontSize: 10, fontWeight: 600, cursor: 'pointer',
-                    transition: 'all .15s', border: 'none',
-                    background: theme === id ? 'rgba(139,92,246,0.25)' : 'transparent',
-                    color: theme === id ? '#C4B5FD' : 'rgba(255,255,255,0.35)',
-                    boxShadow: theme === id ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
+                    flex: 1, padding: '5px 0', borderRadius: 6,
+                    fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none',
+                    background: theme === id ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.04)',
+                    color: theme === id ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                    transition: 'all .12s',
                   }}
                 >
-                  <span style={{ fontSize: 15 }}>{icon}</span>
-                  <span>{label}</span>
+                  {label}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Déconnexion */}
-          <div style={{ padding: '4px 8px 10px' }}>
-            <button
+          <div style={{ padding: '5px 6px' }}>
+            <DarkMenuItem
+              icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>}
+              label="Se déconnecter"
               onClick={handleLogout}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 10px', borderRadius: 10, cursor: 'pointer',
-                background: 'transparent', border: 'none', transition: 'background .12s',
-                fontSize: 12, fontWeight: 600, color: '#F87171',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
-              </svg>
-              Se déconnecter
-            </button>
+              color="#F87171"
+              hoverBg="rgba(248,113,113,0.1)"
+            />
           </div>
 
         </div>
       )}
     </div>
+  )
+}
+
+function DarkMenuItem({ icon, label, onClick, color = 'rgba(255,255,255,0.6)', hoverBg = 'rgba(255,255,255,0.06)' }: {
+  icon: React.ReactNode
+  label: string
+  onClick: () => void
+  color?: string
+  hoverBg?: string
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 9,
+        padding: '7px 9px', borderRadius: 7, cursor: 'pointer',
+        background: 'transparent', border: 'none', transition: 'background .1s',
+        fontSize: 12, fontWeight: 500, color,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+        {icon}
+      </svg>
+      {label}
+    </button>
   )
 }
 
