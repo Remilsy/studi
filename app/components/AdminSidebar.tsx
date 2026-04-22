@@ -69,7 +69,7 @@ function AdminProfileButton() {
 
   async function handleReset() {
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/reset-callback`,
     })
     setResetSent(true)
     setTimeout(() => setResetSent(false), 4000)
