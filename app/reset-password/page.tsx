@@ -3,20 +3,46 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
+type Status = 'loading' | 'ready' | 'invalid' | 'success'
+
 export default function ResetPassword() {
-  const [password, setPassword]   = useState('')
-  const [confirm, setConfirm]     = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState('')
-  const [success, setSuccess]     = useState(false)
-  const [ready, setReady]         = useState(false)
+  const [status, setStatus]   = useState<Status>('loading')
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm]   = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
   useEffect(() => {
-    // Supabase injecte le token dans le hash de l'URL
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true)
-    })
-    return () => subscription.unsubscribe()
+    async function init() {
+      // PKCE flow: Supabase envoie ?code=xxx dans l'URL
+      const params = new URLSearchParams(window.location.search)
+      const code   = params.get('code')
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) { setStatus('invalid'); return }
+        setStatus('ready')
+        return
+      }
+
+      // Fallback: vérifier si une session recovery est déjà active (hash flow)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setStatus('ready')
+      } else {
+        // Écouter l'événement PASSWORD_RECOVERY (hash flow legacy)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+          if (event === 'PASSWORD_RECOVERY') setStatus('ready')
+        })
+        // Timeout : si rien après 3s, le lien est invalide
+        const t = setTimeout(() => {
+          setStatus('invalid')
+          subscription.unsubscribe()
+        }, 3000)
+        return () => { clearTimeout(t); subscription.unsubscribe() }
+      }
+    }
+    init()
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -28,7 +54,7 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password })
     setLoading(false)
     if (error) setError(error.message)
-    else setSuccess(true)
+    else setStatus('success')
   }
 
   return (
@@ -38,37 +64,59 @@ export default function ResetPassword() {
         padding: 32, width: '100%', maxWidth: 380,
         boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
       }}>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#5C7A5C' }}/>
           <span style={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>Studi</span>
         </div>
 
-        {success ? (
+        {status === 'loading' && (
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <p style={{ fontSize: 13, color: '#9CA3AF' }}>Vérification du lien…</p>
+          </div>
+        )}
+
+        {status === 'invalid' && (
+          <div>
+            <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 6 }}>Lien expiré</p>
+            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20 }}>
+              Ce lien est invalide ou a expiré. Demande un nouveau lien depuis le menu de ton compte.
+            </p>
+            <a href="/login" style={{
+              display: 'block', textAlign: 'center', padding: '10px 0', borderRadius: 8,
+              background: '#F3F4F6', color: '#374151', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+            }}>
+              Retour à la connexion
+            </a>
+          </div>
+        )}
+
+        {status === 'success' && (
           <div>
             <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 6 }}>Mot de passe mis à jour</p>
-            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 24 }}>Tu peux maintenant te connecter avec ton nouveau mot de passe.</p>
+            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 24 }}>
+              Tu peux maintenant te connecter avec ton nouveau mot de passe.
+            </p>
             <a href="/login" style={{
-              display: 'block', width: '100%', textAlign: 'center',
-              padding: '10px 0', borderRadius: 8, background: '#5C7A5C',
-              color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              display: 'block', textAlign: 'center', padding: '10px 0', borderRadius: 8,
+              background: '#5C7A5C', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none',
             }}>
               Se connecter
             </a>
           </div>
-        ) : !ready ? (
-          <div>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 6 }}>Lien invalide</p>
-            <p style={{ fontSize: 13, color: '#6B7280' }}>Ce lien a expiré ou est invalide. Demande un nouveau lien depuis le menu de ton compte.</p>
-          </div>
-        ) : (
+        )}
+
+        {status === 'ready' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 4 }}>Nouveau mot de passe</p>
-              <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20 }}>Choisis un mot de passe sécurisé.</p>
+              <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Choisis un mot de passe sécurisé (min. 6 caractères).</p>
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>Nouveau mot de passe</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>
+                Nouveau mot de passe
+              </label>
               <input
                 type="password"
                 value={password}
@@ -84,7 +132,9 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>Confirmer</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: 6 }}>
+                Confirmer
+              </label>
               <input
                 type="password"
                 value={confirm}
@@ -100,7 +150,9 @@ export default function ResetPassword() {
             </div>
 
             {error && (
-              <p style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
+              <p style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', padding: '8px 12px', borderRadius: 8 }}>
+                {error}
+              </p>
             )}
 
             <button
@@ -108,14 +160,15 @@ export default function ResetPassword() {
               disabled={loading}
               style={{
                 padding: '10px 0', borderRadius: 8, background: '#5C7A5C',
-                color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                border: 'none', opacity: loading ? 0.6 : 1,
+                color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                border: 'none', opacity: loading ? 0.6 : 1, transition: 'opacity .15s',
               }}
             >
-              {loading ? 'Enregistrement...' : 'Enregistrer le mot de passe'}
+              {loading ? 'Enregistrement…' : 'Enregistrer le mot de passe'}
             </button>
           </form>
         )}
+
       </div>
     </div>
   )
