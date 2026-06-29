@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MA (間)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;min-height:100vh;transition:background .8s,color .8s}
+body.day{background:#F5F5F2;color:#0A0A0A}
+body.uv{background:#0A0A0A;color:#F5F5F2}
+a{color:inherit}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:20px 32px;backdrop-filter:blur(10px);transition:background .8s}
+body.day nav{background:rgba(245,245,242,.95)}
+body.uv nav{background:rgba(10,10,10,.95)}
+.nav-logo{font-size:14px;font-weight:700;letter-spacing:3px;cursor:pointer;border:none;background:none;color:inherit;font-family:inherit}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-link{font-size:11px;letter-spacing:3px;cursor:pointer;border:none;background:none;font-family:inherit;transition:all .4s}
+body.day .nav-link{color:#ABABAB}
+body.uv .nav-link{color:#666}
+.nav-link.active{font-weight:500}
+body.day .nav-link.active{color:#0A0A0A}
+body.uv .nav-link.active{color:#F5F5F2}
+.nav-link.locked{opacity:.3;cursor:not-allowed}
+.uv-btn{font-size:10px;letter-spacing:2px;padding:6px 16px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .6s}
+body.day .uv-btn{border:1px solid #ABABAB;color:#2C2C2C;background:transparent}
+body.uv .uv-btn{border:1px solid #CCCCFF;color:#CCCCFF;background:rgba(204,204,255,.08)}
+
+.section{min-height:100vh;padding:120px 32px 80px}
+.narrow{max-width:640px;margin:0 auto}
+.wide{max-width:960px;margin:0 auto}
+.label{font-size:11px;letter-spacing:3px;margin-bottom:64px;transition:color .8s}
+body.day .label{color:#ABABAB}
+body.uv .label{color:#666}
+.muted{transition:color .8s}
+body.day .muted{color:#2C2C2C}
+body.uv .muted{color:#ABABAB}
+.light{transition:color .8s}
+body.day .light{color:#ABABAB}
+body.uv .light{color:#666}
+
+h2{font-size:36px;font-weight:700;letter-spacing:-1px;margin-bottom:48px}
+p.body{font-size:15px;line-height:1.8;margin-bottom:32px}
+.sep{width:60px;height:1px;margin:32px auto;transition:background .8s}
+body.day .sep{background:#ABABAB}
+body.uv .sep{background:#666}
+
+.placeholder{display:flex;align-items:center;justify-content:center;border:1px solid;margin:64px 0;transition:all .8s}
+body.day .placeholder{border-color:#E5E5E2;background:#EDEDEA}
+body.uv .placeholder{border-color:#1a1a1a;background:#0f0f0f}
+.placeholder span{font-size:11px;letter-spacing:2px}
+
+blockquote{padding-left:24px;margin:64px 0;border-left:1px solid;transition:border-color .8s}
+body.day blockquote{border-color:#ABABAB}
+body.uv blockquote{border-color:#CCCCFF}
+blockquote p{font-size:15px;font-style:italic;line-height:1.8}
+body.uv blockquote p{color:#CCCCFF}
+blockquote cite{display:block;font-size:11px;letter-spacing:2px;margin-top:12px;font-style:normal}
+
+.three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:80px}
+.state-card .placeholder{aspect-ratio:3/4;margin:0 0 16px}
+.state-label{font-size:11px;letter-spacing:3px;font-weight:700;margin-bottom:4px}
+.state-sub{font-size:11px;letter-spacing:1px;margin-bottom:8px}
+.state-desc{font-size:13px;line-height:1.7}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:80px}
+.col-title{font-size:11px;letter-spacing:3px;font-weight:700;margin-bottom:16px}
+
+.uv-reveal{position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border:1px solid;overflow:hidden;margin:48px 0;transition:all .8s}
+body.day .uv-reveal{border-color:#E5E5E2;background:#EDEDEA}
+body.uv .uv-reveal{border-color:#1a1a1a;background:#0A0A0A}
+.kanji-big{position:absolute;font-size:120px;font-weight:700;color:#CCCCFF;opacity:0;transition:all .8s;text-shadow:0 0 60px #CCCCFF,0 0 120px rgba(204,204,255,.3)}
+body.uv .kanji-big{opacity:1}
+body.uv .uv-reveal span.light{color:rgba(204,204,255,.4)}
+
+.logo-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:80px}
+.logo-box{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid;transition:all .8s}
+body.day .logo-box{border-color:#E5E5E2;background:#EDEDEA}
+body.uv .logo-box{border-color:#1a1a1a;background:#0f0f0f}
+.logo-box.dark{background:#0A0A0A !important;border-color:#1a1a1a !important}
+.logo-text{font-size:80px;font-weight:700}
+.kanji-logo{font-size:80px;transition:all .8s}
+body.day .kanji-logo{color:#F5F5F2}
+body.uv .kanji-logo{color:#CCCCFF;text-shadow:0 0 40px #CCCCFF}
+
+.typo-item{margin-bottom:24px}
+.typo-big{font-size:48px;font-weight:700;letter-spacing:-1px}
+.typo-med{font-size:32px;letter-spacing:-1px}
+.typo-ita{font-size:28px;font-style:italic;letter-spacing:-1px}
+.typo-label{font-size:11px;letter-spacing:2px;margin-top:4px}
+
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.swatch{aspect-ratio:1;border-radius:2px;border:1px solid;margin-bottom:12px}
+body.day .swatch{border-color:#E5E5E2}
+body.uv .swatch{border-color:#1a1a1a}
+.swatch-name{font-size:10px;letter-spacing:2px;font-weight:700}
+.swatch-hex{font-size:10px;letter-spacing:1px;margin-top:4px}
+
+.obj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin:64px 0}
+.obj-val{font-size:24px;font-weight:700;letter-spacing:-1px}
+.obj-lbl{font-size:10px;letter-spacing:3px;margin-top:8px;text-transform:uppercase}
+
+.cta{display:inline-block;font-size:11px;letter-spacing:3px;padding:16px 32px;border:1px solid;text-decoration:none;transition:all .4s}
+.cta:hover{opacity:.7}
+body.day .cta{border-color:#0A0A0A;color:#0A0A0A}
+body.uv .cta{border-color:#CCCCFF;color:#CCCCFF}
+
+.locked-section{transition:opacity .8s}
+
+footer{padding:48px 32px;border-top:1px solid;transition:border-color .8s}
+body.day footer{border-color:#E5E5E2}
+body.uv footer{border-color:#1a1a1a}
+footer .inner{max-width:960px;margin:0 auto;display:flex;justify-content:space-between}
+footer span{font-size:11px;letter-spacing:2px}
+
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 32px;position:relative}
+.hero-title{font-weight:700;line-height:.85;letter-spacing:-4px;transition:color .8s}
+.hero-kanji{font-size:80px;line-height:1;margin-top:8px;color:#CCCCFF;opacity:0;transition:all .8s;transform:scale(.9)}
+body.uv .hero-kanji{opacity:1;transform:scale(1)}
+.hero-tag{font-size:13px;letter-spacing:4px}
+.hero-sub{font-size:11px;letter-spacing:2px;margin-top:16px}
+.scroll-line{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);width:1px;height:48px;animation:pulse 2s ease-in-out infinite}
+body.day .scroll-line{background:#ABABAB}
+body.uv .scroll-line{background:#666}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+@media(max-width:768px){
+  .three-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr;gap:32px}
+  .logo-grid{grid-template-columns:1fr}
+  .palette{grid-template-columns:repeat(3,1fr)}
+  .obj-grid{grid-template-columns:1fr}
+  nav{padding:16px 20px}
+  .nav-links{gap:16px}
+  .section{padding:100px 20px 60px}
+}
+</style>
+</head>
+<body class="day">
+
+<nav>
+  <button class="nav-logo" onclick="scrollTo('accueil')">MA</button>
+  <div class="nav-links">
+    <button class="nav-link active" data-section="concept" onclick="navTo('concept')">CONCEPT</button>
+    <button class="nav-link locked" data-section="piece" onclick="navTo('piece')">PIECE</button>
+    <button class="nav-link locked" data-section="acquerir" onclick="navTo('acquerir')">ACQUERIR</button>
+    <button class="uv-btn" onclick="toggleUV()">UV</button>
+  </div>
+</nav>
+
+<!-- ACCUEIL -->
+<section class="hero" id="accueil">
+  <div class="hero-title" style="font-size:clamp(120px,20vw,280px)">MA</div>
+  <div class="hero-kanji">間</div>
+  <div class="sep" style="margin:32px auto"></div>
+  <p class="hero-tag muted">KIMONO NOIR, ENCRE REACTIVE UV</p>
+  <p class="hero-sub light">REMI LUSLEY - M2 DIRECTION ARTISTIQUE</p>
+  <div class="scroll-line"></div>
+</section>
+
+<!-- CONCEPT -->
+<section class="section" id="concept">
+  <div class="narrow">
+    <p class="label light">01 - CONCEPT</p>
+    <h2>Le vide habite</h2>
+    <p class="body muted">En japonais, 間 ne signifie pas l'absence. C'est l'intervalle entre deux choses, l'espace ou quelque chose peut advenir. Un silence dans la musique. Une pause dans le souffle. Le blanc entre deux traits de pinceau.</p>
+    <p class="body muted">Yohji Yamamoto a construit toute son oeuvre autour de cette idee. Ses vetements ne dessinent pas le corps, ils le suggerent. Le tissu tombe, cree de l'air, fabrique du vide. Ce vide n'est pas un manque. C'est une architecture.</p>
+    <div class="placeholder" style="aspect-ratio:3/2"><span class="light">[ VISUEL - KIMONO, TOMBE DU TISSU ]</span></div>
+    <p class="body muted">Yamamoto dit que le noir absorbe toute la lumiere. Ce n'est pas une metaphore. Un trou noir fait exactement la meme chose. L'horizon des evenements capture tout ce qui s'en approche. Rien n'en sort. Pas meme un photon.</p>
+    <p class="body muted">En 1974, Stephen Hawking demontre l'impossible. Ce qui devrait etre totalement noir emet pourtant une radiation. Une fuite infime a la frontiere du neant. Le vide quantique, meme au bord de l'effondrement, produit quelque chose.</p>
+    <blockquote><p>&#171; Black holes ain't so black. &#187;</p><cite class="light">STEPHEN HAWKING, 1974</cite></blockquote>
+    <p class="body muted">Le parallele n'est pas decoratif. Yamamoto n'a pas invente une posture esthetique, il a decouvert une loi physique. Le noir comme absorption. Le vide comme presence active. La revelation comme paradoxe.</p>
+    <p class="body muted">MA en est la demonstration textile. Un kimono noir, porteur d'un kanji invisible a l'oeil nu, qui ne se revele que sous lumiere ultraviolette a 365 nanometres. Le rayonnement Hawking, cousu dans la matiere.</p>
+    <div class="placeholder" style="aspect-ratio:2/1"><span class="light">[ VISUEL - SCHEMA TROU NOIR / RAYONNEMENT HAWKING ]</span></div>
+    <div id="concept-end"><p class="light" style="font-size:11px;letter-spacing:2px">Ref. Hawking, S.W. (1974). Black Hole Explosions? Nature, 248(5443), 30-31.</p></div>
+  </div>
+</section>
+
+<!-- LA PIECE -->
+<section class="section locked-section" id="piece">
+  <div class="wide">
+    <p class="label light">02 - LA PIECE</p>
+    <h2>Kimono MA</h2>
+    <p class="light" style="font-size:13px;letter-spacing:1px;margin-bottom:64px">Laine crepe, coutures apparentes, encre photoluminescente UV 365 nm</p>
+    <div class="three-grid">
+      <div class="state-card"><div class="placeholder" style="aspect-ratio:3/4;margin:0 0 16px"><span class="light">[ PORTE ]</span></div><p class="state-label">PORTE</p><p class="state-sub light">Silhouette</p><p class="state-desc muted">Le kimono vit sur le corps. Le tissu tombe, le vide se cree entre la laine et la peau. Le kanji reste invisible.</p></div>
+      <div class="state-card"><div class="placeholder" style="aspect-ratio:3/4;margin:0 0 16px"><span class="light">[ POSE ]</span></div><p class="state-label">POSE</p><p class="state-sub light">Tableau</p><p class="state-desc muted">Plie ou etendu, la piece devient surface. Les coutures apparentes dessinent une geographie. Le noir absorbe le regard.</p></div>
+      <div class="state-card"><div class="placeholder" style="aspect-ratio:3/4;margin:0 0 16px"><span class="light">[ SUSPENDU ]</span></div><p class="state-label">SUSPENDU</p><p class="state-sub light">Oeuvre murale</p><p class="state-desc muted">Accroche, le kimono est architecture. Le vide interieur prend forme. L'espace respire autour.</p></div>
+    </div>
+    <h3 style="font-size:24px;font-weight:700;margin-bottom:32px">La revelation</h3>
+    <p class="body muted" style="max-width:640px">Le kanji 間 est inscrit dans le dos du kimono a l'encre photoluminescente. En lumiere naturelle, il n'existe pas. Sous ultraviolet a 365 nm, il apparait. Le noir rayonne.</p>
+    <p class="body muted" style="max-width:640px">Activez le mode UV dans la navigation pour voir ce que l'oeil nu ne peut pas percevoir.</p>
+    <div class="uv-reveal"><div class="kanji-big">間</div><span class="light" id="uvLabel">[ VISUEL - DOS DU KIMONO, LUMIERE NATURELLE ]</span></div>
+    <div class="two-col">
+      <div><p class="col-title">MATIERE</p><p class="muted" style="font-size:13px;line-height:1.8">Laine crepe japonaise. Le grain du tissu rappelle le papier washi. Les coutures sont laissees visibles, volontairement imparfaites. L'esprit wabi-sabi traverse chaque detail.</p></div>
+      <div><p class="col-title">GESTE</p><p class="muted" style="font-size:13px;line-height:1.8">L'encre photoluminescente est appliquee au pinceau, geste unique, sans reprise possible. Chaque piece porte la trace d'un instant. L'erreur fait partie du processus.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- IDENTITE -->
+<section class="section locked-section" id="identite">
+  <div class="wide">
+    <p class="label light">03 - IDENTITE</p>
+    <h2>Identite visuelle</h2>
+    <div class="logo-grid">
+      <div class="logo-box"><span class="logo-text">MA</span></div>
+      <div class="logo-box dark"><span class="kanji-logo">間</span></div>
+    </div>
+    <p class="col-title" style="margin-bottom:32px">TYPOGRAPHIE</p>
+    <div class="typo-item"><p class="typo-big">Helvetica Neue Bold</p><p class="typo-label light">TITRES ET LOGOTYPE</p></div>
+    <div class="typo-item"><p class="typo-med muted">Helvetica Neue Regular</p><p class="typo-label light">CORPS DE TEXTE</p></div>
+    <div class="typo-item"><p class="typo-ita muted">Helvetica Neue Italic</p><p class="typo-label light">CITATIONS</p></div>
+    <p class="col-title" style="margin:48px 0 32px">PALETTE</p>
+    <div class="palette">
+      <div><div class="swatch" style="background:#0A0A0A"></div><p class="swatch-name">ENCRE</p><p class="swatch-hex light">#0A0A0A</p></div>
+      <div><div class="swatch" style="background:#F5F5F2"></div><p class="swatch-name">PARCHEMIN</p><p class="swatch-hex light">#F5F5F2</p></div>
+      <div><div class="swatch" style="background:#2C2C2C"></div><p class="swatch-name">CENDRE</p><p class="swatch-hex light">#2C2C2C</p></div>
+      <div><div class="swatch" style="background:#ABABAB"></div><p class="swatch-name">BRUME</p><p class="swatch-hex light">#ABABAB</p></div>
+      <div><div class="swatch" style="background:#CCCCFF"></div><p class="swatch-name">UV / NUIT</p><p class="swatch-hex light">#CCCCFF</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ACQUERIR -->
+<section class="section locked-section" id="acquerir" style="display:flex;align-items:center">
+  <div class="narrow" style="text-align:center">
+    <p class="label light">04 - ACQUERIR</p>
+    <h2 style="font-size:48px">Piece numerotee</h2>
+    <div class="sep"></div>
+    <p class="body muted">Chaque kimono MA est une piece unique, numerotee et signee. L'encre photoluminescente est appliquee a la main, en un seul geste. Deux pieces ne portent jamais le meme trait.</p>
+    <p class="body muted">Un certificat d'authenticite accompagne chaque exemplaire, detaillant les materiaux, le processus et le numero de serie. L'acquisition se fait sur demande.</p>
+    <div class="obj-grid">
+      <div><p class="obj-val">Limitee</p><p class="obj-lbl light">Edition</p></div>
+      <div><p class="obj-val">Inclus</p><p class="obj-lbl light">Certificat</p></div>
+      <div><p class="obj-val">Main</p><p class="obj-lbl light">Fabrication</p></div>
+    </div>
+    <a href="mailto:lusleyr@gmail.com" class="cta">DEMANDE D'INFORMATION</a>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span class="light">MA (間) - REMI LUSLEY</span>
+    <span class="light">M2 Direction Artistique - 2024-2025</span>
+  </div>
+</footer>
+
+<script>
+let uvMode=false;
+let unlocked=false;
+
+function toggleUV(){
+  uvMode=!uvMode;
+  document.body.className=uvMode?'uv':'day';
+  document.querySelector('.uv-btn').textContent=uvMode?'365 nm':'UV';
+  document.getElementById('uvLabel').textContent=uvMode?'[ KANJI REVELE - 365 nm ]':'[ VISUEL - DOS DU KIMONO, LUMIERE NATURELLE ]';
+}
+
+function navTo(id){
+  if((id==='piece'||id==='acquerir')&&!unlocked){
+    document.getElementById('concept').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+
+// Unlock when concept-end is visible
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting&&e.target.id==='concept-end'){
+      unlocked=true;
+      document.querySelectorAll('.nav-link.locked').forEach(el=>el.classList.remove('locked'));
+      document.querySelectorAll('.locked-section').forEach(el=>{el.style.opacity='1';el.style.pointerEvents='auto'});
+    }
+    if(e.isIntersecting&&e.target.tagName==='SECTION'){
+      document.querySelectorAll('.nav-link').forEach(el=>el.classList.remove('active'));
+      const btn=document.querySelector('[data-section="'+e.target.id+'"]');
+      if(btn)btn.classList.add('active');
+    }
+  });
+},{threshold:.3});
+
+document.querySelectorAll('section, #concept-end').forEach(el=>obs.observe(el));
+
+// Initially lock sections
+document.querySelectorAll('.locked-section').forEach(el=>{el.style.opacity='.15';el.style.pointerEvents='none'});
+</script>
+</body>
+</html>
