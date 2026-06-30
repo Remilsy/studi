@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Station Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s}
+body.light{background:#f5f5f2;color:#111}
+a{text-decoration:none;color:inherit}
+
+.race-day-banner{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(90deg,#FC4C02,#ff7a3d);color:#fff;text-align:center;padding:10px;font-size:13px;font-weight:700;letter-spacing:2px}
+.theme-toggle{position:fixed;top:52px;right:20px;z-index:90;background:rgba(255,255,255,0.08);border:1px solid #333;color:#888;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;transition:all .3s}
+.theme-toggle:hover{border-color:#FC4C02;color:#FC4C02}
+body.light .theme-toggle{background:rgba(0,0,0,0.05);border-color:#ccc;color:#666}
+
+.glow{position:fixed;width:300px;height:300px;background:#FC4C02;filter:blur(150px);opacity:0.12;border-radius:50%;pointer-events:none;z-index:0}
+.glow-1{top:20%;left:30%}
+.glow-2{bottom:10%;right:20%;opacity:0.08}
+
+.stage{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px 120px;text-align:center}
+.eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#888;margin-bottom:24px}
+.logo{line-height:.9;margin-bottom:24px}
+.logo-top{display:block;font-size:clamp(48px,10vw,90px);font-weight:900;letter-spacing:-3px}
+.logo-bottom{display:block;font-size:clamp(48px,10vw,90px);font-weight:900;letter-spacing:-3px;color:#FC4C02}
+body.light .logo-top{color:#111}
+.tagline{font-size:15px;color:#888;margin-bottom:48px;max-width:400px}
+
+.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:640px;width:100%;margin-bottom:48px}
+.nav-card{background:#161616;border:1px solid #333;border-radius:30px;padding:40px 32px;text-align:left;transition:all .3s ease;cursor:pointer;position:relative;overflow:hidden}
+.nav-card:hover{transform:translateY(-10px);border-color:#FC4C02;box-shadow:0 20px 40px rgba(252,76,2,0.2)}
+body.light .nav-card{background:#fff;border-color:#e0e0e0}
+body.light .nav-card:hover{border-color:#FC4C02;box-shadow:0 20px 40px rgba(252,76,2,0.12)}
+.card-icon{font-size:32px;display:block;margin-bottom:16px}
+.card-label{font-size:20px;font-weight:700;letter-spacing:-1px;margin-bottom:8px}
+.card-desc{font-size:13px;color:#888;line-height:1.5;margin-bottom:16px}
+.card-arrow{position:absolute;top:32px;right:32px;font-size:18px;color:#555;transition:color .3s}
+.nav-card:hover .card-arrow{color:#FC4C02}
+
+.live-strip{display:flex;align-items:center;gap:0;max-width:640px;width:100%;background:#161616;border:1px solid #333;border-radius:24px;padding:24px 32px;margin-bottom:24px}
+body.light .live-strip{background:#fff;border-color:#e0e0e0}
+.live-stat{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#FC4C02;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-val{font-size:22px;font-weight:900;letter-spacing:-1px}
+.live-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.live-sep{width:1px;height:32px;background:#333;flex-shrink:0}
+body.light .live-sep{background:#ddd}
+
+.last-session{display:flex;align-items:center;gap:10px;font-size:13px;color:#888;background:#161616;border:1px solid #333;border-radius:16px;padding:12px 20px;max-width:640px;width:100%}
+body.light .last-session{background:#fff;border-color:#e0e0e0}
+.last-text{color:#ccc}
+body.light .last-text{color:#444}
+
+.bottom-tag{position:fixed;bottom:80px;left:0;right:0;text-align:center;font-size:11px;color:#555;letter-spacing:1px;z-index:1}
+
+.mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:90;background:#111;border-top:1px solid #222;padding:8px 0 env(safe-area-inset-bottom,8px)}
+body.light .mobile-nav{background:#fff;border-color:#e0e0e0}
+.mobile-nav-inner{display:flex;justify-content:space-around;max-width:400px;margin:0 auto}
+.mob-link{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#888;padding:6px 12px;border-radius:12px;transition:color .2s}
+.mob-link.active,.mob-link:hover{color:#FC4C02}
+.mob-icon{font-size:18px}
+.mob-label{letter-spacing:.5px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .8s ease forwards;opacity:0}
+.fade-up:nth-child(2){animation-delay:.1s}
+.fade-up:nth-child(3){animation-delay:.2s}
+.fade-up:nth-child(4){animation-delay:.3s}
+.fade-up:nth-child(5){animation-delay:.4s}
+.fade-up:nth-child(6){animation-delay:.5s}
+
+@media(max-width:600px){
+  .nav-grid{grid-template-columns:1fr}
+  .live-strip{flex-direction:column;gap:16px;padding:20px}
+  .live-sep{width:80%;height:1px}
+  .logo-top,.logo-bottom{font-size:48px}
+}
+</style>
+</head>
+<body>
+<div class="race-day-banner">&#127937; RACE DAY - GO REMI !</div>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+<button class="theme-toggle" onclick="toggleTheme()">&#9728;&#65039; Theme</button>
+
+<div class="stage">
+  <p class="eyebrow fade-up">Tableau de bord athlete</p>
+  <h1 class="logo fade-up">
+    <span class="logo-top">Station</span>
+    <span class="logo-bottom">Performance</span>
+  </h1>
+  <p class="tagline fade-up" id="tagline">Chargement...</p>
+
+  <nav class="nav-grid fade-up">
+    <a href="dashboard.html" class="nav-card">
+      <span class="card-icon">&#128200;</span>
+      <div class="card-label">Dashboard</div>
+      <p class="card-desc">Flux Strava, splits km, donnees cardio de chaque seance.</p>
+      <span class="card-arrow">&#8599;</span>
+    </a>
+    <a href="profil.html" class="nav-card">
+      <span class="card-icon">&#128100;</span>
+      <div class="card-label">Profil</div>
+      <p class="card-desc">Zones, records, allures cibles, objectifs et analyse IA.</p>
+      <span class="card-arrow">&#8599;</span>
+    </a>
+  </nav>
+
+  <div class="live-strip fade-up">
+    <div class="live-stat"><span class="live-dot"></span><div><div class="live-val" id="stat-km">-</div><div class="live-lbl">km en 2026</div></div></div>
+    <div class="live-sep"></div>
+    <div class="live-stat"><div><div class="live-val" id="stat-sessions">-</div><div class="live-lbl">seances</div></div></div>
+    <div class="live-sep"></div>
+    <div class="live-stat"><div><div class="live-val" id="stat-elev">-</div><div class="live-lbl">m D+</div></div></div>
+    <div class="live-sep"></div>
+    <div class="live-stat"><div><div class="live-val" id="stat-pace">-</div><div class="live-lbl">allure moy.</div></div></div>
+  </div>
+
+  <div class="last-session fade-up">
+    <span>&#127939;</span><span class="last-text" id="lastText">-</span>
+  </div>
+</div>
+
+<p class="bottom-tag">Connecte a Strava - Sync. en temps reel</p>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="index.html" class="mob-link active"><span class="mob-icon">&#127968;</span><span class="mob-label">Accueil</span></a>
+    <a href="dashboard.html" class="mob-link"><span class="mob-icon">&#128200;</span><span class="mob-label">Dashboard</span></a>
+    <a href="profil.html" class="mob-link"><span class="mob-icon">&#128100;</span><span class="mob-label">Profil</span></a>
+  </div>
+</nav>
+
+<script>
+// ── DEMO DATA ──
+const SESSIONS = [
+  // Semaine 1 - 31 mars
+  {date:'2026-03-31',name:'Footing EF',distance:10.2,duration:'58:30',pace:'5:44',elev:45,fc:138,type:'easy'},
+  {date:'2026-04-01',name:'Fractionne 10x400m',distance:9.8,duration:'48:15',pace:'4:55',elev:30,fc:165,type:'interval'},
+  {date:'2026-04-03',name:'Seuil 3x2000m',distance:12.1,duration:'56:40',pace:'4:41',elev:55,fc:170,type:'threshold'},
+  {date:'2026-04-05',name:'Footing recuperation',distance:8.0,duration:'47:20',pace:'5:55',elev:25,fc:132,type:'easy'},
+  {date:'2026-04-06',name:'Sortie longue',distance:22.0,duration:'1:56:00',pace:'5:16',elev:180,fc:148,type:'long'},
+  // Semaine 2 - 7 avril
+  {date:'2026-04-07',name:'Footing EF',distance:10.5,duration:'59:00',pace:'5:37',elev:50,fc:140,type:'easy'},
+  {date:'2026-04-08',name:'Fractionne 6x1000m',distance:11.2,duration:'52:30',pace:'4:41',elev:35,fc:168,type:'interval'},
+  {date:'2026-04-10',name:'Seuil 20min',distance:11.8,duration:'54:20',pace:'4:36',elev:60,fc:172,type:'threshold'},
+  {date:'2026-04-12',name:'Footing vallonne',distance:9.5,duration:'55:10',pace:'5:48',elev:120,fc:142,type:'easy'},
+  {date:'2026-04-13',name:'Sortie longue',distance:24.0,duration:'2:05:00',pace:'5:12',elev:210,fc:150,type:'long'},
+  // Semaine 3 - 14 avril
+  {date:'2026-04-14',name:'Footing EF',distance:10.0,duration:'56:00',pace:'5:36',elev:40,fc:136,type:'easy'},
+  {date:'2026-04-15',name:'Fractionne 5x1000m',distance:10.5,duration:'49:00',pace:'4:40',elev:25,fc:170,type:'interval'},
+  {date:'2026-04-17',name:'Tempo allure marathon',distance:14.0,duration:'1:04:00',pace:'4:34',elev:70,fc:168,type:'threshold'},
+  {date:'2026-04-19',name:'Footing EF',distance:8.5,duration:'49:30',pace:'5:49',elev:30,fc:134,type:'easy'},
+  {date:'2026-04-20',name:'Sortie longue',distance:26.0,duration:'2:16:00',pace:'5:14',elev:230,fc:152,type:'long'},
+  // Semaine 4 - 21 avril (decharge)
+  {date:'2026-04-21',name:'Footing souple',distance:8.0,duration:'46:40',pace:'5:50',elev:25,fc:130,type:'easy'},
+  {date:'2026-04-22',name:'Fractionne leger 6x400m',distance:8.0,duration:'40:00',pace:'5:00',elev:15,fc:155,type:'interval'},
+  {date:'2026-04-24',name:'Footing EF',distance:9.0,duration:'51:00',pace:'5:40',elev:35,fc:136,type:'easy'},
+  {date:'2026-04-26',name:'Sortie longue moderee',distance:18.0,duration:'1:35:00',pace:'5:17',elev:130,fc:146,type:'long'},
+  // Semaine 5 - 28 avril
+  {date:'2026-04-28',name:'Footing EF',distance:10.0,duration:'56:30',pace:'5:39',elev:45,fc:137,type:'easy'},
+  {date:'2026-04-29',name:'Fractionne 8x600m',distance:10.2,duration:'48:00',pace:'4:42',elev:20,fc:167,type:'interval'},
+  {date:'2026-05-01',name:'Seuil 2x15min',distance:12.5,duration:'57:00',pace:'4:34',elev:55,fc:171,type:'threshold'},
+  {date:'2026-05-03',name:'Footing vallonne',distance:9.0,duration:'53:00',pace:'5:53',elev:140,fc:143,type:'easy'},
+  {date:'2026-05-04',name:'Sortie longue',distance:28.0,duration:'2:26:00',pace:'5:13',elev:260,fc:151,type:'long'},
+  // Semaine 6 - 5 mai
+  {date:'2026-05-05',name:'Footing EF',distance:10.0,duration:'55:40',pace:'5:34',elev:40,fc:135,type:'easy'},
+  {date:'2026-05-06',name:'Fractionne 12x400m',distance:10.8,duration:'50:00',pace:'4:38',elev:25,fc:169,type:'interval'},
+  {date:'2026-05-08',name:'Tempo allure marathon',distance:15.0,duration:'1:08:00',pace:'4:32',elev:65,fc:169,type:'threshold'},
+  {date:'2026-05-09',name:'Footing recuperation',distance:7.5,duration:'44:00',pace:'5:52',elev:20,fc:131,type:'easy'},
+  {date:'2026-05-10',name:'Sortie longue',distance:30.0,duration:'2:37:00',pace:'5:14',elev:280,fc:153,type:'long'},
+  // Semaine 7 - 12 mai
+  {date:'2026-05-12',name:'Footing EF',distance:10.5,duration:'58:00',pace:'5:31',elev:50,fc:138,type:'easy'},
+  {date:'2026-05-13',name:'Fractionne 6x1000m',distance:11.5,duration:'52:00',pace:'4:31',elev:30,fc:172,type:'interval'},
+  {date:'2026-05-15',name:'Seuil 25min',distance:13.0,duration:'58:30',pace:'4:30',elev:60,fc:173,type:'threshold'},
+  {date:'2026-05-16',name:'Footing EF',distance:8.0,duration:'46:00',pace:'5:45',elev:30,fc:133,type:'easy'},
+  {date:'2026-05-17',name:'Sortie longue',distance:32.0,duration:'2:48:00',pace:'5:15',elev:300,fc:154,type:'long'},
+  // Semaine 8 - 19 mai (decharge)
+  {date:'2026-05-19',name:'Footing souple',distance:8.0,duration:'46:00',pace:'5:45',elev:25,fc:130,type:'easy'},
+  {date:'2026-05-20',name:'Fractionne leger 5x400m',distance:7.5,duration:'38:00',pace:'5:04',elev:10,fc:152,type:'interval'},
+  {date:'2026-05-22',name:'Footing EF',distance:9.0,duration:'51:00',pace:'5:40',elev:35,fc:135,type:'easy'},
+  {date:'2026-05-24',name:'Sortie longue moderee',distance:20.0,duration:'1:46:00',pace:'5:18',elev:150,fc:147,type:'long'},
+  // Semaine 9 - 26 mai
+  {date:'2026-05-26',name:'Footing EF',distance:10.0,duration:'55:00',pace:'5:30',elev:45,fc:136,type:'easy'},
+  {date:'2026-05-27',name:'Fractionne 10x400m',distance:10.5,duration:'48:30',pace:'4:37',elev:20,fc:170,type:'interval'},
+  {date:'2026-05-29',name:'Seuil 2x20min',distance:14.0,duration:'1:02:00',pace:'4:26',elev:65,fc:174,type:'threshold'},
+  {date:'2026-05-30',name:'Footing recuperation',distance:8.0,duration:'47:00',pace:'5:52',elev:25,fc:132,type:'easy'},
+  {date:'2026-05-31',name:'Sortie longue',distance:30.0,duration:'2:35:00',pace:'5:10',elev:270,fc:152,type:'long'},
+  // Semaine 10 - 2 juin
+  {date:'2026-06-02',name:'Footing EF',distance:10.0,duration:'54:30',pace:'5:27',elev:45,fc:135,type:'easy'},
+  {date:'2026-06-03',name:'Fractionne 6x1000m',distance:11.0,duration:'50:00',pace:'4:33',elev:30,fc:171,type:'interval'},
+  {date:'2026-06-05',name:'Tempo allure marathon',distance:16.0,duration:'1:12:00',pace:'4:30',elev:70,fc:170,type:'threshold'},
+  {date:'2026-06-06',name:'Footing EF',distance:8.5,duration:'48:30',pace:'5:42',elev:30,fc:134,type:'easy'},
+  {date:'2026-06-07',name:'Sortie longue',distance:28.0,duration:'2:24:00',pace:'5:09',elev:250,fc:151,type:'long'},
+  // Semaine 11 - 9 juin
+  {date:'2026-06-09',name:'Footing EF',distance:10.0,duration:'54:00',pace:'5:24',elev:40,fc:134,type:'easy'},
+  {date:'2026-06-10',name:'Fractionne 5x1000m',distance:10.0,duration:'46:00',pace:'4:36',elev:25,fc:169,type:'interval'},
+  {date:'2026-06-12',name:'Seuil 20min',distance:12.0,duration:'53:00',pace:'4:25',elev:50,fc:173,type:'threshold'},
+  {date:'2026-06-13',name:'Footing recuperation',distance:7.0,duration:'41:00',pace:'5:51',elev:20,fc:130,type:'easy'},
+  {date:'2026-06-14',name:'Sortie longue',distance:24.0,duration:'2:04:00',pace:'5:10',elev:200,fc:150,type:'long'},
+  // Semaine 12 - 16 juin (pre-affutage)
+  {date:'2026-06-16',name:'Footing EF',distance:9.0,duration:'49:30',pace:'5:30',elev:35,fc:134,type:'easy'},
+  {date:'2026-06-17',name:'Fractionne 4x1000m',distance:9.0,duration:'42:00',pace:'4:40',elev:20,fc:166,type:'interval'},
+  {date:'2026-06-19',name:'Seuil court 15min',distance:10.0,duration:'46:00',pace:'4:36',elev:40,fc:170,type:'threshold'},
+  {date:'2026-06-20',name:'Footing souple',distance:7.0,duration:'41:00',pace:'5:51',elev:20,fc:129,type:'easy'},
+  {date:'2026-06-21',name:'Sortie longue moderee',distance:18.0,duration:'1:34:00',pace:'5:13',elev:130,fc:146,type:'long'},
+  // Semaine 13 - 23 juin (affutage final)
+  {date:'2026-06-23',name:'Footing EF',distance:14.0,duration:'1:17:00',pace:'5:30',elev:55,fc:136,type:'easy'},
+  {date:'2026-06-24',name:'Fractionne 5x1000m',distance:10.0,duration:'47:00',pace:'4:42',elev:30,fc:165,type:'interval'},
+  {date:'2026-06-25',name:'Footing vallonne',distance:8.0,duration:'45:00',pace:'5:37',elev:80,fc:140,type:'easy'},
+  {date:'2026-06-27',name:'Sortie longue moderee',distance:8.0,duration:'44:00',pace:'5:30',elev:35,fc:135,type:'easy'},
+  // 28 juin = RACE DAY
+];
+
+function totalKm(acts){return acts.reduce((s,a)=>s+a.distance,0)}
+function totalElev(acts){return acts.reduce((s,a)=>s+a.elev,0)}
+function avgPace(acts){
+  if(!acts.length)return'-';
+  const paces=acts.map(a=>{const p=a.pace.split(':');return+p[0]+ +p[1]/60});
+  const avg=paces.reduce((s,v)=>s+v,0)/paces.length;
+  const m=Math.floor(avg),s=Math.round((avg-m)*60);
+  return m+':'+(s<10?'0'+s:s);
+}
+
+// Fill stats
+const km=totalKm(SESSIONS);
+const elev=totalElev(SESSIONS);
+document.getElementById('stat-km').textContent=Math.round(km);
+document.getElementById('stat-sessions').textContent=SESSIONS.length;
+document.getElementById('stat-elev').textContent=Math.round(elev).toLocaleString();
+document.getElementById('stat-pace').textContent=avgPace(SESSIONS);
+
+// Last session
+const last=SESSIONS[SESSIONS.length-1];
+const d=new Date(last.date);
+const jours=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+document.getElementById('lastText').textContent=jours[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+' - '+last.name+' - '+last.distance+' km en '+last.duration+' ('+last.pace+'/km)';
+
+// Tagline
+const taglines=['Objectif marathon 3h15','Chaque kilometre compte','La constance fait la performance','Bloc affutage en cours'];
+document.getElementById('tagline').textContent=taglines[Math.floor(Math.random()*taglines.length)];
+
+// Theme
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  localStorage.setItem('sp_theme',document.body.classList.contains('light')?'light':'dark');
+}
+if(localStorage.getItem('sp_theme')==='light')document.body.classList.add('light');
+</script>
+</body>
+</html>
