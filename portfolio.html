@@ -184,7 +184,7 @@ footer span{font-size:12px;color:rgba(255,255,255,.3)}
     </a>
 
     <!-- MA -->
-    <a class="card c-half fade d6" href="ma.html" style="--accent:rgba(139,92,246,.3);--glow:rgba(139,92,246,.1);--accent-light:rgba(196,181,253,.6)">
+    <a class="card c-half fade d6" href="/ma.html" style="--accent:rgba(139,92,246,.3);--glow:rgba(139,92,246,.1);--accent-light:rgba(196,181,253,.6)">
       <div class="overlay" style="background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(168,85,247,.05))"></div>
       <div class="inner" style="min-height:260px;display:flex;flex-direction:column;justify-content:space-between">
         <div>
@@ -202,7 +202,7 @@ footer span{font-size:12px;color:rgba(255,255,255,.3)}
     </a>
 
     <!-- STATION PERFORMANCE -->
-    <a class="card c-full fade d7" href="station-performance/index.html" style="--accent:rgba(252,76,2,.3);--glow:rgba(252,76,2,.1);--accent-light:rgba(253,186,116,.6)">
+    <a class="card c-full fade d7" href="/station-performance/index.html" style="--accent:rgba(252,76,2,.3);--glow:rgba(252,76,2,.1);--accent-light:rgba(253,186,116,.6)">
       <div class="overlay" style="background:linear-gradient(135deg,rgba(252,76,2,.1),rgba(220,38,38,.05))"></div>
       <div class="inner" style="min-height:220px;display:flex;flex-direction:row;gap:32px;align-items:flex-start;flex-wrap:wrap">
         <div style="flex:1;min-width:280px">
@@ -229,7 +229,6 @@ footer span{font-size:12px;color:rgba(255,255,255,.3)}
 </div>
 
 <script>
-// Particles
 const pc=document.getElementById('particles');
 const colors=['rgba(16,185,129,0.5)','rgba(99,102,241,0.5)','rgba(139,92,246,0.4)','rgba(255,255,255,0.3)'];
 for(let i=0;i<30;i++){
@@ -238,8 +237,6 @@ for(let i=0;i<30;i++){
   Object.assign(d.style,{width:s+'px',height:s+'px',background:colors[Math.floor(Math.random()*4)],left:Math.random()*100+'%',top:Math.random()*100+'%',animationDelay:Math.random()*10+'s',animationDuration:(6+Math.random()*10)+'s',boxShadow:'0 0 '+(4+Math.random()*6)+'px currentColor'});
   pc.appendChild(d);
 }
-
-// Skills bars
 const skills=[
   {name:'Next.js / React',level:90,color:'linear-gradient(to right,#34d399,#2dd4bf)'},
   {name:'TypeScript',level:80,color:'linear-gradient(to right,#60a5fa,#818cf8)'},
