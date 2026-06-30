@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Station Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s;padding-bottom:80px}
+body.light{background:#f5f5f2;color:#111}
+a{text-decoration:none;color:inherit}
+
+.theme-toggle{position:fixed;top:16px;right:20px;z-index:90;background:rgba(255,255,255,0.08);border:1px solid #333;color:#888;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;transition:all .3s}
+.theme-toggle:hover{border-color:#FC4C02;color:#FC4C02}
+body.light .theme-toggle{background:rgba(0,0,0,0.05);border-color:#ccc;color:#666}
+
+.glow{position:fixed;width:300px;height:300px;background:#FC4C02;filter:blur(150px);opacity:0.1;border-radius:50%;pointer-events:none;z-index:0}
+.glow-1{top:5%;left:50%}
+
+.container{max-width:900px;margin:0 auto;padding:60px 20px;position:relative;z-index:1}
+.page-header{margin-bottom:40px}
+.page-title{font-size:36px;font-weight:900;letter-spacing:-2px;margin-bottom:4px}
+.page-sub{font-size:13px;color:#888}
+.back-link{font-size:12px;color:#888;margin-bottom:16px;display:inline-block;transition:color .2s}
+.back-link:hover{color:#FC4C02}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
+.stat-card{background:#161616;border:1px solid #333;border-radius:20px;padding:24px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:#FC4C02;transform:translateY(-4px)}
+body.light .stat-card{background:#fff;border-color:#e0e0e0}
+.stat-val{font-size:28px;font-weight:900;letter-spacing:-1px}
+.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+.section-title{font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:16px;margin-top:40px}
+
+.chart-container{background:#161616;border:1px solid #333;border-radius:30px;padding:32px;margin-bottom:32px;overflow:hidden}
+body.light .chart-container{background:#fff;border-color:#e0e0e0}
+.chart-title{font-size:16px;font-weight:700;margin-bottom:20px}
+.chart{display:flex;align-items:flex-end;gap:10px;height:200px;padding-top:24px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.chart-bar{width:100%;min-width:20px;border-radius:8px 8px 4px 4px;background:linear-gradient(to top,#FC4C02,#ff7a3d);transition:all .6s ease;min-height:6px;position:relative}
+.chart-bar:hover{filter:brightness(1.2);transform:scaleY(1.03)}
+.chart-bar-val{font-size:10px;font-weight:700;color:#fff;position:absolute;top:-20px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.chart-label{font-size:9px;color:#888;text-align:center;margin-top:2px}
+
+.session-list{display:flex;flex-direction:column;gap:8px}
+.session-card{background:#161616;border:1px solid #333;border-radius:20px;padding:20px 24px;cursor:pointer;transition:all .3s}
+.session-card:hover{border-color:#FC4C02;transform:translateY(-4px);box-shadow:0 12px 30px rgba(252,76,2,0.15)}
+body.light .session-card{background:#fff;border-color:#e0e0e0}
+.session-top{display:flex;justify-content:space-between;align-items:center}
+.session-name{font-size:15px;font-weight:700}
+.session-date{font-size:12px;color:#888}
+.session-stats{display:flex;gap:20px;margin-top:10px;flex-wrap:wrap}
+.session-stat{font-size:12px;color:#aaa}
+.session-stat span{color:#fff;font-weight:600}
+body.light .session-stat span{color:#111}
+.type-badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;margin-left:10px}
+.type-easy{background:rgba(34,197,94,0.15);color:#22c55e}
+.type-interval{background:rgba(252,76,2,0.15);color:#FC4C02}
+.type-threshold{background:rgba(234,179,8,0.15);color:#eab308}
+.type-long{background:rgba(99,102,241,0.15);color:#6366f1}
+
+.session-detail{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;padding:0 0}
+.session-detail.open{max-height:400px;padding:16px 0 0}
+.splits{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.split{background:#222;border-radius:10px;padding:8px;text-align:center;font-size:11px}
+body.light .split{background:#f0f0ed}
+.split-km{font-size:9px;color:#888}
+.split-val{font-weight:700;font-size:13px;margin-top:2px}
+
+.ai-btn{display:block;width:100%;margin-top:32px;padding:16px;border-radius:20px;border:1px solid #FC4C02;background:transparent;color:#FC4C02;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px}
+.ai-btn:hover{background:#FC4C02;color:#fff}
+.ai-result{margin-top:16px;background:#161616;border:1px solid #333;border-radius:20px;padding:24px;font-size:13px;line-height:1.7;color:#ccc;display:none}
+body.light .ai-result{background:#fff;border-color:#e0e0e0;color:#444}
+.ai-result.show{display:block;animation:fadeUp .5s ease}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:90;background:#111;border-top:1px solid #222;padding:8px 0 env(safe-area-inset-bottom,8px)}
+body.light .mobile-nav{background:#fff;border-color:#e0e0e0}
+.mobile-nav-inner{display:flex;justify-content:space-around;max-width:400px;margin:0 auto}
+.mob-link{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#888;padding:6px 12px;border-radius:12px;transition:color .2s}
+.mob-link.active,.mob-link:hover{color:#FC4C02}
+.mob-icon{font-size:18px}
+
+@media(max-width:600px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .stat-val{font-size:22px}
+}
+</style>
+</head>
+<body>
+<div class="glow glow-1"></div>
+<button class="theme-toggle" onclick="toggleTheme()">&#9728;&#65039; Theme</button>
+
+<div class="container">
+  <a href="index.html" class="back-link">&larr; Accueil</a>
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">Suivi des seances et charge d'entrainement</p>
+  </div>
+
+  <div class="stats-row" id="weekStats"></div>
+
+  <p class="section-title">Charge hebdomadaire (km)</p>
+  <div class="chart-container">
+    <div class="chart" id="chart"></div>
+  </div>
+
+  <p class="section-title">Seances recentes</p>
+  <div class="session-list" id="sessionList"></div>
+
+  <button class="ai-btn" onclick="showAnalysis()">&#129302; Analyser avec l'IA</button>
+  <div class="ai-result" id="aiResult"></div>
+</div>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="index.html" class="mob-link"><span class="mob-icon">&#127968;</span><span class="mob-label">Accueil</span></a>
+    <a href="dashboard.html" class="mob-link active"><span class="mob-icon">&#128200;</span><span class="mob-label">Dashboard</span></a>
+    <a href="profil.html" class="mob-link"><span class="mob-icon">&#128100;</span><span class="mob-label">Profil</span></a>
+  </div>
+</nav>
+
+<script>
+const SESSIONS=[{date:'2026-03-31',name:'Footing EF',distance:10.2,duration:'58:30',pace:'5:44',elev:45,fc:138,type:'easy'},{date:'2026-04-01',name:'Fractionne 10x400m',distance:9.8,duration:'48:15',pace:'4:55',elev:30,fc:165,type:'interval'},{date:'2026-04-03',name:'Seuil 3x2000m',distance:12.1,duration:'56:40',pace:'4:41',elev:55,fc:170,type:'threshold'},{date:'2026-04-05',name:'Footing recuperation',distance:8.0,duration:'47:20',pace:'5:55',elev:25,fc:132,type:'easy'},{date:'2026-04-06',name:'Sortie longue',distance:22.0,duration:'1:56:00',pace:'5:16',elev:180,fc:148,type:'long'},{date:'2026-04-07',name:'Footing EF',distance:10.5,duration:'59:00',pace:'5:37',elev:50,fc:140,type:'easy'},{date:'2026-04-08',name:'Fractionne 6x1000m',distance:11.2,duration:'52:30',pace:'4:41',elev:35,fc:168,type:'interval'},{date:'2026-04-10',name:'Seuil 20min',distance:11.8,duration:'54:20',pace:'4:36',elev:60,fc:172,type:'threshold'},{date:'2026-04-12',name:'Footing vallonne',distance:9.5,duration:'55:10',pace:'5:48',elev:120,fc:142,type:'easy'},{date:'2026-04-13',name:'Sortie longue',distance:24.0,duration:'2:05:00',pace:'5:12',elev:210,fc:150,type:'long'},{date:'2026-04-14',name:'Footing EF',distance:10.0,duration:'56:00',pace:'5:36',elev:40,fc:136,type:'easy'},{date:'2026-04-15',name:'Fractionne 5x1000m',distance:10.5,duration:'49:00',pace:'4:40',elev:25,fc:170,type:'interval'},{date:'2026-04-17',name:'Tempo allure marathon',distance:14.0,duration:'1:04:00',pace:'4:34',elev:70,fc:168,type:'threshold'},{date:'2026-04-19',name:'Footing EF',distance:8.5,duration:'49:30',pace:'5:49',elev:30,fc:134,type:'easy'},{date:'2026-04-20',name:'Sortie longue',distance:26.0,duration:'2:16:00',pace:'5:14',elev:230,fc:152,type:'long'},{date:'2026-04-21',name:'Footing souple',distance:8.0,duration:'46:40',pace:'5:50',elev:25,fc:130,type:'easy'},{date:'2026-04-22',name:'Fractionne leger 6x400m',distance:8.0,duration:'40:00',pace:'5:00',elev:15,fc:155,type:'interval'},{date:'2026-04-24',name:'Footing EF',distance:9.0,duration:'51:00',pace:'5:40',elev:35,fc:136,type:'easy'},{date:'2026-04-26',name:'Sortie longue moderee',distance:18.0,duration:'1:35:00',pace:'5:17',elev:130,fc:146,type:'long'},{date:'2026-04-28',name:'Footing EF',distance:10.0,duration:'56:30',pace:'5:39',elev:45,fc:137,type:'easy'},{date:'2026-04-29',name:'Fractionne 8x600m',distance:10.2,duration:'48:00',pace:'4:42',elev:20,fc:167,type:'interval'},{date:'2026-05-01',name:'Seuil 2x15min',distance:12.5,duration:'57:00',pace:'4:34',elev:55,fc:171,type:'threshold'},{date:'2026-05-03',name:'Footing vallonne',distance:9.0,duration:'53:00',pace:'5:53',elev:140,fc:143,type:'easy'},{date:'2026-05-04',name:'Sortie longue',distance:28.0,duration:'2:26:00',pace:'5:13',elev:260,fc:151,type:'long'},{date:'2026-05-05',name:'Footing EF',distance:10.0,duration:'55:40',pace:'5:34',elev:40,fc:135,type:'easy'},{date:'2026-05-06',name:'Fractionne 12x400m',distance:10.8,duration:'50:00',pace:'4:38',elev:25,fc:169,type:'interval'},{date:'2026-05-08',name:'Tempo allure marathon',distance:15.0,duration:'1:08:00',pace:'4:32',elev:65,fc:169,type:'threshold'},{date:'2026-05-09',name:'Footing recuperation',distance:7.5,duration:'44:00',pace:'5:52',elev:20,fc:131,type:'easy'},{date:'2026-05-10',name:'Sortie longue',distance:30.0,duration:'2:37:00',pace:'5:14',elev:280,fc:153,type:'long'},{date:'2026-05-12',name:'Footing EF',distance:10.5,duration:'58:00',pace:'5:31',elev:50,fc:138,type:'easy'},{date:'2026-05-13',name:'Fractionne 6x1000m',distance:11.5,duration:'52:00',pace:'4:31',elev:30,fc:172,type:'interval'},{date:'2026-05-15',name:'Seuil 25min',distance:13.0,duration:'58:30',pace:'4:30',elev:60,fc:173,type:'threshold'},{date:'2026-05-16',name:'Footing EF',distance:8.0,duration:'46:00',pace:'5:45',elev:30,fc:133,type:'easy'},{date:'2026-05-17',name:'Sortie longue',distance:32.0,duration:'2:48:00',pace:'5:15',elev:300,fc:154,type:'long'},{date:'2026-05-19',name:'Footing souple',distance:8.0,duration:'46:00',pace:'5:45',elev:25,fc:130,type:'easy'},{date:'2026-05-20',name:'Fractionne leger 5x400m',distance:7.5,duration:'38:00',pace:'5:04',elev:10,fc:152,type:'interval'},{date:'2026-05-22',name:'Footing EF',distance:9.0,duration:'51:00',pace:'5:40',elev:35,fc:135,type:'easy'},{date:'2026-05-24',name:'Sortie longue moderee',distance:20.0,duration:'1:46:00',pace:'5:18',elev:150,fc:147,type:'long'},{date:'2026-05-26',name:'Footing EF',distance:10.0,duration:'55:00',pace:'5:30',elev:45,fc:136,type:'easy'},{date:'2026-05-27',name:'Fractionne 10x400m',distance:10.5,duration:'48:30',pace:'4:37',elev:20,fc:170,type:'interval'},{date:'2026-05-29',name:'Seuil 2x20min',distance:14.0,duration:'1:02:00',pace:'4:26',elev:65,fc:174,type:'threshold'},{date:'2026-05-30',name:'Footing recuperation',distance:8.0,duration:'47:00',pace:'5:52',elev:25,fc:132,type:'easy'},{date:'2026-05-31',name:'Sortie longue',distance:30.0,duration:'2:35:00',pace:'5:10',elev:270,fc:152,type:'long'},{date:'2026-06-02',name:'Footing EF',distance:10.0,duration:'54:30',pace:'5:27',elev:45,fc:135,type:'easy'},{date:'2026-06-03',name:'Fractionne 6x1000m',distance:11.0,duration:'50:00',pace:'4:33',elev:30,fc:171,type:'interval'},{date:'2026-06-05',name:'Tempo allure marathon',distance:16.0,duration:'1:12:00',pace:'4:30',elev:70,fc:170,type:'threshold'},{date:'2026-06-06',name:'Footing EF',distance:8.5,duration:'48:30',pace:'5:42',elev:30,fc:134,type:'easy'},{date:'2026-06-07',name:'Sortie longue',distance:28.0,duration:'2:24:00',pace:'5:09',elev:250,fc:151,type:'long'},{date:'2026-06-09',name:'Footing EF',distance:10.0,duration:'54:00',pace:'5:24',elev:40,fc:134,type:'easy'},{date:'2026-06-10',name:'Fractionne 5x1000m',distance:10.0,duration:'46:00',pace:'4:36',elev:25,fc:169,type:'interval'},{date:'2026-06-12',name:'Seuil 20min',distance:12.0,duration:'53:00',pace:'4:25',elev:50,fc:173,type:'threshold'},{date:'2026-06-13',name:'Footing recuperation',distance:7.0,duration:'41:00',pace:'5:51',elev:20,fc:130,type:'easy'},{date:'2026-06-14',name:'Sortie longue',distance:24.0,duration:'2:04:00',pace:'5:10',elev:200,fc:150,type:'long'},{date:'2026-06-16',name:'Footing EF',distance:9.0,duration:'49:30',pace:'5:30',elev:35,fc:134,type:'easy'},{date:'2026-06-17',name:'Fractionne 4x1000m',distance:9.0,duration:'42:00',pace:'4:40',elev:20,fc:166,type:'interval'},{date:'2026-06-19',name:'Seuil court 15min',distance:10.0,duration:'46:00',pace:'4:36',elev:40,fc:170,type:'threshold'},{date:'2026-06-20',name:'Footing souple',distance:7.0,duration:'41:00',pace:'5:51',elev:20,fc:129,type:'easy'},{date:'2026-06-21',name:'Sortie longue moderee',distance:18.0,duration:'1:34:00',pace:'5:13',elev:130,fc:146,type:'long'},{date:'2026-06-23',name:'Footing EF',distance:14.0,duration:'1:17:00',pace:'5:30',elev:55,fc:136,type:'easy'},{date:'2026-06-24',name:'Fractionne 5x1000m',distance:10.0,duration:'47:00',pace:'4:42',elev:30,fc:165,type:'interval'},{date:'2026-06-25',name:'Footing vallonne',distance:8.0,duration:'45:00',pace:'5:37',elev:80,fc:140,type:'easy'},{date:'2026-06-27',name:'Sortie longue moderee',distance:8.0,duration:'44:00',pace:'5:30',elev:35,fc:135,type:'easy'}];
+
+// Week stats
+const now=new Date('2026-06-25');
+const weekStart=new Date('2026-06-22');weekStart.setHours(0,0,0,0);
+const weekEnd=new Date('2026-06-28');weekEnd.setHours(23,59,59);
+const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+const thisWeek=SESSIONS.filter(a=>new Date(a.date)>=weekStart&&new Date(a.date)<=weekEnd);
+const thisMonth=SESSIONS.filter(a=>new Date(a.date)>=monthStart&&new Date(a.date)<=now);
+
+function avgPace(acts){
+  if(!acts.length)return'-';
+  const p=acts.map(a=>{const s=a.pace.split(':');return+s[0]+ +s[1]/60});
+  const avg=p.reduce((s,v)=>s+v,0)/p.length;
+  const m=Math.floor(avg),sec=Math.round((avg-m)*60);
+  return m+':'+(sec<10?'0'+sec:sec);
+}
+
+document.getElementById('weekStats').innerHTML=[
+  {v:thisWeek.reduce((s,a)=>s+a.distance,0).toFixed(1),l:'km cette semaine'},
+  {v:thisMonth.reduce((s,a)=>s+a.distance,0).toFixed(0),l:'km ce mois'},
+  {v:thisWeek.length,l:'seances semaine'},
+  {v:avgPace(thisMonth),l:'allure moy. mois'},
+].map(s=>`<div class="stat-card"><div class="stat-val">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
+
+// Weekly chart
+const weeks={};
+SESSIONS.forEach(s=>{
+  const d=new Date(s.date);
+  const day=d.getDay();
+  const diff=day===0?6:day-1;
+  const w=new Date(d);w.setDate(d.getDate()-diff);
+  const key=w.toISOString().split('T')[0];
+  weeks[key]=(weeks[key]||0)+s.distance;
+});
+const wKeys=Object.keys(weeks).sort().slice(-10);
+const maxKm=Math.max(...wKeys.map(k=>weeks[k]));
+const chartEl=document.getElementById('chart');
+const maxBarHeight=160;
+wKeys.forEach(k=>{
+  const km=weeks[k];
+  const h=Math.max(6,Math.round((km/maxKm)*maxBarHeight));
+  const d=new Date(k);
+  const label=(d.getDate())+'/'+(d.getMonth()+1);
+  chartEl.innerHTML+=`<div class="chart-bar-wrap"><div class="chart-bar" style="height:${h}px"><span class="chart-bar-val">${Math.round(km)}</span></div><div class="chart-label">${label}</div></div>`;
+});
+
+// Session list (last 15)
+const recent=SESSIONS.slice().reverse().slice(0,15);
+const list=document.getElementById('sessionList');
+recent.forEach((s,i)=>{
+  const d=new Date(s.date);
+  const dateStr=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  const typeClass='type-'+s.type;
+  const typeName={easy:'EF',interval:'Fractionne',threshold:'Seuil',long:'Long'}[s.type]||s.type;
+  // Generate fake splits
+  const nbKm=Math.floor(s.distance);
+  const basePace=s.pace.split(':');
+  const baseMin=+basePace[0]+ +basePace[1]/60;
+  let splits='';
+  for(let k=1;k<=nbKm;k++){
+    const variation=(Math.random()-0.5)*0.3;
+    const p=baseMin+variation;
+    const m=Math.floor(p),sec=Math.round((p-m)*60);
+    splits+=`<div class="split"><div class="split-km">km ${k}</div><div class="split-val">${m}:${sec<10?'0'+sec:sec}</div></div>`;
+  }
+  list.innerHTML+=`
+    <div class="session-card" onclick="this.querySelector('.session-detail').classList.toggle('open')">
+      <div class="session-top">
+        <div><span class="session-name">${s.name}</span><span class="type-badge ${typeClass}">${typeName}</span></div>
+        <span class="session-date">${dateStr}</span>
+      </div>
+      <div class="session-stats">
+        <div class="session-stat"><span>${s.distance} km</span></div>
+        <div class="session-stat"><span>${s.duration}</span></div>
+        <div class="session-stat"><span>${s.pace}/km</span></div>
+        <div class="session-stat">D+ <span>${s.elev}m</span></div>
+        <div class="session-stat">FC <span>${s.fc} bpm</span></div>
+      </div>
+      <div class="session-detail"><div class="splits">${splits}</div></div>
+    </div>`;
+});
+
+// AI analysis
+function showAnalysis(){
+  const el=document.getElementById('aiResult');
+  el.classList.add('show');
+  el.innerHTML=`<strong style="color:#FC4C02">Analyse IA - Semaine en cours</strong><br><br>
+  Ta charge cette semaine est en phase d'affutage, ce qui est parfaitement logique a J-3 du marathon. Le volume a baisse progressivement depuis le pic a 75 km il y a 4 semaines. Bonne gestion.<br><br>
+  <strong>Points positifs :</strong> les allures de seuil se sont ameliorees de 4:41 a 4:25/km sur 12 semaines. La FC moyenne en EF a baisse de 138 a 132 bpm, signe d'une progression aerobique solide. La sortie longue de 32 km a 5:15 est un excellent indicateur pour un objectif a 3h15.<br><br>
+  <strong>Attention :</strong> ta derniere seance de fractionne etait assez legere (3x400m), ce qui est normal en affutage. Evite tout effort intense d'ici dimanche. Hydratation et sommeil sont prioritaires maintenant.<br><br>
+  <strong>Pronostic :</strong> sur la base de ta VMA estimee, de ta progression d'allures et de ta charge, un chrono entre <strong>3h12 et 3h18</strong> semble realiste. Vise les 4:35/km au depart et ajuste apres le semi.`;
+}
+
+function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('sp_theme',document.body.classList.contains('light')?'light':'dark')}
+if(localStorage.getItem('sp_theme')==='light')document.body.classList.add('light');
+</script>
+</body>
+</html>
